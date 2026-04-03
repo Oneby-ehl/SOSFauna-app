@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "SOS Fauna",
+    "slug": "sos-fauna",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "sosfauna",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1f5f3a"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1f5f3a"
+      },
+      "package": "com.onebyehl.sosfauna"
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    }
+  }
+}
