@@ -150,7 +150,7 @@ export default function HomeScreen() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [animalState, setAnimalState] = useState<AnimalState>('unknown');
-  const [otherSituationText, setOtherSituationText] = useState('');
+  const [observations, setObservations] = useState('');
 
   const [animalType, setAnimalType] = useState<AnimalType>('unknown');
 
@@ -209,11 +209,10 @@ export default function HomeScreen() {
       `Ubicación: ${locationText}`,
       `Mapa: ${mapsUrl}`,
       `Situación observada: ${selectedFlags}`,
-      flags.other
-        ? `Detalle de "Otro": ${otherSituationText || 'Sin detalle adicional'}`
-        : null,
+      flags.other ? 'Situación adicional: Otro' : null,
       `Foto capturada: ${photoUri ? 'sí' : 'no'}`,
       `Vídeo capturado: ${videoUri ? 'sí' : 'no'}`,
+      observations.trim() ? `Observaciones: ${observations.trim()}` : null,
     ]
       .filter(Boolean)
       .join('\n');
@@ -222,7 +221,7 @@ export default function HomeScreen() {
     flags.other,
     fullName,
     locationText,
-    otherSituationText,
+    observations,
     phone,
     photoUri,
     selectedAnimalLabel,
@@ -325,15 +324,10 @@ export default function HomeScreen() {
   };
 
   const toggleFlag = (key: keyof FlagsState) => {
-    setFlags((prev) => {
-      const updated = { ...prev, [key]: !prev[key] };
-
-      if (key === 'other' && prev.other) {
-        setOtherSituationText('');
-      }
-
-      return updated;
-    });
+    setFlags((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   const openWhatsAppWithNumber = async (number: string) => {
@@ -394,7 +388,7 @@ export default function HomeScreen() {
           setFullName('');
           setPhone('');
           setAnimalState('unknown');
-          setOtherSituationText('');
+          setObservations('');
           setAnimalType('unknown');
           setPhotoUri(null);
           setVideoUri(null);
@@ -439,13 +433,6 @@ export default function HomeScreen() {
           'Información incompleta',
           'Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.'
         );
-        return false;
-      }
-    }
-
-    if (step === 3) {
-      if (flags.other && !otherSituationText.trim()) {
-        Alert.alert('Falta detalle', 'Has marcado “Otro”. Describe brevemente qué observas.');
         return false;
       }
     }
@@ -564,13 +551,17 @@ export default function HomeScreen() {
           <Pressable style={styles.sideArrowLeft} onPress={goBack}>
             <Text style={styles.sideArrowText}>‹</Text>
           </Pressable>
-        ) : <View style={styles.sideArrowPlaceholder} />}
+        ) : (
+          <View style={styles.sideArrowPlaceholder} />
+        )}
 
         {step < 5 ? (
           <Pressable style={styles.sideArrowRight} onPress={goNext}>
             <Text style={styles.sideArrowText}>›</Text>
           </Pressable>
-        ) : <View style={styles.sideArrowPlaceholder} />}
+        ) : (
+          <View style={styles.sideArrowPlaceholder} />
+        )}
       </View>
     );
   };
@@ -744,16 +735,6 @@ export default function HomeScreen() {
                 })}
               </View>
 
-              {flags.other ? (
-                <TextInput
-                  placeholder="Describe brevemente qué observas"
-                  value={otherSituationText}
-                  onChangeText={setOtherSituationText}
-                  multiline
-                  style={[styles.input, styles.textArea]}
-                />
-              ) : null}
-
               <View style={styles.bottomHelpRow}>
                 <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
                   <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
@@ -787,19 +768,85 @@ export default function HomeScreen() {
 
     if (animalState === 'dead') {
       return (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoid}
+          keyboardVerticalOffset={90}
+        >
+          <SectionCard title="Paso 5. Resumen">
+            <View style={styles.sectionContent}>
+              <Text style={styles.sectionDescription}>
+                Este es el resumen preparado para comunicar el caso a los servicios adecuados.
+              </Text>
+
+              <Text style={styles.summaryBox}>{summary}</Text>
+
+              <TextInput
+                placeholder="Observaciones"
+                value={observations}
+                onChangeText={setObservations}
+                multiline
+                style={[styles.input, styles.textAreaStep5]}
+              />
+
+              <View style={styles.warningBox}>
+                <Text style={styles.warningText}>
+                  En este caso llama directamente a los agentes forestales, o a seguridad ciudadana más cercana, o a emergencias o a los que consideres más oportunos según tu caso. Tienes abajo los contactos. Puedes copiar el resumen y usarlo si te lo piden los servicios de seguridad o emergencias.
+                </Text>
+              </View>
+
+              <Pressable style={styles.secondaryButton} onPress={copySummary}>
+                <Text style={styles.secondaryButtonText}>Copiar resumen</Text>
+              </Pressable>
+
+              <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
+                <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.primaryButton, !hasOpenedHelpPhones && styles.disabledButton]}
+                onPress={finishFlow}
+                disabled={!hasOpenedHelpPhones}
+              >
+                <Text style={styles.primaryButtonText}>Finalizar</Text>
+              </Pressable>
+            </View>
+          </SectionCard>
+        </KeyboardAvoidingView>
+      );
+    }
+
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+        keyboardVerticalOffset={90}
+      >
         <SectionCard title="Paso 5. Resumen">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Este es el resumen preparado para comunicar el caso a los servicios adecuados.
+              Este es el resumen para enviar el aviso a un centro especializado.
             </Text>
 
             <Text style={styles.summaryBox}>{summary}</Text>
 
+            <TextInput
+              placeholder="Observaciones"
+              value={observations}
+              onChangeText={setObservations}
+              multiline
+              style={[styles.input, styles.textAreaStep5]}
+            />
+
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
-                En este caso llama directamente a los agentes forestales, o a seguridad ciudadana más cercana, o a emergencias o a los que consideres más oportunos según tu caso. Tienes abajo los contactos. Puedes copiar el resumen y usarlo si te lo piden los servicios de seguridad o emergencias.
+                Importante: la foto y el vídeo no se adjuntan automáticamente. Deberás enviarlos manualmente desde WhatsApp.
               </Text>
             </View>
+
+            <Pressable style={styles.primaryButton} onPress={() => setShowWhatsAppOptions(true)}>
+              <Text style={styles.primaryButtonText}>Enviar por WhatsApp</Text>
+            </Pressable>
 
             <Pressable style={styles.secondaryButton} onPress={copySummary}>
               <Text style={styles.secondaryButtonText}>Copiar resumen</Text>
@@ -808,50 +855,9 @@ export default function HomeScreen() {
             <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
               <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
             </Pressable>
-
-            <Pressable
-              style={[
-                styles.primaryButton,
-                !hasOpenedHelpPhones && styles.disabledButton,
-              ]}
-              onPress={finishFlow}
-              disabled={!hasOpenedHelpPhones}
-            >
-              <Text style={styles.primaryButtonText}>Finalizar</Text>
-            </Pressable>
           </View>
         </SectionCard>
-      );
-    }
-
-    return (
-      <SectionCard title="Paso 5. Resumen">
-        <View style={styles.sectionContent}>
-          <Text style={styles.sectionDescription}>
-            Este es el resumen para enviar el aviso a un centro especializado.
-          </Text>
-
-          <Text style={styles.summaryBox}>{summary}</Text>
-
-          <View style={styles.warningBox}>
-            <Text style={styles.warningText}>
-              Importante: la foto y el vídeo no se adjuntan automáticamente. Deberás enviarlos manualmente desde WhatsApp.
-            </Text>
-          </View>
-
-          <Pressable style={styles.primaryButton} onPress={() => setShowWhatsAppOptions(true)}>
-            <Text style={styles.primaryButtonText}>Enviar por WhatsApp</Text>
-          </Pressable>
-
-          <Pressable style={styles.secondaryButton} onPress={copySummary}>
-            <Text style={styles.secondaryButtonText}>Copiar resumen</Text>
-          </Pressable>
-
-          <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-            <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
-          </Pressable>
-        </View>
-      </SectionCard>
+      </KeyboardAvoidingView>
     );
   };
 
@@ -884,7 +890,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f3f7f4',
   },
   container: {
-    padding: 18,
+    paddingHorizontal: 26,
+    paddingVertical: 18,
     gap: 16,
     paddingBottom: 32,
   },
@@ -942,24 +949,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#ffffff',
   },
-  textArea: {
-    minHeight: 110,
+  textAreaStep5: {
+    minHeight: 100,
     textAlignVertical: 'top',
-    marginBottom: 12,
   },
   primaryButton: {
     backgroundColor: '#14532d',
     borderRadius: 14,
     paddingVertical: 12,
     alignItems: 'center',
-  },
-  primaryButtonSmall: {
-    backgroundColor: '#14532d',
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    minWidth: 96,
   },
   primaryButtonText: {
     color: '#ffffff',
@@ -1099,10 +1097,11 @@ const styles = StyleSheet.create({
   },
   sideArrowLeft: {
     position: 'absolute',
-    left: 8,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    left: 0,
+    width: 22,
+    height: 120,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
     backgroundColor: '#14532d',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1110,23 +1109,24 @@ const styles = StyleSheet.create({
   },
   sideArrowRight: {
     position: 'absolute',
-    right: 8,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    right: 0,
+    width: 22,
+    height: 120,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
     backgroundColor: '#14532d',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
   },
   sideArrowPlaceholder: {
-    width: 52,
-    height: 52,
+    width: 22,
+    height: 120,
   },
   sideArrowText: {
     color: '#ffffff',
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
-    lineHeight: 34,
+    lineHeight: 30,
   },
 });
