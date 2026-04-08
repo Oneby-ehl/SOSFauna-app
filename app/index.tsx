@@ -3,9 +3,10 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
 import * as Location from 'expo-location';
 import * as MediaLibrary from 'expo-media-library';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,7 +18,6 @@ import {
 } from 'react-native';
 
 import { SectionCard } from '@/components/SectionCard';
-import { emergencyContacts } from '@/lib/constants';
 import { provinceContacts } from '@/lib/provinceContacts';
 
 type FlagsState = {
@@ -41,6 +41,8 @@ type AnimalType =
 type AnimalState = 'alive' | 'dead' | 'unknown';
 
 type Step = 1 | 2 | 3 | 4 | 5;
+
+type PanelView = 'summary' | 'observations';
 
 const GREFA_WHATSAPP = '34648539901';
 
@@ -67,6 +69,21 @@ const FLAG_LABELS: Array<{ key: keyof FlagsState; label: string }> = [
   { key: 'canNotMove', label: 'No se mueve bien' },
   { key: 'roadRisk', label: 'Peligro en carretera' },
   { key: 'other', label: 'Otro' },
+];
+
+const NATIONAL_HELP_CONTACTS = [
+  { name: 'Emergencias', phone: '112', note: 'Emergencias generales' },
+  { name: 'SEPRONA', phone: '062', note: 'Guardia Civil · Protección de la naturaleza' },
+  { name: 'Policía Municipal / Local', phone: '092', note: 'Policía local del municipio' },
+  { name: 'Policía Nacional', phone: '091', note: 'Atención policial' },
+];
+
+const MADRID_PROVINCE_CONTACTS = [
+  { name: 'GREFA guardia', phone: '648 53 99 01', note: 'Guardia para avisos de fauna salvaje herida' },
+  { name: 'GREFA central', phone: '91 638 75 50', note: 'Teléfono general del centro' },
+  { name: 'CRAS Madrid', phone: '91 276 06 26', note: 'Centro de Recuperación de Animales Silvestres de la Comunidad de Madrid' },
+  { name: 'Agentes Forestales de Madrid', phone: '900 181 628', note: 'Avisos e incidencias sobre fauna y medio natural' },
+  { name: 'Mis Amigas las Palomas', phone: '640 267 284', note: 'Contacto de apoyo para palomas en Madrid' },
 ];
 
 function getAdvice(animalState: AnimalState, animalType: AnimalType, flags: FlagsState) {
@@ -148,6 +165,8 @@ export default function HomeScreen() {
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
   const [showProvinces, setShowProvinces] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const [provinceSearch, setProvinceSearch] = useState('');
+  const [stepFiveView, setStepFiveView] = useState<PanelView>('summary');
 
   const [customWhatsAppNumber, setCustomWhatsAppNumber] = useState('');
   const [hasSentWhatsApp, setHasSentWhatsApp] = useState(false);
@@ -166,8 +185,7 @@ export default function HomeScreen() {
   const [locationCaptured, setLocationCaptured] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
 
-  const [editableSummary, setEditableSummary] = useState('');
-  const [summaryTouched, setSummaryTouched] = useState(false);
+  const [observations, setObservations] = useState('');
 
   const [flags, setFlags] = useState<FlagsState>({
     bleeding: false,
@@ -202,6 +220,26 @@ export default function HomeScreen() {
     [animalState]
   );
 
+  const mergedProvinceContacts = useMemo(() => {
+    const madridEntry = { province: 'Madrid', contacts: MADRID_PROVINCE_CONTACTS };
+    const base = Array.isArray(provinceContacts) ? provinceContacts : [];
+    const withoutMadrid = base.filter((item) => item.province !== 'Madrid');
+
+    return [madridEntry, ...withoutMadrid].sort((a, b) => a.province.localeCompare(b.province, 'es'));
+  }, []);
+
+  const filteredProvinceContacts = useMemo(() => {
+    const normalizedSearch = provinceSearch.trim().toLowerCase();
+
+    if (!normalizedSearch) return mergedProvinceContacts;
+
+    return mergedProvinceContacts.filter((item) =>
+      item.province.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(
+        normalizedSearch.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      )
+    );
+  }, [provinceSearch, mergedProvinceContacts]);
+
   const generatedSummary = useMemo(() => {
     const mapsUrl = coords
       ? `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`
@@ -219,6 +257,7 @@ export default function HomeScreen() {
       flags.other ? 'Situación adicional: Otro' : null,
       `Foto capturada: ${photoUri ? 'sí' : 'no'}`,
       `Vídeo capturado: ${videoUri ? 'sí' : 'no'}`,
+      observations.trim() ? `Observaciones: ${observations.trim()}` : null,
     ]
       .filter(Boolean)
       .join('\n');
@@ -233,13 +272,9 @@ export default function HomeScreen() {
     selectedAnimalStateLabel,
     selectedFlags,
     videoUri,
+    observations,
   ]);
 
-  useEffect(() => {
-    if (!summaryTouched) {
-      setEditableSummary(generatedSummary);
-    }
-  }, [generatedSummary, summaryTouched]);
 
   const saveToGallery = async (uri: string, label: string) => {
     try {
@@ -352,7 +387,7 @@ export default function HomeScreen() {
       return;
     }
 
-    const text = encodeURIComponent(editableSummary || generatedSummary);
+    const text = encodeURIComponent(generatedSummary);
     const url = `https://wa.me/${cleaned}?text=${text}`;
     const supported = await Linking.canOpenURL(url);
 
@@ -366,7 +401,7 @@ export default function HomeScreen() {
   };
 
   const copySummary = async () => {
-    await Clipboard.setStringAsync(editableSummary || generatedSummary);
+    await Clipboard.setStringAsync(generatedSummary);
     Alert.alert('Resumen copiado', 'El resumen se ha copiado al portapapeles.');
   };
 
@@ -375,43 +410,43 @@ export default function HomeScreen() {
     await Linking.openURL(url);
   };
 
-  const finishFlow = () => {
-    if (animalState === 'dead' && !hasOpenedHelpPhones) return;
-    if (animalState !== 'dead' && !hasSentWhatsApp) return;
+  const resetFlow = () => {
+    setStep(1);
+    setShowContacts(false);
+    setShowWhatsAppOptions(false);
+    setShowProvinces(false);
+    setSelectedProvince(null);
+    setCustomWhatsAppNumber('');
+    setHasSentWhatsApp(false);
+    setHasOpenedHelpPhones(false);
+    setFullName('');
+    setPhone('');
+    setAnimalState('unknown');
+    setAnimalType('unknown');
+    setPhotoUri(null);
+    setVideoUri(null);
+    setLocationText('Ubicación no capturada todavía.');
+    setCoords(null);
+    setLocationCaptured(false);
+    setLocationLoading(false);
+    setProvinceSearch('');
+    setStepFiveView('summary');
+    setObservations('');
+    setFlags({
+      bleeding: false,
+      baby: false,
+      catDog: false,
+      canNotMove: false,
+      roadRisk: false,
+      other: false,
+    });
+  };
 
+  const finishFlow = () => {
     Alert.alert('Gracias', 'Gracias por colaborar y ayudar a los animales.', [
       {
         text: 'Aceptar',
-        onPress: () => {
-          setStep(1);
-          setShowContacts(false);
-          setShowWhatsAppOptions(false);
-          setShowProvinces(false);
-          setSelectedProvince(null);
-          setCustomWhatsAppNumber('');
-          setHasSentWhatsApp(false);
-          setHasOpenedHelpPhones(false);
-          setFullName('');
-          setPhone('');
-          setAnimalState('unknown');
-          setAnimalType('unknown');
-          setPhotoUri(null);
-          setVideoUri(null);
-          setLocationText('Ubicación no capturada todavía.');
-          setCoords(null);
-          setLocationCaptured(false);
-          setLocationLoading(false);
-          setEditableSummary('');
-          setSummaryTouched(false);
-          setFlags({
-            bleeding: false,
-            baby: false,
-            catDog: false,
-            canNotMove: false,
-            roadRisk: false,
-            other: false,
-          });
-        },
+        onPress: resetFlow,
       },
     ]);
   };
@@ -458,6 +493,12 @@ export default function HomeScreen() {
       return;
     }
 
+    if (stepFiveView === 'observations') {
+      Keyboard.dismiss();
+      setStepFiveView('summary');
+      return;
+    }
+
     if (selectedProvince) {
       setSelectedProvince(null);
       return;
@@ -489,16 +530,17 @@ export default function HomeScreen() {
     setShowContacts(false);
     setShowProvinces(true);
     setSelectedProvince(null);
+    setProvinceSearch('');
   };
 
   const renderContacts = () => (
     <SectionCard title="Teléfonos de ayuda">
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          Puedes consultar estos teléfonos y volver después al paso en el que estabas.
+          Aquí tienes primero los teléfonos nacionales y, debajo, el acceso a contactos por provincias.
         </Text>
 
-        {emergencyContacts.map((contact) => (
+        {NATIONAL_HELP_CONTACTS.map((contact) => (
           <Pressable
             key={contact.name}
             style={styles.contactRow}
@@ -516,9 +558,6 @@ export default function HomeScreen() {
           <Text style={styles.secondaryButtonText}>Teléfonos de ayuda por provincias</Text>
         </Pressable>
 
-        <Pressable style={styles.secondaryButton} onPress={() => setShowContacts(false)}>
-          <Text style={styles.secondaryButtonText}>Volver</Text>
-        </Pressable>
       </View>
     </SectionCard>
   );
@@ -530,31 +569,41 @@ export default function HomeScreen() {
           Selecciona una provincia para ver los centros disponibles.
         </Text>
 
-        {provinceContacts.map((item) => (
-          <Pressable
-            key={item.province}
-            style={styles.contactRow}
-            onPress={() => setSelectedProvince(item.province)}
-          >
-            <View style={styles.contactTextBlock}>
-              <Text style={styles.contactName}>{item.province}</Text>
-              <Text style={styles.contactNote}>
-                {item.contacts.length} contacto{item.contacts.length === 1 ? '' : 's'}
-              </Text>
-            </View>
-            <Text style={styles.contactPhone}>Ver</Text>
-          </Pressable>
-        ))}
+        <TextInput
+          placeholder="Buscar provincia"
+          value={provinceSearch}
+          onChangeText={setProvinceSearch}
+          style={styles.input}
+          autoCapitalize="words"
+        />
 
-        <Pressable style={styles.secondaryButton} onPress={() => setShowProvinces(false)}>
-          <Text style={styles.secondaryButtonText}>Volver</Text>
-        </Pressable>
+        {filteredProvinceContacts.length ? (
+          filteredProvinceContacts.map((item) => (
+            <Pressable
+              key={item.province}
+              style={styles.contactRow}
+              onPress={() => setSelectedProvince(item.province)}
+            >
+              <View style={styles.contactTextBlock}>
+                <Text style={styles.contactName}>{item.province}</Text>
+                <Text style={styles.contactNote}>
+                  {item.contacts.length} contacto{item.contacts.length === 1 ? '' : 's'}
+                </Text>
+              </View>
+              <Text style={styles.contactPhone}>Ver</Text>
+            </Pressable>
+          ))
+        ) : (
+          <View style={styles.warningBox}>
+            <Text style={styles.warningText}>No se han encontrado provincias con ese nombre.</Text>
+          </View>
+        )}
       </View>
     </SectionCard>
   );
 
   const renderProvinceDetail = () => {
-    const province = provinceContacts.find((p) => p.province === selectedProvince);
+    const province = mergedProvinceContacts.find((p) => p.province === selectedProvince);
 
     if (!province) return null;
 
@@ -579,19 +628,46 @@ export default function HomeScreen() {
             </Pressable>
           ))}
 
-          <Pressable style={styles.secondaryButton} onPress={() => setSelectedProvince(null)}>
-            <Text style={styles.secondaryButtonText}>Volver</Text>
-          </Pressable>
         </View>
       </SectionCard>
     );
   };
 
+
+  const renderObservationsEditor = () => (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardAvoid}
+      keyboardVerticalOffset={90}
+    >
+      <SectionCard title="Paso 5. Añadir observaciones">
+        <View style={styles.sectionContent}>
+          <Text style={styles.sectionDescription}>
+            Escribe aquí lo que hayas observado del caso. Al finalizar volverás al resumen.
+          </Text>
+
+          <TextInput
+            placeholder="Escribe aquí tus observaciones"
+            value={observations}
+            onChangeText={setObservations}
+            multiline
+            style={[styles.input, styles.observationsEditor]}
+            textAlignVertical="top"
+          />
+
+          <Pressable style={styles.primaryButton} onPress={() => { Keyboard.dismiss(); setStepFiveView('summary'); }}>
+            <Text style={styles.primaryButtonText}>Finalizar</Text>
+          </Pressable>
+        </View>
+      </SectionCard>
+    </KeyboardAvoidingView>
+  );
+
   const renderWhatsAppOptions = () => (
     <SectionCard title="Enviar por WhatsApp">
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          Elige si quieres enviar el resumen directamente a GREFA o a otro número.
+          El resumen está listo para WhatsApp. Pulsa la flecha izquierda para volver, o Cancelar para descartar el aviso.
         </Text>
 
         <Pressable
@@ -624,24 +700,21 @@ export default function HomeScreen() {
           <Text style={styles.primaryButtonText}>Finalizar</Text>
         </Pressable>
 
-        <View style={styles.navRowCenter}>
-          <Pressable
-            style={styles.secondaryButtonSmall}
-            onPress={() => setShowWhatsAppOptions(false)}
-          >
-            <Text style={styles.secondaryButtonText}>Volver</Text>
-          </Pressable>
-        </View>
+        <Pressable style={styles.secondaryButton} onPress={resetFlow}>
+          <Text style={styles.secondaryButtonText}>Cancelar</Text>
+        </Pressable>
       </View>
     </SectionCard>
   );
 
   const renderNavigationArrows = () => {
-    if (showContacts || showWhatsAppOptions || showProvinces || selectedProvince) return null;
+    const isOverlayOpen = showContacts || showWhatsAppOptions || showProvinces || !!selectedProvince;
+    const canShowBackArrow = isOverlayOpen || step > 1 || stepFiveView === 'observations';
+    const canShowForwardArrow = !isOverlayOpen && stepFiveView !== 'observations' && step < 5;
 
     return (
       <View pointerEvents="box-none" style={styles.sideNavOverlay}>
-        {step > 1 ? (
+        {canShowBackArrow ? (
           <Pressable style={styles.sideArrowLeft} onPress={goBack}>
             <Text style={styles.sideArrowText}>‹</Text>
           </Pressable>
@@ -649,7 +722,7 @@ export default function HomeScreen() {
           <View style={styles.sideArrowPlaceholder} />
         )}
 
-        {step < 5 ? (
+        {canShowForwardArrow ? (
           <Pressable style={styles.sideArrowRight} onPress={goNext}>
             <Text style={styles.sideArrowText}>›</Text>
           </Pressable>
@@ -665,6 +738,7 @@ export default function HomeScreen() {
     if (showProvinces && !selectedProvince) return renderProvinceList();
     if (selectedProvince) return renderProvinceDetail();
     if (showWhatsAppOptions) return renderWhatsAppOptions();
+    if (stepFiveView === 'observations') return renderObservationsEditor();
 
     if (step === 1) {
       return (
@@ -714,9 +788,9 @@ export default function HomeScreen() {
               </Text>
             </View>
 
-            <View style={styles.bottomHelpRow}>
-              <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-                <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
+            <View style={styles.inlineActionRow}>
+              <Pressable style={styles.secondaryButtonSmall} onPress={resetFlow}>
+                <Text style={styles.secondaryButtonText}>↺ Limpiar</Text>
               </Pressable>
             </View>
           </View>
@@ -770,11 +844,6 @@ export default function HomeScreen() {
 
             <Text style={styles.helperText}>{locationText}</Text>
 
-            <View style={styles.bottomHelpRow}>
-              <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-                <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
-              </Pressable>
-            </View>
           </View>
         </SectionCard>
       );
@@ -830,12 +899,6 @@ export default function HomeScreen() {
                   );
                 })}
               </View>
-
-              <View style={styles.bottomHelpRow}>
-                <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-                  <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
-                </Pressable>
-              </View>
             </View>
           </SectionCard>
         </KeyboardAvoidingView>
@@ -850,13 +913,8 @@ export default function HomeScreen() {
               Orientación básica según lo que has seleccionado:
             </Text>
 
-            <Text style={styles.summaryBox}>{advice}</Text>
+            <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
 
-            <View style={styles.bottomHelpRow}>
-              <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-                <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
-              </Pressable>
-            </View>
           </View>
         </SectionCard>
       );
@@ -872,41 +930,37 @@ export default function HomeScreen() {
           <SectionCard title="Paso 5. Resumen">
             <View style={styles.sectionContent}>
               <Text style={styles.sectionDescription}>
-                Este es el resumen preparado para comunicar el caso a los servicios adecuados.
+                Lee el resumen y pulsa en Teléfonos de ayuda para llamar a los servicios de ayuda o emergencias más cercanos.
               </Text>
 
-              <TextInput
-                value={editableSummary}
-                onChangeText={(text) => {
-                  setEditableSummary(text);
-                  setSummaryTouched(true);
-                }}
-                multiline
-                style={[styles.input, styles.summaryEditor]}
-                textAlignVertical="top"
-              />
+              <Text style={[styles.summaryBox, styles.summaryEditor]}>{generatedSummary}</Text>
+
+              <Pressable style={styles.secondaryButton} onPress={() => setStepFiveView('observations')}>
+                <Text style={styles.secondaryButtonText}>Añadir observaciones</Text>
+              </Pressable>
 
               <View style={styles.warningBox}>
                 <Text style={styles.warningText}>
-                  En este caso llama directamente a los agentes forestales, o a seguridad ciudadana más cercana, o a emergencias o a los que consideres más oportunos según tu caso. Tienes abajo los contactos. Puedes copiar el resumen y usarlo si te lo piden los servicios de seguridad o emergencias.
+                  Llama a Agentes Forestales, seguridad o emergencias según el caso. Puedes copiar el resumen si te lo piden.
                 </Text>
               </View>
 
-              <Pressable style={styles.secondaryButton} onPress={copySummary}>
-                <Text style={styles.secondaryButtonText}>Copiar resumen</Text>
-              </Pressable>
+              <View style={styles.actionRow}>
+                <Pressable style={styles.iconActionButton} onPress={copySummary}>
+                  <Text style={styles.iconActionEmoji}>📋</Text>
+                  <Text style={styles.iconActionLabel}>Copiar</Text>
+                </Pressable>
 
-              <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-                <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
-              </Pressable>
+                <Pressable style={styles.iconActionButton} onPress={handleOpenHelp}>
+                  <Text style={styles.iconActionEmoji}>📞</Text>
+                  <Text style={styles.iconActionLabel}>Ayuda</Text>
+                </Pressable>
 
-              <Pressable
-                style={[styles.primaryButton, !hasOpenedHelpPhones && styles.disabledButton]}
-                onPress={finishFlow}
-                disabled={!hasOpenedHelpPhones}
-              >
-                <Text style={styles.primaryButtonText}>Finalizar</Text>
-              </Pressable>
+                <Pressable style={[styles.iconActionButton, styles.iconActionButtonPrimary]} onPress={finishFlow}>
+                  <Text style={styles.iconActionEmoji}>✅</Text>
+                  <Text style={styles.iconActionLabelPrimary}>Finalizar</Text>
+                </Pressable>
+              </View>
             </View>
           </SectionCard>
         </KeyboardAvoidingView>
@@ -922,19 +976,14 @@ export default function HomeScreen() {
         <SectionCard title="Paso 5. Resumen">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Este es el resumen para enviar el aviso a un centro especializado.
+              Lee el resumen. Añade observaciones si hace falta. Usa los botones de abajo o pulsa Finalizar.
             </Text>
 
-            <TextInput
-              value={editableSummary}
-              onChangeText={(text) => {
-                setEditableSummary(text);
-                setSummaryTouched(true);
-              }}
-              multiline
-              style={[styles.input, styles.summaryEditor]}
-              textAlignVertical="top"
-            />
+            <Text style={[styles.summaryBox, styles.summaryEditor]}>{generatedSummary}</Text>
+
+            <Pressable style={styles.secondaryButton} onPress={() => setStepFiveView('observations')}>
+              <Text style={styles.secondaryButtonText}>Añadir observaciones</Text>
+            </Pressable>
 
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
@@ -942,17 +991,27 @@ export default function HomeScreen() {
               </Text>
             </View>
 
-            <Pressable style={styles.primaryButton} onPress={() => setShowWhatsAppOptions(true)}>
-              <Text style={styles.primaryButtonText}>Enviar por WhatsApp</Text>
-            </Pressable>
+            <View style={styles.actionRow}>
+              <Pressable style={[styles.iconActionButton, styles.iconActionButtonPrimary]} onPress={() => setShowWhatsAppOptions(true)}>
+                <Text style={styles.iconActionEmoji}>🟢</Text>
+                <Text style={styles.iconActionLabelPrimary}>WhatsApp</Text>
+              </Pressable>
 
-            <Pressable style={styles.secondaryButton} onPress={copySummary}>
-              <Text style={styles.secondaryButtonText}>Copiar resumen</Text>
-            </Pressable>
+              <Pressable style={styles.iconActionButton} onPress={copySummary}>
+                <Text style={styles.iconActionEmoji}>📋</Text>
+                <Text style={styles.iconActionLabel}>Copiar</Text>
+              </Pressable>
 
-            <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-              <Text style={styles.secondaryButtonText}>Teléfonos de ayuda</Text>
-            </Pressable>
+              <Pressable style={styles.iconActionButton} onPress={handleOpenHelp}>
+                <Text style={styles.iconActionEmoji}>📞</Text>
+                <Text style={styles.iconActionLabel}>Ayuda</Text>
+              </Pressable>
+
+              <Pressable style={[styles.iconActionButton, styles.iconActionButtonPrimarySoft]} onPress={finishFlow}>
+                <Text style={styles.iconActionEmoji}>✅</Text>
+                <Text style={styles.iconActionLabelPrimary}>Finalizar</Text>
+              </Pressable>
+            </View>
           </View>
         </SectionCard>
       </KeyboardAvoidingView>
@@ -962,11 +1021,17 @@ export default function HomeScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {!showContacts && !showProvinces && !selectedProvince && (
+        {!showContacts && !showProvinces && !selectedProvince && stepFiveView !== 'observations' && (
           <View style={styles.hero}>
             <Text style={styles.badge}>SOS Fauna · Asistente</Text>
             <Text style={styles.heroText}>
-              Envía el aviso y obtén orientación básica. Una vez hayas rellenado los campos pulsa la flecha hacia delante o hacia atrás para finalizar.
+              {showWhatsAppOptions
+                ? 'El resumen está listo para WhatsApp. Pulsa la flecha izquierda para volver o Cancelar para descartar el aviso.'
+                : step === 5
+                  ? animalState === 'dead'
+                    ? 'Lee el resumen y llama al servicio más adecuado con Ayuda.'
+                    : 'Lee el resumen y usa los botones de abajo. Añade observaciones si hace falta.'
+                  : 'Envía el aviso y obtén orientación básica. Avanza o retrocede con las flechas laterales.'}
             </Text>
             {!showWhatsAppOptions ? (
               <Text style={styles.stepIndicator}>Paso {step} de 5</Text>
@@ -991,7 +1056,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     paddingVertical: 18,
     gap: 16,
-    paddingBottom: 32,
+    paddingBottom: 140,
   },
   keyboardAvoid: {
     flex: 1,
@@ -999,7 +1064,7 @@ const styles = StyleSheet.create({
   hero: {
     backgroundColor: '#e7f5ea',
     borderRadius: 18,
-    padding: 18,
+    padding: 16,
     gap: 8,
     borderWidth: 1,
     borderColor: '#cfe8d4',
@@ -1015,8 +1080,8 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   heroText: {
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 12,
+    lineHeight: 17,
     color: '#374151',
   },
   stepIndicator: {
@@ -1029,9 +1094,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   sectionDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#4b5563',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   subheading: {
     fontSize: 15,
@@ -1048,9 +1113,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   summaryEditor: {
+    minHeight: 184,
+    lineHeight: 21,
+    color: '#111827',
+  },
+  adviceBox: {
+    fontSize: 17,
+    lineHeight: 26,
+    minHeight: 240,
+  },
+  observationsEditor: {
     minHeight: 220,
     lineHeight: 22,
     color: '#111827',
+    paddingTop: 12,
+    paddingBottom: 24,
   },
   primaryButton: {
     backgroundColor: '#14532d',
@@ -1148,6 +1225,50 @@ const styles = StyleSheet.create({
     padding: 12,
     lineHeight: 22,
     color: '#111827',
+  },
+  inlineActionRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 6,
+    flexWrap: 'nowrap',
+    marginTop: 2,
+  },
+  iconActionButton: {
+    flex: 1,
+    minHeight: 48,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  iconActionButtonPrimary: {
+    backgroundColor: '#14532d',
+  },
+  iconActionButtonPrimarySoft: {
+    backgroundColor: '#166534',
+  },
+  iconActionEmoji: {
+    fontSize: 12,
+  },
+  iconActionLabel: {
+    color: '#111827',
+    fontSize: 9,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  iconActionLabelPrimary: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   bottomHelpRow: {
     marginTop: 8,
