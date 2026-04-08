@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
 import * as Location from 'expo-location';
 import * as MediaLibrary from 'expo-media-library';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -15,8 +15,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
+
 import { SectionCard } from '@/components/SectionCard';
 import { emergencyContacts } from '@/lib/constants';
+import { provinceContacts } from '@/lib/provinceContacts';
 
 type FlagsState = {
   bleeding: boolean;
@@ -141,8 +143,12 @@ function isValidPhone(phone: string) {
 
 export default function HomeScreen() {
   const [step, setStep] = useState<Step>(1);
+
   const [showContacts, setShowContacts] = useState(false);
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
+  const [showProvinces, setShowProvinces] = useState(false);
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+
   const [customWhatsAppNumber, setCustomWhatsAppNumber] = useState('');
   const [hasSentWhatsApp, setHasSentWhatsApp] = useState(false);
   const [hasOpenedHelpPhones, setHasOpenedHelpPhones] = useState(false);
@@ -150,8 +156,6 @@ export default function HomeScreen() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [animalState, setAnimalState] = useState<AnimalState>('unknown');
-  const [observations, setObservations] = useState('');
-
   const [animalType, setAnimalType] = useState<AnimalType>('unknown');
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -161,6 +165,9 @@ export default function HomeScreen() {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationCaptured, setLocationCaptured] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+
+  const [editableSummary, setEditableSummary] = useState('');
+  const [summaryTouched, setSummaryTouched] = useState(false);
 
   const [flags, setFlags] = useState<FlagsState>({
     bleeding: false,
@@ -195,7 +202,7 @@ export default function HomeScreen() {
     [animalState]
   );
 
-  const summary = useMemo(() => {
+  const generatedSummary = useMemo(() => {
     const mapsUrl = coords
       ? `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`
       : 'Sin ubicación';
@@ -212,7 +219,6 @@ export default function HomeScreen() {
       flags.other ? 'Situación adicional: Otro' : null,
       `Foto capturada: ${photoUri ? 'sí' : 'no'}`,
       `Vídeo capturado: ${videoUri ? 'sí' : 'no'}`,
-      observations.trim() ? `Observaciones: ${observations.trim()}` : null,
     ]
       .filter(Boolean)
       .join('\n');
@@ -221,7 +227,6 @@ export default function HomeScreen() {
     flags.other,
     fullName,
     locationText,
-    observations,
     phone,
     photoUri,
     selectedAnimalLabel,
@@ -229,6 +234,12 @@ export default function HomeScreen() {
     selectedFlags,
     videoUri,
   ]);
+
+  useEffect(() => {
+    if (!summaryTouched) {
+      setEditableSummary(generatedSummary);
+    }
+  }, [generatedSummary, summaryTouched]);
 
   const saveToGallery = async (uri: string, label: string) => {
     try {
@@ -341,7 +352,7 @@ export default function HomeScreen() {
       return;
     }
 
-    const text = encodeURIComponent(summary);
+    const text = encodeURIComponent(editableSummary || generatedSummary);
     const url = `https://wa.me/${cleaned}?text=${text}`;
     const supported = await Linking.canOpenURL(url);
 
@@ -355,20 +366,13 @@ export default function HomeScreen() {
   };
 
   const copySummary = async () => {
-    await Clipboard.setStringAsync(summary);
+    await Clipboard.setStringAsync(editableSummary || generatedSummary);
     Alert.alert('Resumen copiado', 'El resumen se ha copiado al portapapeles.');
   };
 
   const callNumber = async (phoneNumber: string) => {
     const url = `tel:${phoneNumber}`;
     await Linking.openURL(url);
-  };
-
-  const showProvincePhones = () => {
-    Alert.alert(
-      'Pendiente de ampliar',
-      'En el siguiente paso añadiremos teléfonos de ayuda por provincias y contactos específicos como “Mis amigas las palomas”.'
-    );
   };
 
   const finishFlow = () => {
@@ -382,13 +386,14 @@ export default function HomeScreen() {
           setStep(1);
           setShowContacts(false);
           setShowWhatsAppOptions(false);
+          setShowProvinces(false);
+          setSelectedProvince(null);
           setCustomWhatsAppNumber('');
           setHasSentWhatsApp(false);
           setHasOpenedHelpPhones(false);
           setFullName('');
           setPhone('');
           setAnimalState('unknown');
-          setObservations('');
           setAnimalType('unknown');
           setPhotoUri(null);
           setVideoUri(null);
@@ -396,6 +401,8 @@ export default function HomeScreen() {
           setCoords(null);
           setLocationCaptured(false);
           setLocationLoading(false);
+          setEditableSummary('');
+          setSummaryTouched(false);
           setFlags({
             bleeding: false,
             baby: false,
@@ -451,6 +458,21 @@ export default function HomeScreen() {
       return;
     }
 
+    if (selectedProvince) {
+      setSelectedProvince(null);
+      return;
+    }
+
+    if (showProvinces) {
+      setShowProvinces(false);
+      return;
+    }
+
+    if (showContacts) {
+      setShowContacts(false);
+      return;
+    }
+
     if (step > 1) {
       setStep((prev) => (prev - 1) as Step);
     }
@@ -459,6 +481,14 @@ export default function HomeScreen() {
   const handleOpenHelp = () => {
     setHasOpenedHelpPhones(true);
     setShowContacts(true);
+    setShowProvinces(false);
+    setSelectedProvince(null);
+  };
+
+  const handleOpenProvincePhones = () => {
+    setShowContacts(false);
+    setShowProvinces(true);
+    setSelectedProvince(null);
   };
 
   const renderContacts = () => (
@@ -482,7 +512,7 @@ export default function HomeScreen() {
           </Pressable>
         ))}
 
-        <Pressable style={styles.secondaryButton} onPress={showProvincePhones}>
+        <Pressable style={styles.secondaryButton} onPress={handleOpenProvincePhones}>
           <Text style={styles.secondaryButtonText}>Teléfonos de ayuda por provincias</Text>
         </Pressable>
 
@@ -492,6 +522,70 @@ export default function HomeScreen() {
       </View>
     </SectionCard>
   );
+
+  const renderProvinceList = () => (
+    <SectionCard title="Teléfonos por provincias">
+      <View style={styles.sectionContent}>
+        <Text style={styles.sectionDescription}>
+          Selecciona una provincia para ver los centros disponibles.
+        </Text>
+
+        {provinceContacts.map((item) => (
+          <Pressable
+            key={item.province}
+            style={styles.contactRow}
+            onPress={() => setSelectedProvince(item.province)}
+          >
+            <View style={styles.contactTextBlock}>
+              <Text style={styles.contactName}>{item.province}</Text>
+              <Text style={styles.contactNote}>
+                {item.contacts.length} contacto{item.contacts.length === 1 ? '' : 's'}
+              </Text>
+            </View>
+            <Text style={styles.contactPhone}>Ver</Text>
+          </Pressable>
+        ))}
+
+        <Pressable style={styles.secondaryButton} onPress={() => setShowProvinces(false)}>
+          <Text style={styles.secondaryButtonText}>Volver</Text>
+        </Pressable>
+      </View>
+    </SectionCard>
+  );
+
+  const renderProvinceDetail = () => {
+    const province = provinceContacts.find((p) => p.province === selectedProvince);
+
+    if (!province) return null;
+
+    return (
+      <SectionCard title={province.province}>
+        <View style={styles.sectionContent}>
+          <Text style={styles.sectionDescription}>
+            Estos son los contactos disponibles para esta provincia.
+          </Text>
+
+          {province.contacts.map((contact) => (
+            <Pressable
+              key={`${province.province}-${contact.name}-${contact.phone}`}
+              style={styles.contactRow}
+              onPress={() => callNumber(contact.phone)}
+            >
+              <View style={styles.contactTextBlock}>
+                <Text style={styles.contactName}>{contact.name}</Text>
+                <Text style={styles.contactNote}>{contact.note}</Text>
+              </View>
+              <Text style={styles.contactPhone}>{contact.phone}</Text>
+            </Pressable>
+          ))}
+
+          <Pressable style={styles.secondaryButton} onPress={() => setSelectedProvince(null)}>
+            <Text style={styles.secondaryButtonText}>Volver</Text>
+          </Pressable>
+        </View>
+      </SectionCard>
+    );
+  };
 
   const renderWhatsAppOptions = () => (
     <SectionCard title="Enviar por WhatsApp">
@@ -543,7 +637,7 @@ export default function HomeScreen() {
   );
 
   const renderNavigationArrows = () => {
-    if (showContacts || showWhatsAppOptions) return null;
+    if (showContacts || showWhatsAppOptions || showProvinces || selectedProvince) return null;
 
     return (
       <View pointerEvents="box-none" style={styles.sideNavOverlay}>
@@ -568,6 +662,8 @@ export default function HomeScreen() {
 
   const renderStep = () => {
     if (showContacts) return renderContacts();
+    if (showProvinces && !selectedProvince) return renderProvinceList();
+    if (selectedProvince) return renderProvinceDetail();
     if (showWhatsAppOptions) return renderWhatsAppOptions();
 
     if (step === 1) {
@@ -779,14 +875,15 @@ export default function HomeScreen() {
                 Este es el resumen preparado para comunicar el caso a los servicios adecuados.
               </Text>
 
-              <Text style={styles.summaryBox}>{summary}</Text>
-
               <TextInput
-                placeholder="Observaciones"
-                value={observations}
-                onChangeText={setObservations}
+                value={editableSummary}
+                onChangeText={(text) => {
+                  setEditableSummary(text);
+                  setSummaryTouched(true);
+                }}
                 multiline
-                style={[styles.input, styles.textAreaStep5]}
+                style={[styles.input, styles.summaryEditor]}
+                textAlignVertical="top"
               />
 
               <View style={styles.warningBox}>
@@ -828,14 +925,15 @@ export default function HomeScreen() {
               Este es el resumen para enviar el aviso a un centro especializado.
             </Text>
 
-            <Text style={styles.summaryBox}>{summary}</Text>
-
             <TextInput
-              placeholder="Observaciones"
-              value={observations}
-              onChangeText={setObservations}
+              value={editableSummary}
+              onChangeText={(text) => {
+                setEditableSummary(text);
+                setSummaryTouched(true);
+              }}
               multiline
-              style={[styles.input, styles.textAreaStep5]}
+              style={[styles.input, styles.summaryEditor]}
+              textAlignVertical="top"
             />
 
             <View style={styles.warningBox}>
@@ -864,11 +962,11 @@ export default function HomeScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {!showContacts && (
+        {!showContacts && !showProvinces && !selectedProvince && (
           <View style={styles.hero}>
             <Text style={styles.badge}>SOS Fauna · Asistente</Text>
             <Text style={styles.heroText}>
-              Sigue los pasos para enviar el aviso y recibir una orientación básica.
+              Envía el aviso y obtén orientación básica. Una vez hayas rellenado los campos pulsa la flecha hacia delante o hacia atrás para finalizar.
             </Text>
             {!showWhatsAppOptions ? (
               <Text style={styles.stepIndicator}>Paso {step} de 5</Text>
@@ -949,9 +1047,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#ffffff',
   },
-  textAreaStep5: {
-    minHeight: 100,
-    textAlignVertical: 'top',
+  summaryEditor: {
+    minHeight: 220,
+    lineHeight: 22,
+    color: '#111827',
   },
   primaryButton: {
     backgroundColor: '#14532d',
