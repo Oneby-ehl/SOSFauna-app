@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#1f5f3a"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
@@ -22,6 +24,16 @@
     },
     "web": {
       "favicon": "./assets/icon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ad6b2da3-c115-4da9-965c-87df382ea20a"
+      }
+    },
+    "plugins": [
+      "expo-web-browser",
+      "expo-font",
+      "expo-router"
+    ]
   }
 }

@@ -17,6 +17,8 @@ import {
   View,
 } from 'react-native';
 
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { SectionCard } from '@/components/SectionCard';
 import { provinceContacts } from '@/lib/provinceContacts';
 
@@ -38,11 +40,9 @@ type AnimalType =
   | 'reptileAmphibian'
   | 'unknown';
 
-type AnimalState = 'alive' | 'dead' | 'unknown';
+type AnimalState = 'alive' | 'dead';
 
 type Step = 1 | 2 | 3 | 4 | 5;
-
-type PanelView = 'summary' | 'observations';
 
 const GREFA_WHATSAPP = '34648539901';
 
@@ -59,7 +59,6 @@ const ANIMAL_OPTIONS: Array<{ key: AnimalType; label: string }> = [
 const ANIMAL_STATE_OPTIONS: Array<{ key: AnimalState; label: string }> = [
   { key: 'alive', label: 'Vivo' },
   { key: 'dead', label: 'Muerto' },
-  { key: 'unknown', label: 'No lo sé' },
 ];
 
 const FLAG_LABELS: Array<{ key: keyof FlagsState; label: string }> = [
@@ -159,6 +158,7 @@ function isValidPhone(phone: string) {
 }
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>(1);
 
   const [showContacts, setShowContacts] = useState(false);
@@ -166,7 +166,6 @@ export default function HomeScreen() {
   const [showProvinces, setShowProvinces] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [provinceSearch, setProvinceSearch] = useState('');
-  const [stepFiveView, setStepFiveView] = useState<PanelView>('summary');
 
   const [customWhatsAppNumber, setCustomWhatsAppNumber] = useState('');
   const [hasSentWhatsApp, setHasSentWhatsApp] = useState(false);
@@ -174,7 +173,7 @@ export default function HomeScreen() {
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [animalState, setAnimalState] = useState<AnimalState>('unknown');
+  const [animalState, setAnimalState] = useState<AnimalState>('alive');
   const [animalType, setAnimalType] = useState<AnimalType>('unknown');
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -185,7 +184,6 @@ export default function HomeScreen() {
   const [locationCaptured, setLocationCaptured] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
 
-  const [observations, setObservations] = useState('');
 
   const [flags, setFlags] = useState<FlagsState>({
     bleeding: false,
@@ -257,7 +255,6 @@ export default function HomeScreen() {
       flags.other ? 'Situación adicional: Otro' : null,
       `Foto capturada: ${photoUri ? 'sí' : 'no'}`,
       `Vídeo capturado: ${videoUri ? 'sí' : 'no'}`,
-      observations.trim() ? `Observaciones: ${observations.trim()}` : null,
     ]
       .filter(Boolean)
       .join('\n');
@@ -272,7 +269,6 @@ export default function HomeScreen() {
     selectedAnimalStateLabel,
     selectedFlags,
     videoUri,
-    observations,
   ]);
 
 
@@ -388,16 +384,26 @@ export default function HomeScreen() {
     }
 
     const text = encodeURIComponent(generatedSummary);
-    const url = `https://wa.me/${cleaned}?text=${text}`;
-    const supported = await Linking.canOpenURL(url);
+    const urls = [
+      `whatsapp://send?phone=${cleaned}&text=${text}`,
+      `https://wa.me/${cleaned}?text=${text}`,
+      `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`,
+    ];
 
-    if (!supported) {
-      Alert.alert('WhatsApp no disponible', 'No se pudo abrir WhatsApp en este dispositivo.');
-      return;
+    for (const url of urls) {
+      try {
+        await Linking.openURL(url);
+        setHasSentWhatsApp(true);
+        return;
+      } catch {
+        // Probar la siguiente opción
+      }
     }
 
-    setHasSentWhatsApp(true);
-    await Linking.openURL(url);
+    Alert.alert(
+      'No se pudo abrir WhatsApp',
+      'Comprueba que WhatsApp está instalado y vuelve a intentarlo.'
+    );
   };
 
   const copySummary = async () => {
@@ -421,7 +427,7 @@ export default function HomeScreen() {
     setHasOpenedHelpPhones(false);
     setFullName('');
     setPhone('');
-    setAnimalState('unknown');
+    setAnimalState('alive');
     setAnimalType('unknown');
     setPhotoUri(null);
     setVideoUri(null);
@@ -430,8 +436,6 @@ export default function HomeScreen() {
     setLocationCaptured(false);
     setLocationLoading(false);
     setProvinceSearch('');
-    setStepFiveView('summary');
-    setObservations('');
     setFlags({
       bleeding: false,
       baby: false,
@@ -452,7 +456,7 @@ export default function HomeScreen() {
   };
 
   const validateStep = () => {
-    if (step === 1) {
+    if (step === 3) {
       if (!fullName.trim()) {
         Alert.alert('Falta el nombre', 'Introduce tu nombre y apellidos antes de continuar.');
         return false;
@@ -469,7 +473,7 @@ export default function HomeScreen() {
       }
     }
 
-    if (step === 2) {
+    if (step === 4) {
       if (!photoUri && !videoUri && !locationCaptured) {
         Alert.alert(
           'Información incompleta',
@@ -490,12 +494,6 @@ export default function HomeScreen() {
   const goBack = () => {
     if (showWhatsAppOptions) {
       setShowWhatsAppOptions(false);
-      return;
-    }
-
-    if (stepFiveView === 'observations') {
-      Keyboard.dismiss();
-      setStepFiveView('summary');
       return;
     }
 
@@ -634,35 +632,6 @@ export default function HomeScreen() {
   };
 
 
-  const renderObservationsEditor = () => (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.keyboardAvoid}
-      keyboardVerticalOffset={90}
-    >
-      <SectionCard title="Paso 5. Añadir observaciones">
-        <View style={styles.sectionContent}>
-          <Text style={styles.sectionDescription}>
-            Escribe aquí lo que hayas observado del caso. Al finalizar volverás al resumen.
-          </Text>
-
-          <TextInput
-            placeholder="Escribe aquí tus observaciones"
-            value={observations}
-            onChangeText={setObservations}
-            multiline
-            style={[styles.input, styles.observationsEditor]}
-            textAlignVertical="top"
-          />
-
-          <Pressable style={styles.primaryButton} onPress={() => { Keyboard.dismiss(); setStepFiveView('summary'); }}>
-            <Text style={styles.primaryButtonText}>Finalizar</Text>
-          </Pressable>
-        </View>
-      </SectionCard>
-    </KeyboardAvoidingView>
-  );
-
   const renderWhatsAppOptions = () => (
     <SectionCard title="Enviar por WhatsApp">
       <View style={styles.sectionContent}>
@@ -709,8 +678,8 @@ export default function HomeScreen() {
 
   const renderNavigationArrows = () => {
     const isOverlayOpen = showContacts || showWhatsAppOptions || showProvinces || !!selectedProvince;
-    const canShowBackArrow = isOverlayOpen || step > 1 || stepFiveView === 'observations';
-    const canShowForwardArrow = !isOverlayOpen && stepFiveView !== 'observations' && step < 5;
+    const canShowBackArrow = isOverlayOpen || step > 1;
+    const canShowForwardArrow = !isOverlayOpen && step < 5;
 
     return (
       <View pointerEvents="box-none" style={styles.sideNavOverlay}>
@@ -738,11 +707,130 @@ export default function HomeScreen() {
     if (showProvinces && !selectedProvince) return renderProvinceList();
     if (selectedProvince) return renderProvinceDetail();
     if (showWhatsAppOptions) return renderWhatsAppOptions();
-    if (stepFiveView === 'observations') return renderObservationsEditor();
 
     if (step === 1) {
       return (
-        <SectionCard title="Paso 1. Datos de contacto">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoid}
+          keyboardVerticalOffset={90}
+        >
+          <SectionCard title="Paso 1. Tipo y situación del animal">
+            <View style={styles.sectionContent}>
+              <Text style={styles.sectionDescription}>
+                Indica primero si el animal está vivo o muerto. Después completa solo los datos que correspondan.
+              </Text>
+
+              <View style={styles.sectionGroup}>
+                <Text style={styles.subheading}>Estado del animal</Text>
+                <View style={styles.flagGrid}>
+                  {ANIMAL_STATE_OPTIONS.map((option) => {
+                    const active = animalState === option.key;
+
+                    return (
+                      <Pressable
+                        key={option.key}
+                        style={[styles.flag, active && styles.flagActive]}
+                        onPress={() => {
+                          setAnimalState(option.key);
+
+                          if (option.key === 'dead') {
+                            setAnimalType('unknown');
+                            setFlags({
+                              bleeding: false,
+                              baby: false,
+                              catDog: false,
+                              canNotMove: false,
+                              roadRisk: false,
+                              other: false,
+                            });
+                          }
+                        }}
+                      >
+                        <Text style={[styles.flagText, active && styles.flagTextActive]}>
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
+              {animalState === 'dead' ? (
+                <View style={styles.warningBox}>
+                  <Text style={styles.warningText}>
+                    Si el animal está muerto, no lo toques ni modifiques el lugar. Continúa para ver qué hacer.
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.sectionGroup}>
+                    <Text style={styles.subheading}>Tipo de animal</Text>
+                    <View style={styles.flagGrid}>
+                      {ANIMAL_OPTIONS.map((option) => {
+                        const active = animalType === option.key;
+
+                        return (
+                          <Pressable
+                            key={option.key}
+                            style={[styles.flag, active && styles.flagActive]}
+                            onPress={() => setAnimalType(option.key)}
+                          >
+                            <Text style={[styles.flagText, active && styles.flagTextActive]}>
+                              {option.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <View style={styles.sectionGroup}>
+                    <Text style={styles.subheading}>Situación observada</Text>
+                    <View style={styles.flagGrid}>
+                      {FLAG_LABELS.map(({ key, label }) => {
+                        const active = flags[key];
+
+                        return (
+                          <Pressable
+                            key={key}
+                            style={[styles.flag, active && styles.flagActive]}
+                            onPress={() => toggleFlag(key)}
+                          >
+                            <Text style={[styles.flagText, active && styles.flagTextActive]}>
+                              {label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                </>
+              )}
+            </View>
+          </SectionCard>
+        </KeyboardAvoidingView>
+      );
+    }
+
+    if (step === 2) {
+      return (
+        <SectionCard title="Paso 2. Qué hacer ahora">
+          <View style={styles.sectionContent}>
+            <Text style={styles.sectionDescription}>
+              Sigue estas recomendaciones antes de actuar o mover al animal.
+            </Text>
+
+            <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
+
+          </View>
+        </SectionCard>
+      );
+    }
+
+    if (step === 3) {
+      return (
+        <SectionCard title="Paso 3. Datos de contacto">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
               Introduce tus datos e indica si el animal está vivo o muerto.
@@ -763,25 +851,6 @@ export default function HomeScreen() {
               style={styles.input}
             />
 
-            <Text style={styles.subheading}>Estado del animal</Text>
-            <View style={styles.flagGrid}>
-              {ANIMAL_STATE_OPTIONS.map((option) => {
-                const active = animalState === option.key;
-
-                return (
-                  <Pressable
-                    key={option.key}
-                    style={[styles.flag, active && styles.flagActive]}
-                    onPress={() => setAnimalState(option.key)}
-                  >
-                    <Text style={[styles.flagText, active && styles.flagTextActive]}>
-                      {option.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
                 Tus datos no se almacenan en esta app ni se usan para ningún otro fin.
@@ -798,9 +867,10 @@ export default function HomeScreen() {
       );
     }
 
-    if (step === 2) {
+
+    if (step === 4) {
       return (
-        <SectionCard title="Paso 2. Foto, vídeo y ubicación">
+        <SectionCard title="Paso 4. Foto, vídeo y ubicación">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
               Captura una foto y/o un vídeo y obtén la ubicación del hallazgo.
@@ -849,77 +919,6 @@ export default function HomeScreen() {
       );
     }
 
-    if (step === 3) {
-      return (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardAvoid}
-          keyboardVerticalOffset={90}
-        >
-          <SectionCard title="Paso 3. Tipo y situación del animal">
-            <View style={styles.sectionContent}>
-              <Text style={styles.sectionDescription}>
-                Selecciona el tipo de animal y marca solo lo que observes con claridad.
-              </Text>
-
-              <Text style={styles.subheading}>Tipo de animal</Text>
-              <View style={styles.flagGrid}>
-                {ANIMAL_OPTIONS.map((option) => {
-                  const active = animalType === option.key;
-
-                  return (
-                    <Pressable
-                      key={option.key}
-                      style={[styles.flag, active && styles.flagActive]}
-                      onPress={() => setAnimalType(option.key)}
-                    >
-                      <Text style={[styles.flagText, active && styles.flagTextActive]}>
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              <Text style={styles.subheading}>Situación del animal</Text>
-              <View style={styles.flagGrid}>
-                {FLAG_LABELS.map(({ key, label }) => {
-                  const active = flags[key];
-
-                  return (
-                    <Pressable
-                      key={key}
-                      style={[styles.flag, active && styles.flagActive]}
-                      onPress={() => toggleFlag(key)}
-                    >
-                      <Text style={[styles.flagText, active && styles.flagTextActive]}>
-                        {label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          </SectionCard>
-        </KeyboardAvoidingView>
-      );
-    }
-
-    if (step === 4) {
-      return (
-        <SectionCard title="Paso 4. Orientación básica">
-          <View style={styles.sectionContent}>
-            <Text style={styles.sectionDescription}>
-              Orientación básica según lo que has seleccionado:
-            </Text>
-
-            <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
-
-          </View>
-        </SectionCard>
-      );
-    }
-
     if (animalState === 'dead') {
       return (
         <KeyboardAvoidingView
@@ -934,10 +933,6 @@ export default function HomeScreen() {
               </Text>
 
               <Text style={[styles.summaryBox, styles.summaryEditor]}>{generatedSummary}</Text>
-
-              <Pressable style={styles.secondaryButton} onPress={() => setStepFiveView('observations')}>
-                <Text style={styles.secondaryButtonText}>Añadir observaciones</Text>
-              </Pressable>
 
               <View style={styles.warningBox}>
                 <Text style={styles.warningText}>
@@ -976,14 +971,10 @@ export default function HomeScreen() {
         <SectionCard title="Paso 5. Resumen">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Lee el resumen. Añade observaciones si hace falta. Usa los botones de abajo o pulsa Finalizar.
+              Lee el resumen y utiliza las opciones disponibles para enviar, copiar o finalizar el aviso.
             </Text>
 
             <Text style={[styles.summaryBox, styles.summaryEditor]}>{generatedSummary}</Text>
-
-            <Pressable style={styles.secondaryButton} onPress={() => setStepFiveView('observations')}>
-              <Text style={styles.secondaryButtonText}>Añadir observaciones</Text>
-            </Pressable>
 
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
@@ -1019,9 +1010,16 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {!showContacts && !showProvinces && !selectedProvince && stepFiveView !== 'observations' && (
+    <SafeAreaView style={styles.screen} edges={['bottom']}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.container,
+          { paddingBottom: Math.max(300, insets.bottom + 260) },
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
+        {!showContacts && !showProvinces && !selectedProvince && (
           <View style={styles.hero}>
             <Text style={styles.badge}>SOS Fauna · Asistente</Text>
             <Text style={styles.heroText}>
@@ -1029,8 +1027,8 @@ export default function HomeScreen() {
                 ? 'El resumen está listo para WhatsApp. Pulsa la flecha izquierda para volver o Cancelar para descartar el aviso.'
                 : step === 5
                   ? animalState === 'dead'
-                    ? 'Lee el resumen y llama al servicio más adecuado con Ayuda.'
-                    : 'Lee el resumen y usa los botones de abajo. Añade observaciones si hace falta.'
+                    ? 'Lee el resumen y llama al servicio más adecuado pulsando el botón Ayuda.'
+                    : 'Usa WhatsApp para enviar la información a GREFA o a otro contacto. Si lo prefieres, pulsa Ayuda para localizar teléfonos de asistencia especializados. Pulsa Finalizar cuando hayas terminado.'
                   : 'Envía el aviso y obtén orientación básica. Avanza o retrocede con las flechas laterales.'}
             </Text>
             {!showWhatsAppOptions ? (
@@ -1043,7 +1041,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {renderNavigationArrows()}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -1052,11 +1050,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f3f7f4',
   },
+  scrollView: {
+    flex: 1,
+  },
   container: {
+    flexGrow: 1,
     paddingHorizontal: 26,
-    paddingVertical: 18,
+    paddingTop: 12,
     gap: 16,
-    paddingBottom: 140,
   },
   keyboardAvoid: {
     flex: 1,
@@ -1093,6 +1094,14 @@ const styles = StyleSheet.create({
   sectionContent: {
     gap: 12,
   },
+  sectionGroup: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#dbe7dd',
+    borderRadius: 14,
+    padding: 12,
+    gap: 10,
+  },
   sectionDescription: {
     fontSize: 13,
     color: '#4b5563',
@@ -1118,16 +1127,13 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   adviceBox: {
-    fontSize: 17,
-    lineHeight: 26,
-    minHeight: 240,
-  },
-  observationsEditor: {
-    minHeight: 220,
-    lineHeight: 22,
-    color: '#111827',
-    paddingTop: 12,
-    paddingBottom: 24,
+    fontSize: 18,
+    lineHeight: 30,
+    minHeight: 320,
+    paddingTop: 18,
+    paddingBottom: 18,
+    backgroundColor: '#eef8f0',
+    borderColor: '#b7dfc0',
   },
   primaryButton: {
     backgroundColor: '#14532d',
