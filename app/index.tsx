@@ -1,9 +1,9 @@
-import * as Clipboard from 'expo-clipboard';
-import * as ImagePicker from 'expo-image-picker';
-import * as Linking from 'expo-linking';
-import * as Location from 'expo-location';
-import * as MediaLibrary from 'expo-media-library';
-import { useMemo, useState } from 'react';
+import * as Clipboard from "expo-clipboard";
+import * as ImagePicker from "expo-image-picker";
+import * as Linking from "expo-linking";
+import * as Location from "expo-location";
+import * as MediaLibrary from "expo-media-library";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -15,12 +15,18 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
+} from "react-native";
 
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-import { SectionCard } from '@/components/SectionCard';
-import { provinceContacts } from '@/lib/provinceContacts';
+import { Stack } from "expo-router";
+import MapView, { Marker } from "react-native-maps";
+
+import { SectionCard } from "@/components/SectionCard";
+import { provinceContacts } from "@/lib/provinceContacts";
 
 type FlagsState = {
   bleeding: boolean;
@@ -28,119 +34,196 @@ type FlagsState = {
   catDog: boolean;
   canNotMove: boolean;
   roadRisk: boolean;
+  ringGps: boolean;
+  trapped: boolean;
+  cannotFly: boolean;
+  weakness: boolean;
+  normalAppearance: boolean;
+  breathing: boolean;
   other: boolean;
 };
 
 type AnimalType =
-  | 'smallBird'
-  | 'largeBird'
-  | 'bat'
-  | 'smallMammal'
-  | 'largeMammal'
-  | 'reptileAmphibian'
-  | 'unknown';
+  | "smallBird"
+  | "largeBird"
+  | "bat"
+  | "smallMammal"
+  | "largeMammal"
+  | "reptileAmphibian"
+  | "unknown";
 
-type AnimalState = 'alive' | 'dead';
+type AnimalState = "alive" | "dead";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
-const GREFA_WHATSAPP = '34648539901';
+const GREFA_WHATSAPP = "34648539901";
 
 const ANIMAL_OPTIONS: Array<{ key: AnimalType; label: string }> = [
-  { key: 'smallBird', label: 'Ave pequeña' },
-  { key: 'largeBird', label: 'Ave rapaz / ave grande' },
-  { key: 'bat', label: 'Murciélago' },
-  { key: 'smallMammal', label: 'Pequeño mamífero' },
-  { key: 'largeMammal', label: 'Mamífero grande' },
-  { key: 'reptileAmphibian', label: 'Reptil / anfibio' },
-  { key: 'unknown', label: 'No lo sé' },
+  { key: "smallBird", label: "Ave pequeña" },
+  { key: "largeBird", label: "Ave rapaz / ave grande" },
+  { key: "bat", label: "Murciélago" },
+  { key: "smallMammal", label: "Pequeño mamífero" },
+  { key: "largeMammal", label: "Mamífero grande" },
+  { key: "reptileAmphibian", label: "Reptil / anfibio" },
+  { key: "unknown", label: "No lo sé" },
 ];
 
 const ANIMAL_STATE_OPTIONS: Array<{ key: AnimalState; label: string }> = [
-  { key: 'alive', label: 'Vivo' },
-  { key: 'dead', label: 'Muerto' },
+  { key: "alive", label: "Vivo" },
+  { key: "dead", label: "Muerto" },
 ];
 
 const FLAG_LABELS: Array<{ key: keyof FlagsState; label: string }> = [
-  { key: 'bleeding', label: 'Sangra' },
-  { key: 'baby', label: 'Es cría' },
-  { key: 'catDog', label: 'Ataque de gato/perro' },
-  { key: 'canNotMove', label: 'No se mueve bien' },
-  { key: 'roadRisk', label: 'Peligro en carretera' },
-  { key: 'other', label: 'Otro' },
+  { key: "bleeding", label: "Sangra" },
+  { key: "baby", label: "Es cría" },
+  { key: "catDog", label: "Ataque de gato/perro" },
+  { key: "canNotMove", label: "No se mueve bien" },
+  { key: "roadRisk", label: "Peligro en carretera" },
+  { key: "ringGps", label: "Anilla / GPS" },
+  { key: "trapped", label: "Atrapado" },
+  { key: "cannotFly", label: "No vuela" },
+  { key: "weakness", label: "Debilidad / decaimiento" },
+  { key: "normalAppearance", label: "Apariencia normal" },
+  { key: "breathing", label: "Respiración agitada" },
+  { key: "other", label: "Otro" },
 ];
 
 const NATIONAL_HELP_CONTACTS = [
-  { name: 'Emergencias', phone: '112', note: 'Emergencias generales' },
-  { name: 'SEPRONA', phone: '062', note: 'Guardia Civil · Protección de la naturaleza' },
-  { name: 'Policía Municipal / Local', phone: '092', note: 'Policía local del municipio' },
-  { name: 'Policía Nacional', phone: '091', note: 'Atención policial' },
+  { name: "Emergencias", phone: "112", note: "Emergencias generales" },
+  {
+    name: "SEPRONA",
+    phone: "062",
+    note: "Guardia Civil · Protección de la naturaleza",
+  },
+  {
+    name: "Policía Municipal / Local",
+    phone: "092",
+    note: "Policía local del municipio",
+  },
+  { name: "Policía Nacional", phone: "091", note: "Atención policial" },
 ];
 
 const MADRID_PROVINCE_CONTACTS = [
-  { name: 'GREFA guardia', phone: '648 53 99 01', note: 'Guardia para avisos de fauna salvaje herida' },
-  { name: 'GREFA central', phone: '91 638 75 50', note: 'Teléfono general del centro' },
-  { name: 'CRAS Madrid', phone: '91 276 06 26', note: 'Centro de Recuperación de Animales Silvestres de la Comunidad de Madrid' },
-  { name: 'Agentes Forestales de Madrid', phone: '900 181 628', note: 'Avisos e incidencias sobre fauna y medio natural' },
-  { name: 'Mis Amigas las Palomas', phone: '640 267 284', note: 'Contacto de apoyo para palomas en Madrid' },
+  {
+    name: "GREFA guardia",
+    phone: "648 53 99 01",
+    note: "Guardia para avisos de fauna salvaje herida",
+  },
+  {
+    name: "GREFA central",
+    phone: "91 638 75 50",
+    note: "Teléfono general del centro",
+  },
+  {
+    name: "CRAS Madrid",
+    phone: "91 276 06 26",
+    note: "Centro de Recuperación de Animales Silvestres de la Comunidad de Madrid",
+  },
+  {
+    name: "Agentes Forestales de Madrid",
+    phone: "900 181 628",
+    note: "Avisos e incidencias sobre fauna y medio natural",
+  },
+  {
+    name: "Mis Amigas las Palomas",
+    phone: "640 267 284",
+    note: "Contacto de apoyo para palomas en Madrid",
+  },
 ];
 
-function getAdvice(animalState: AnimalState, animalType: AnimalType, flags: FlagsState) {
-  if (animalState === 'dead') {
-    return 'No lo toques ni modifiques el escenario del cadáver porque puede servir como prueba para una investigación pericial o judicial. Observa si encuentras algo extraño alrededor y comunícalo a los agentes de seguridad, a los agentes forestales o a emergencias.';
+function canUseCannotFly(animalType: AnimalType) {
+  return (
+    animalType === "smallBird" ||
+    animalType === "largeBird" ||
+    animalType === "bat" ||
+    animalType === "unknown"
+  );
+}
+
+function getAdvice(
+  animalState: AnimalState,
+  animalType: AnimalType,
+  flags: FlagsState,
+) {
+  if (animalState === "dead") {
+    return "No lo toques ni modifiques el escenario del cadáver porque puede servir como prueba para una investigación pericial o judicial. Observa si encuentras algo extraño alrededor y comunícalo a los agentes de seguridad, a los agentes forestales o a emergencias.";
   }
 
-  if (animalType === 'smallBird') {
+  if (animalType === "smallBird") {
+    if (
+      flags.bleeding ||
+      flags.catDog ||
+      flags.canNotMove ||
+      flags.roadRisk ||
+      flags.trapped ||
+      flags.cannotFly ||
+      flags.weakness ||
+      flags.breathing ||
+      flags.other
+    ) {
+      return "Parece un caso que puede requerir valoración o ingreso. Colócalo en una caja de cartón cerrada y ventilada, en silencio, sin ruidos y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+    }
+
     if (flags.baby) {
-      return 'Puede ser un volantón. Observa antes de recogerlo. Si no hay peligro inmediato, los padres pueden seguir atendiéndolo cerca. Si necesitas retirarlo, colócalo en una caja de cartón, en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
+      return "Puede ser un volantón. Observa antes de recogerlo. Si no hay peligro inmediato, los padres pueden seguir atendiéndolo cerca. Si necesitas retirarlo, colócalo en una caja de cartón cerrada y ventilada, en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
     }
 
-    if (flags.bleeding || flags.catDog || flags.canNotMove || flags.other) {
-      return 'Parece un caso que puede requerir valoración o ingreso. Colócalo en una caja de cartón, en silencio, sin ruidos y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
+    return "Si no vuela o parece débil, colócalo en una caja de cartón cerrada y ventilada, en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Evita manipularlo más de lo necesario y no le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+  }
+
+  if (animalType === "largeBird") {
+    return "Precaución: una rapaz o ave grande puede lesionarte con pico, alas o garras. No la manipules salvo peligro inmediato. Si es imprescindible, usa una manta o toalla gruesa. Mantenla apartada de ruido, estrés y de temperaturas extremas. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+  }
+
+  if (animalType === "bat") {
+    return "No lo toques con la mano desnuda. Usa guantes o una tela. Colócalo en una caja de cartón cerrada y ventilada ventilada, sin ruidos y protegido del frío o del calor extremo. Evita manipularlo más de lo necesario. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+  }
+
+  if (animalType === "smallMammal") {
+    if (
+      flags.bleeding ||
+      flags.catDog ||
+      flags.canNotMove ||
+      flags.roadRisk ||
+      flags.trapped ||
+      flags.cannotFly ||
+      flags.weakness ||
+      flags.breathing ||
+      flags.other
+    ) {
+      return "Parece un caso que puede requerir valoración o ingreso. Manipula lo mínimo. Colócalo en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, tranquilo y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
     }
 
-    return 'Si no vuela o parece débil, colócalo en una caja de cartón, en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Evita manipularlo más de lo necesario y no le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
-  }
-
-  if (animalType === 'largeBird') {
-    return 'Precaución: una rapaz o ave grande puede lesionarte con pico, alas o garras. No la manipules salvo peligro inmediato. Si es imprescindible, usa una manta o toalla gruesa. Mantenla apartada de ruido, estrés y de temperaturas extremas. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
-  }
-
-  if (animalType === 'bat') {
-    return 'No lo toques con la mano desnuda. Usa guantes o una tela. Colócalo en una caja de cartón ventilada, sin ruidos y protegido del frío o del calor extremo. Evita manipularlo más de lo necesario. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
-  }
-
-  if (animalType === 'smallMammal') {
     if (flags.baby) {
-      return 'Si es una cría, manipúlala lo mínimo. Colócala en una caja de cartón con calor suave, en silencio, sin ruidos y protegida del frío o del calor extremo. No la alimentes salvo indicación expresa. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
+      return "Si es una cría, manipúlala lo mínimo. Colócala en una caja de cartón cerrada y ventilada con calor suave, en silencio, sin ruidos y protegida del frío o del calor extremo. No la alimentes salvo indicación expresa. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
     }
 
-    return 'Manipula lo mínimo. Colócalo en una caja de cartón o recipiente seguro, tranquilo y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
+    return "Manipula lo mínimo. Colócalo en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, tranquilo y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
   }
 
-  if (animalType === 'largeMammal') {
-    return 'No intentes capturarlo ni acercarte más de lo necesario. Puede reaccionar con miedo o agresividad. Mantén distancia, evita acorralarlo y procura que quede apartado de ruido, estrés y peligro inmediato. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
+  if (animalType === "largeMammal") {
+    return "No intentes capturarlo ni acercarte más de lo necesario. Puede reaccionar con miedo o agresividad. Mantén distancia, evita acorralarlo y procura que quede apartado de ruido, estrés y peligro inmediato. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
   }
 
-  if (animalType === 'reptileAmphibian') {
-    return 'Evita manipularlo salvo riesgo inmediato. Mantenlo en un recipiente seguro y ventilado o en una zona protegida, sin ruido y evitando frío o calor extremo. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
+  if (animalType === "reptileAmphibian") {
+    return "Evita manipularlo salvo riesgo inmediato. Mantenlo en un recipiente seguro y ventilado o en una zona protegida, sin ruido y evitando frío o calor extremo. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
   }
 
-  return 'Si no sabes qué animal es, mantén distancia, evita manipularlo y no le des comida ni agua. Si es necesario moverlo por seguridad, mantenlo en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.';
+  return "Si no sabes qué animal es, mantén distancia, evita manipularlo y no le des comida ni agua. Si es necesario moverlo por seguridad, mantenlo en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
 }
 
 function normalizePhone(phone: string) {
-  return phone.replace(/[^\d+]/g, '');
+  return phone.replace(/[^\d+]/g, "");
 }
 
 function normalizeWhatsAppNumber(phone: string) {
-  let normalized = phone.replace(/[^\d+]/g, '').trim();
+  let normalized = phone.replace(/[^\d+]/g, "").trim();
 
-  if (!normalized) return '';
-  if (normalized.startsWith('+')) normalized = normalized.slice(1);
-  if (normalized.startsWith('00')) normalized = normalized.slice(2);
+  if (!normalized) return "";
+  if (normalized.startsWith("+")) normalized = normalized.slice(1);
+  if (normalized.startsWith("00")) normalized = normalized.slice(2);
 
-  return normalized.replace(/[^\d]/g, '');
+  return normalized.replace(/[^\d]/g, "");
 }
 
 function countDigits(phone: string) {
@@ -152,7 +235,7 @@ function isValidPhone(phone: string) {
   const plusCount = (normalized.match(/\+/g) || []).length;
 
   if (plusCount > 1) return false;
-  if (normalized.includes('+') && !normalized.startsWith('+')) return false;
+  if (normalized.includes("+") && !normalized.startsWith("+")) return false;
 
   return countDigits(normalized) >= 9;
 }
@@ -160,30 +243,54 @@ function isValidPhone(phone: string) {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>(1);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   const [showContacts, setShowContacts] = useState(false);
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
   const [showProvinces, setShowProvinces] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [provinceSearch, setProvinceSearch] = useState('');
+  const [provinceSearch, setProvinceSearch] = useState("");
 
-  const [customWhatsAppNumber, setCustomWhatsAppNumber] = useState('');
+  const [customWhatsAppNumber, setCustomWhatsAppNumber] = useState("");
   const [hasSentWhatsApp, setHasSentWhatsApp] = useState(false);
   const [hasOpenedHelpPhones, setHasOpenedHelpPhones] = useState(false);
 
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [animalState, setAnimalState] = useState<AnimalState>('alive');
-  const [animalType, setAnimalType] = useState<AnimalType>('unknown');
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [animalState, setAnimalState] = useState<AnimalState>("alive");
+  const [animalType, setAnimalType] = useState<AnimalType>("unknown");
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [videoUri, setVideoUri] = useState<string | null>(null);
 
-  const [locationText, setLocationText] = useState('Ubicación no capturada todavía.');
-  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationText, setLocationText] = useState(
+    "Ubicación no capturada todavía.",
+  );
+  const [coords, setCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [locationCaptured, setLocationCaptured] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
 
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [scrollY, setScrollY] = useState(0);
+  const [scrollContentHeight, setScrollContentHeight] = useState(0);
+  const [scrollLayoutHeight, setScrollLayoutHeight] = useState(0);
+  const [mapZoom, setMapZoom] = useState(15);
+
+  const mapRegion = useMemo(() => {
+    if (!coords) return null;
+
+    const delta = Math.max(0.002, 360 / Math.pow(2, mapZoom));
+
+    return {
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      latitudeDelta: delta,
+      longitudeDelta: delta,
+    };
+  }, [coords, mapZoom]);
 
   const [flags, setFlags] = useState<FlagsState>({
     bleeding: false,
@@ -191,39 +298,53 @@ export default function HomeScreen() {
     catDog: false,
     canNotMove: false,
     roadRisk: false,
+    ringGps: false,
+    trapped: false,
+    cannotFly: false,
+    weakness: false,
+    normalAppearance: false,
+    breathing: false,
     other: false,
   });
 
   const advice = useMemo(
     () => getAdvice(animalState, animalType, flags),
-    [animalState, animalType, flags]
+    [animalState, animalType, flags],
   );
 
   const selectedFlags = useMemo(
     () =>
       FLAG_LABELS.filter(({ key }) => flags[key])
         .map(({ label }) => label)
-        .join(', ') || 'Sin marcas',
-    [flags]
+        .join(", ") || "Sin marcas",
+    [flags],
   );
 
   const selectedAnimalLabel = useMemo(
-    () => ANIMAL_OPTIONS.find((option) => option.key === animalType)?.label || 'No indicado',
-    [animalType]
+    () =>
+      ANIMAL_OPTIONS.find((option) => option.key === animalType)?.label ||
+      "No indicado",
+    [animalType],
   );
 
   const selectedAnimalStateLabel = useMemo(
     () =>
-      ANIMAL_STATE_OPTIONS.find((option) => option.key === animalState)?.label || 'No indicado',
-    [animalState]
+      ANIMAL_STATE_OPTIONS.find((option) => option.key === animalState)
+        ?.label || "No indicado",
+    [animalState],
   );
 
   const mergedProvinceContacts = useMemo(() => {
-    const madridEntry = { province: 'Madrid', contacts: MADRID_PROVINCE_CONTACTS };
+    const madridEntry = {
+      province: "Madrid",
+      contacts: MADRID_PROVINCE_CONTACTS,
+    };
     const base = Array.isArray(provinceContacts) ? provinceContacts : [];
-    const withoutMadrid = base.filter((item) => item.province !== 'Madrid');
+    const withoutMadrid = base.filter((item) => item.province !== "Madrid");
 
-    return [madridEntry, ...withoutMadrid].sort((a, b) => a.province.localeCompare(b.province, 'es'));
+    return [madridEntry, ...withoutMadrid].sort((a, b) =>
+      a.province.localeCompare(b.province, "es"),
+    );
   }, []);
 
   const filteredProvinceContacts = useMemo(() => {
@@ -232,32 +353,70 @@ export default function HomeScreen() {
     if (!normalizedSearch) return mergedProvinceContacts;
 
     return mergedProvinceContacts.filter((item) =>
-      item.province.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(
-        normalizedSearch.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      )
+      item.province
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .includes(
+          normalizedSearch.normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+        ),
     );
   }, [provinceSearch, mergedProvinceContacts]);
+
+  const showStep5ActionBar =
+    !showWelcome &&
+    step === 5 &&
+    !showContacts &&
+    !showWhatsAppOptions &&
+    !showProvinces &&
+    !selectedProvince;
+
+  const canShowStep1ScrollHint =
+    !showWelcome &&
+    step === 1 &&
+    !showContacts &&
+    !showWhatsAppOptions &&
+    !showProvinces &&
+    !selectedProvince &&
+    scrollContentHeight > scrollLayoutHeight + 40;
+
+  const isNearBottom =
+    scrollY + scrollLayoutHeight >= scrollContentHeight - 80;
+
+  useEffect(() => {
+    setScrollY(0);
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    });
+  }, [
+    step,
+    showContacts,
+    showWhatsAppOptions,
+    showProvinces,
+    selectedProvince,
+    showWelcome,
+  ]);
 
   const generatedSummary = useMemo(() => {
     const mapsUrl = coords
       ? `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`
-      : 'Sin ubicación';
+      : "Sin ubicación";
 
     return [
-      'AVISO DE RESCATE DE FAUNA',
-      `Nombre: ${fullName || 'No indicado'}`,
-      `Teléfono: ${phone || 'No indicado'}`,
+      "AVISO DE RESCATE DE FAUNA",
+      `Nombre: ${fullName || "No indicado"}`,
+      `Teléfono: ${phone || "No indicado"}`,
       `Estado del animal: ${selectedAnimalStateLabel}`,
       `Tipo de animal: ${selectedAnimalLabel}`,
       `Ubicación: ${locationText}`,
       `Mapa: ${mapsUrl}`,
       `Situación observada: ${selectedFlags}`,
-      flags.other ? 'Situación adicional: Otro' : null,
-      `Foto capturada: ${photoUri ? 'sí' : 'no'}`,
-      `Vídeo capturado: ${videoUri ? 'sí' : 'no'}`,
+      flags.other ? "Situación adicional: Otro" : null,
+      `Foto capturada: ${photoUri ? "sí" : "no"}`,
+      `Vídeo capturado: ${videoUri ? "sí" : "no"}`,
     ]
       .filter(Boolean)
-      .join('\n');
+      .join("\n");
   }, [
     coords,
     flags.other,
@@ -271,15 +430,14 @@ export default function HomeScreen() {
     videoUri,
   ]);
 
-
   const saveToGallery = async (uri: string, label: string) => {
     try {
       const permission = await MediaLibrary.requestPermissionsAsync();
 
       if (!permission.granted) {
         Alert.alert(
-          'Permiso recomendado',
-          `No se ha concedido permiso para guardar ${label} en la galería.`
+          "Permiso recomendado",
+          `No se ha concedido permiso para guardar ${label} en la galería.`,
         );
         return;
       }
@@ -287,8 +445,8 @@ export default function HomeScreen() {
       await MediaLibrary.saveToLibraryAsync(uri);
     } catch {
       Alert.alert(
-        'No se pudo guardar',
-        `No se pudo guardar ${label} en la galería del dispositivo.`
+        "No se pudo guardar",
+        `No se pudo guardar ${label} en la galería del dispositivo.`,
       );
     }
   };
@@ -297,19 +455,22 @@ export default function HomeScreen() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permiso necesario', 'Necesitamos acceso a la cámara para capturar la foto.');
+      Alert.alert(
+        "Permiso necesario",
+        "Necesitamos acceso a la cámara para capturar la foto.",
+      );
       return;
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       quality: 0.7,
     });
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setPhotoUri(uri);
-      await saveToGallery(uri, 'la foto');
+      await saveToGallery(uri, "la foto");
     }
   };
 
@@ -317,12 +478,15 @@ export default function HomeScreen() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permiso necesario', 'Necesitamos acceso a la cámara para grabar el vídeo.');
+      Alert.alert(
+        "Permiso necesario",
+        "Necesitamos acceso a la cámara para grabar el vídeo.",
+      );
       return;
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['videos'],
+      mediaTypes: ["videos"],
       quality: 0.7,
       videoMaxDuration: 20,
     });
@@ -330,7 +494,7 @@ export default function HomeScreen() {
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setVideoUri(uri);
-      await saveToGallery(uri, 'el vídeo');
+      await saveToGallery(uri, "el vídeo");
     }
   };
 
@@ -341,7 +505,10 @@ export default function HomeScreen() {
       const permission = await Location.requestForegroundPermissionsAsync();
 
       if (!permission.granted) {
-        Alert.alert('Permiso necesario', 'Necesitamos tu ubicación para enviar el aviso.');
+        Alert.alert(
+          "Permiso necesario",
+          "Necesitamos tu ubicación para enviar el aviso.",
+        );
         return;
       }
 
@@ -355,21 +522,72 @@ export default function HomeScreen() {
       });
 
       setLocationText(
-        `${current.coords.latitude.toFixed(5)}, ${current.coords.longitude.toFixed(5)}`
+        `${current.coords.latitude.toFixed(5)}, ${current.coords.longitude.toFixed(5)}`,
       );
       setLocationCaptured(true);
     } catch {
-      Alert.alert('No se pudo obtener la ubicación', 'Inténtalo de nuevo en unos segundos.');
+      Alert.alert(
+        "No se pudo obtener la ubicación",
+        "Inténtalo de nuevo en unos segundos.",
+      );
     } finally {
       setLocationLoading(false);
     }
   };
 
+  const hasCriticalHealthFlag = (nextFlags: FlagsState) =>
+    nextFlags.bleeding ||
+    nextFlags.catDog ||
+    nextFlags.canNotMove ||
+    nextFlags.trapped ||
+    nextFlags.cannotFly ||
+    nextFlags.weakness ||
+    nextFlags.breathing;
+
   const toggleFlag = (key: keyof FlagsState) => {
-    setFlags((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    if (
+      key === "cannotFly" &&
+      !flags.cannotFly &&
+      !canUseCannotFly(animalType)
+    ) {
+      Alert.alert(
+        "Revisa el tipo de animal",
+        'La opción "No vuela" solo tiene sentido para aves o murciélagos. Cambia primero el tipo de animal si corresponde.',
+      );
+      return;
+    }
+
+    setFlags((prev) => {
+      const nextFlags = {
+        ...prev,
+        [key]: !prev[key],
+      };
+
+      if (
+        nextFlags.normalAppearance &&
+        hasCriticalHealthFlag(nextFlags) &&
+        !prev[key]
+      ) {
+        Alert.alert(
+          "Revisa la selección",
+          'Has elegido "Apariencia normal" junto con una señal de posible problema. Revisa si es correcto antes de continuar.',
+        );
+      }
+
+      return nextFlags;
+    });
+  };
+
+  const selectAnimalType = (nextAnimalType: AnimalType) => {
+    if (flags.cannotFly && !canUseCannotFly(nextAnimalType)) {
+      Alert.alert(
+        "Situación no compatible",
+        'Has marcado "No vuela", pero el tipo seleccionado no parece compatible. Se desmarcará esa opción para evitar confusión.',
+      );
+      setFlags((prev) => ({ ...prev, cannotFly: false }));
+    }
+
+    setAnimalType(nextAnimalType);
   };
 
   const openWhatsAppWithNumber = async (number: string) => {
@@ -377,8 +595,8 @@ export default function HomeScreen() {
 
     if (!cleaned || countDigits(cleaned) < 9) {
       Alert.alert(
-        'Número no válido',
-        'Introduce un número de WhatsApp válido, con prefijo si hace falta.'
+        "Número no válido",
+        "Introduce un número de WhatsApp válido, con prefijo si hace falta.",
       );
       return;
     }
@@ -401,14 +619,21 @@ export default function HomeScreen() {
     }
 
     Alert.alert(
-      'No se pudo abrir WhatsApp',
-      'Comprueba que WhatsApp está instalado y vuelve a intentarlo.'
+      "No se pudo abrir WhatsApp",
+      "Comprueba que WhatsApp está instalado y vuelve a intentarlo.",
     );
+  };
+
+  const openMaps = async () => {
+    if (!coords) return;
+
+    const url = `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
+    await Linking.openURL(url);
   };
 
   const copySummary = async () => {
     await Clipboard.setStringAsync(generatedSummary);
-    Alert.alert('Resumen copiado', 'El resumen se ha copiado al portapapeles.');
+    Alert.alert("Resumen copiado", "El resumen se ha copiado al portapapeles.");
   };
 
   const callNumber = async (phoneNumber: string) => {
@@ -416,59 +641,111 @@ export default function HomeScreen() {
     await Linking.openURL(url);
   };
 
-  const resetFlow = () => {
+  const resetFlow = (returnToWelcome = false) => {
+    setShowWelcome(returnToWelcome);
     setStep(1);
     setShowContacts(false);
     setShowWhatsAppOptions(false);
     setShowProvinces(false);
     setSelectedProvince(null);
-    setCustomWhatsAppNumber('');
+    setCustomWhatsAppNumber("");
     setHasSentWhatsApp(false);
     setHasOpenedHelpPhones(false);
-    setFullName('');
-    setPhone('');
-    setAnimalState('alive');
-    setAnimalType('unknown');
+    setFullName("");
+    setPhone("");
+    setAnimalState("alive");
+    setAnimalType("unknown");
     setPhotoUri(null);
     setVideoUri(null);
-    setLocationText('Ubicación no capturada todavía.');
+    setLocationText("Ubicación no capturada todavía.");
     setCoords(null);
     setLocationCaptured(false);
     setLocationLoading(false);
-    setProvinceSearch('');
+    setProvinceSearch("");
     setFlags({
       bleeding: false,
       baby: false,
       catDog: false,
       canNotMove: false,
       roadRisk: false,
+      ringGps: false,
+      trapped: false,
+      cannotFly: false,
+      weakness: false,
+      normalAppearance: false,
+      breathing: false,
       other: false,
     });
   };
 
+  const confirmCancelFlow = () => {
+    Alert.alert(
+      "Cancelar aviso",
+      "¿Estás seguro de que deseas cancelar este aviso?\n\nSe perderá toda la información introducida y volverás a la pantalla inicial.",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Sí",
+          onPress: () => resetFlow(true),
+        },
+      ]
+    );
+  };
+
   const finishFlow = () => {
-    Alert.alert('Gracias', 'Gracias por colaborar y ayudar a los animales.', [
-      {
-        text: 'Aceptar',
-        onPress: resetFlow,
-      },
-    ]);
+    Alert.alert(
+      "Finalizar aviso",
+      "¿Estás seguro de que deseas finalizar este aviso?\n\nSi continúas se eliminará toda la información introducida y volverás a la pantalla inicial.",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Sí",
+          onPress: () => {
+            Alert.alert(
+              "Gracias",
+              "Gracias por colaborar y ayudar a los animales.",
+              [
+                {
+                  text: "Aceptar",
+                  onPress: () => resetFlow(true),
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
   };
 
   const validateStep = () => {
     if (step === 3) {
       if (!fullName.trim()) {
-        Alert.alert('Falta el nombre', 'Introduce tu nombre y apellidos antes de continuar.');
+        Alert.alert(
+          "Falta el nombre",
+          "Introduce tu nombre y apellidos antes de continuar.",
+        );
         return false;
       }
 
       if (!phone.trim()) {
-        Alert.alert('Falta el teléfono', 'Introduce un teléfono de contacto antes de continuar.');
+        Alert.alert(
+          "Falta el teléfono",
+          "Introduce un teléfono de contacto antes de continuar.",
+        );
         return false;
       }
 
       if (!isValidPhone(phone)) {
-        Alert.alert('Teléfono no válido', 'Introduce un teléfono válido, con al menos 9 dígitos.');
+        Alert.alert(
+          "Teléfono no válido",
+          "Introduce un teléfono válido, con al menos 9 dígitos.",
+        );
         return false;
       }
     }
@@ -476,8 +753,8 @@ export default function HomeScreen() {
     if (step === 4) {
       if (!photoUri && !videoUri && !locationCaptured) {
         Alert.alert(
-          'Información incompleta',
-          'Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.'
+          "Información incompleta",
+          "Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.",
         );
         return false;
       }
@@ -528,14 +805,15 @@ export default function HomeScreen() {
     setShowContacts(false);
     setShowProvinces(true);
     setSelectedProvince(null);
-    setProvinceSearch('');
+    setProvinceSearch("");
   };
 
   const renderContacts = () => (
     <SectionCard title="Teléfonos de ayuda">
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          Aquí tienes primero los teléfonos nacionales y, debajo, el acceso a contactos por provincias.
+          Aquí tienes primero los teléfonos nacionales y, debajo, el acceso a
+          contactos por provincias.
         </Text>
 
         {NATIONAL_HELP_CONTACTS.map((contact) => (
@@ -552,10 +830,14 @@ export default function HomeScreen() {
           </Pressable>
         ))}
 
-        <Pressable style={styles.secondaryButton} onPress={handleOpenProvincePhones}>
-          <Text style={styles.secondaryButtonText}>Teléfonos de ayuda por provincias</Text>
+        <Pressable
+          style={styles.secondaryButton}
+          onPress={handleOpenProvincePhones}
+        >
+          <Text style={styles.secondaryButtonText}>
+            Teléfonos de ayuda por provincias
+          </Text>
         </Pressable>
-
       </View>
     </SectionCard>
   );
@@ -585,7 +867,8 @@ export default function HomeScreen() {
               <View style={styles.contactTextBlock}>
                 <Text style={styles.contactName}>{item.province}</Text>
                 <Text style={styles.contactNote}>
-                  {item.contacts.length} contacto{item.contacts.length === 1 ? '' : 's'}
+                  {item.contacts.length} contacto
+                  {item.contacts.length === 1 ? "" : "s"}
                 </Text>
               </View>
               <Text style={styles.contactPhone}>Ver</Text>
@@ -593,7 +876,9 @@ export default function HomeScreen() {
           ))
         ) : (
           <View style={styles.warningBox}>
-            <Text style={styles.warningText}>No se han encontrado provincias con ese nombre.</Text>
+            <Text style={styles.warningText}>
+              No se han encontrado provincias con ese nombre.
+            </Text>
           </View>
         )}
       </View>
@@ -601,7 +886,9 @@ export default function HomeScreen() {
   );
 
   const renderProvinceDetail = () => {
-    const province = mergedProvinceContacts.find((p) => p.province === selectedProvince);
+    const province = mergedProvinceContacts.find(
+      (p) => p.province === selectedProvince,
+    );
 
     if (!province) return null;
 
@@ -625,18 +912,17 @@ export default function HomeScreen() {
               <Text style={styles.contactPhone}>{contact.phone}</Text>
             </Pressable>
           ))}
-
         </View>
       </SectionCard>
     );
   };
 
-
   const renderWhatsAppOptions = () => (
     <SectionCard title="Enviar por WhatsApp">
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          El resumen está listo para WhatsApp. Pulsa la flecha izquierda para volver, o Cancelar para descartar el aviso.
+          El resumen está listo para WhatsApp. Pulsa la flecha izquierda para
+          volver, o Cancelar para descartar el aviso.
         </Text>
 
         <Pressable
@@ -662,22 +948,98 @@ export default function HomeScreen() {
         </Pressable>
 
         <Pressable
-          style={[styles.primaryButton, !hasSentWhatsApp && styles.disabledButton]}
+          style={[
+            styles.primaryButton,
+            !hasSentWhatsApp && styles.disabledButton,
+          ]}
           onPress={finishFlow}
           disabled={!hasSentWhatsApp}
         >
           <Text style={styles.primaryButtonText}>Finalizar</Text>
         </Pressable>
 
-        <Pressable style={styles.secondaryButton} onPress={resetFlow}>
+        <Pressable style={styles.secondaryButton} onPress={confirmCancelFlow}>
           <Text style={styles.secondaryButtonText}>Cancelar</Text>
         </Pressable>
       </View>
     </SectionCard>
   );
 
+  const renderStep5ActionBar = () => {
+    if (
+      showWhatsAppOptions ||
+      showContacts ||
+      showProvinces ||
+      showWelcome ||
+      selectedProvince ||
+      step !== 5
+    ) {
+      return null;
+    }
+
+    if (animalState === "dead") {
+      return (
+        <View style={styles.step5ActionBar}>
+          <Pressable style={styles.menuActionButton} onPress={copySummary}>
+            <Text style={styles.menuActionEmoji}>📋</Text>
+            <Text style={styles.menuActionLabel}>Copiar</Text>
+          </Pressable>
+
+          <Pressable style={styles.menuActionButton} onPress={handleOpenHelp}>
+            <Text style={styles.menuActionEmoji}>📞</Text>
+            <Text style={styles.menuActionLabel}>Ayuda</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.menuActionButton, styles.menuActionButtonPrimary]}
+            onPress={finishFlow}
+          >
+            <Text style={styles.menuActionEmoji}>✅</Text>
+            <Text style={styles.menuActionLabelPrimary}>Finalizar</Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.step5ActionBar}>
+        <Pressable
+          style={[styles.menuActionButton, styles.menuActionButtonPrimary]}
+          onPress={() => setShowWhatsAppOptions(true)}
+        >
+          <Text style={styles.menuActionEmoji}>🟢</Text>
+          <Text style={styles.menuActionLabelPrimary}>WhatsApp</Text>
+        </Pressable>
+
+        <Pressable style={styles.menuActionButton} onPress={copySummary}>
+          <Text style={styles.menuActionEmoji}>📋</Text>
+          <Text style={styles.menuActionLabel}>Copiar</Text>
+        </Pressable>
+
+        <Pressable style={styles.menuActionButton} onPress={handleOpenHelp}>
+          <Text style={styles.menuActionEmoji}>📞</Text>
+          <Text style={styles.menuActionLabel}>Ayuda</Text>
+        </Pressable>
+
+        <Pressable
+          style={[styles.menuActionButton, styles.menuActionButtonPrimarySoft]}
+          onPress={finishFlow}
+        >
+          <Text style={styles.menuActionEmoji}>✅</Text>
+          <Text style={styles.menuActionLabelPrimary}>Finalizar</Text>
+        </Pressable>
+      </View>
+    );
+  };
+
   const renderNavigationArrows = () => {
-    const isOverlayOpen = showContacts || showWhatsAppOptions || showProvinces || !!selectedProvince;
+    if (showWelcome) return null;
+
+    const isOverlayOpen =
+      showContacts ||
+      showWhatsAppOptions ||
+      showProvinces ||
+      !!selectedProvince;
     const canShowBackArrow = isOverlayOpen || step > 1;
     const canShowForwardArrow = !isOverlayOpen && step < 5;
 
@@ -702,7 +1064,59 @@ export default function HomeScreen() {
     );
   };
 
+  const renderWelcome = () => (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.keyboardAvoid}
+      keyboardVerticalOffset={90}
+    >
+      <SectionCard title="SOS Fauna">
+        <View style={styles.welcomeContent}>
+          <Text style={styles.welcomeTitle}>
+            Asistente de rescate de fauna silvestre
+          </Text>
+
+          <Text style={styles.welcomeVersion}>Versión 1.0.0</Text>
+
+          <View style={styles.welcomeScopeBox}>
+            <Text style={styles.welcomeScopeText}>
+              Aplicación de apoyo para comunicar incidencias con fauna silvestre. Solo cubre España.
+            </Text>
+            <Text style={styles.welcomeScopeSmall}>
+              Los contactos y teléfonos incluidos están orientados al ámbito español.
+            </Text>
+          </View>
+
+          <View style={styles.welcomeFeatureList}>
+            <Text style={styles.welcomeFeature}>• Orientación básica sobre qué hacer.</Text>
+            <Text style={styles.welcomeFeature}>• Captura de foto y vídeo.</Text>
+            <Text style={styles.welcomeFeature}>• Obtención de ubicación GPS.</Text>
+            <Text style={styles.welcomeFeature}>• Contactos de centros de recuperación y servicios de ayuda.</Text>
+          </View>
+
+          <View style={styles.warningBox}>
+            <Text style={styles.warningText}>
+              La información proporcionada por esta aplicación es orientativa y no sustituye el criterio de veterinarios, agentes medioambientales ni servicios de emergencia.
+            </Text>
+          </View>
+
+          <Pressable
+            style={styles.primaryButton}
+            onPress={() => setShowWelcome(false)}
+          >
+            <Text style={styles.primaryButtonText}>Comenzar aviso</Text>
+          </Pressable>
+
+          <Text style={styles.welcomeFooter}>
+            Desarrollado como proyecto de apoyo a la conservación y rescate de fauna silvestre.
+          </Text>
+        </View>
+      </SectionCard>
+    </KeyboardAvoidingView>
+  );
+
   const renderStep = () => {
+    if (showWelcome) return renderWelcome();
     if (showContacts) return renderContacts();
     if (showProvinces && !selectedProvince) return renderProvinceList();
     if (selectedProvince) return renderProvinceDetail();
@@ -711,14 +1125,15 @@ export default function HomeScreen() {
     if (step === 1) {
       return (
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={90}
         >
           <SectionCard title="Paso 1. Tipo y situación del animal">
             <View style={styles.sectionContent}>
               <Text style={styles.sectionDescription}>
-                Indica primero si el animal está vivo o muerto. Después completa solo los datos que correspondan.
+                Indica primero si el animal está vivo o muerto. Después completa
+                solo los datos que correspondan.
               </Text>
 
               <View style={styles.sectionGroup}>
@@ -734,20 +1149,31 @@ export default function HomeScreen() {
                         onPress={() => {
                           setAnimalState(option.key);
 
-                          if (option.key === 'dead') {
-                            setAnimalType('unknown');
+                          if (option.key === "dead") {
+                            setAnimalType("unknown");
                             setFlags({
                               bleeding: false,
                               baby: false,
                               catDog: false,
                               canNotMove: false,
                               roadRisk: false,
+                              ringGps: false,
+                              trapped: false,
+                              cannotFly: false,
+                              weakness: false,
+                              normalAppearance: false,
+                              breathing: false,
                               other: false,
                             });
                           }
                         }}
                       >
-                        <Text style={[styles.flagText, active && styles.flagTextActive]}>
+                        <Text
+                          style={[
+                            styles.flagText,
+                            active && styles.flagTextActive,
+                          ]}
+                        >
                           {option.label}
                         </Text>
                       </Pressable>
@@ -756,10 +1182,11 @@ export default function HomeScreen() {
                 </View>
               </View>
 
-              {animalState === 'dead' ? (
+              {animalState === "dead" ? (
                 <View style={styles.warningBox}>
                   <Text style={styles.warningText}>
-                    Si el animal está muerto, no lo toques ni modifiques el lugar. Continúa para ver qué hacer.
+                    Si el animal está muerto, no lo toques ni modifiques el
+                    lugar. Continúa para ver qué hacer.
                   </Text>
                 </View>
               ) : (
@@ -774,9 +1201,14 @@ export default function HomeScreen() {
                           <Pressable
                             key={option.key}
                             style={[styles.flag, active && styles.flagActive]}
-                            onPress={() => setAnimalType(option.key)}
+                            onPress={() => selectAnimalType(option.key)}
                           >
-                            <Text style={[styles.flagText, active && styles.flagTextActive]}>
+                            <Text
+                              style={[
+                                styles.flagText,
+                                active && styles.flagTextActive,
+                              ]}
+                            >
                               {option.label}
                             </Text>
                           </Pressable>
@@ -797,7 +1229,12 @@ export default function HomeScreen() {
                             style={[styles.flag, active && styles.flagActive]}
                             onPress={() => toggleFlag(key)}
                           >
-                            <Text style={[styles.flagText, active && styles.flagTextActive]}>
+                            <Text
+                              style={[
+                                styles.flagText,
+                                active && styles.flagTextActive,
+                              ]}
+                            >
                               {label}
                             </Text>
                           </Pressable>
@@ -822,7 +1259,6 @@ export default function HomeScreen() {
             </Text>
 
             <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
-
           </View>
         </SectionCard>
       );
@@ -833,7 +1269,9 @@ export default function HomeScreen() {
         <SectionCard title="Paso 3. Datos de contacto">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Introduce tus datos e indica si el animal está vivo o muerto.
+              Facilita tu nombre para que los especialistas sepan a quién
+              dirigirse y un número de teléfono en caso de que necesiten ponerse
+              en contacto contigo.
             </Text>
 
             <TextInput
@@ -853,12 +1291,16 @@ export default function HomeScreen() {
 
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
-                Tus datos no se almacenan en esta app ni se usan para ningún otro fin.
+                Tus datos no se almacenan en esta app ni se usan para ningún
+                otro fin.
               </Text>
             </View>
 
             <View style={styles.inlineActionRow}>
-              <Pressable style={styles.secondaryButtonSmall} onPress={resetFlow}>
+              <Pressable
+                style={styles.secondaryButtonSmall}
+                onPress={resetFlow}
+              >
                 <Text style={styles.secondaryButtonText}>↺ Limpiar</Text>
               </Pressable>
             </View>
@@ -866,7 +1308,6 @@ export default function HomeScreen() {
         </SectionCard>
       );
     }
-
 
     if (step === 4) {
       return (
@@ -878,83 +1319,140 @@ export default function HomeScreen() {
 
             <Pressable style={styles.primaryButton} onPress={pickPhoto}>
               <Text style={styles.primaryButtonText}>
-                {photoUri ? 'Cambiar foto' : 'Hacer foto'}
+                {photoUri ? "Cambiar foto" : "Hacer foto"}
               </Text>
             </Pressable>
 
             <Pressable style={styles.primaryButton} onPress={pickVideo}>
               <Text style={styles.primaryButtonText}>
-                {videoUri ? 'Cambiar vídeo' : 'Grabar vídeo'}
+                {videoUri ? "Cambiar vídeo" : "Grabar vídeo"}
               </Text>
             </Pressable>
 
             <Pressable
-              style={[styles.secondaryButton, locationLoading && styles.disabledButton]}
+              style={[
+                styles.secondaryButton,
+                locationLoading && styles.disabledButton,
+              ]}
               onPress={captureLocation}
               disabled={locationLoading}
             >
               <Text style={styles.secondaryButtonText}>
-                {locationLoading ? 'Capturando ubicación…' : 'Capturar ubicación'}
+                {locationLoading
+                  ? "Capturando ubicación…"
+                  : "Capturar ubicación"}
               </Text>
             </Pressable>
 
             {locationCaptured ? (
               <View style={styles.successBox}>
-                <Text style={styles.successText}>Ubicación capturada correctamente</Text>
+                <Text style={styles.successText}>
+                  Ubicación capturada correctamente
+                </Text>
               </View>
             ) : null}
 
             <Text style={styles.helperText}>
-              {photoUri ? 'Foto capturada y guardada en el dispositivo' : 'Sin foto todavía.'}
+              {photoUri
+                ? "Foto capturada y guardada en el dispositivo"
+                : "Sin foto todavía."}
             </Text>
 
             <Text style={styles.helperText}>
-              {videoUri ? 'Vídeo capturado y guardado en el dispositivo' : 'Sin vídeo todavía.'}
+              {videoUri
+                ? "Vídeo capturado y guardado en el dispositivo"
+                : "Sin vídeo todavía."}
             </Text>
 
             <Text style={styles.helperText}>{locationText}</Text>
 
+            <View style={styles.mapCard}>
+              <Text style={styles.mapTitle}>Mapa del punto indicado</Text>
+
+              {coords ? (
+                <>
+                  <View style={styles.mapPreview}>
+                    {mapRegion ? (
+                      <MapView
+                        style={styles.mapView}
+                        region={mapRegion}
+                        scrollEnabled={false}
+                        zoomEnabled={false}
+                        rotateEnabled={false}
+                        pitchEnabled={false}
+                        toolbarEnabled={false}
+                      >
+                        <Marker
+                          coordinate={{
+                            latitude: coords.latitude,
+                            longitude: coords.longitude,
+                          }}
+                        />
+                      </MapView>
+                    ) : null}
+                    <Text style={styles.mapZoomBadge}>Zoom {mapZoom}</Text>
+                  </View>
+
+                  <Text style={styles.mapCoords}>
+                    {coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}
+                  </Text>
+
+                  <View style={styles.mapControlsRow}>
+                    <Pressable
+                      style={styles.mapControlButton}
+                      onPress={() => setMapZoom((prev) => Math.max(8, prev - 1))}
+                    >
+                      <Text style={styles.mapControlText}>−</Text>
+                    </Pressable>
+
+                    <Pressable style={styles.mapOpenButton} onPress={openMaps}>
+                      <Text style={styles.mapOpenButtonText}>Abrir mapa</Text>
+                    </Pressable>
+
+                    <Pressable
+                      style={styles.mapControlButton}
+                      onPress={() => setMapZoom((prev) => Math.min(20, prev + 1))}
+                    >
+                      <Text style={styles.mapControlText}>+</Text>
+                    </Pressable>
+                  </View>
+                </>
+              ) : (
+                <View style={styles.mapEmptyBox}>
+                  <Text style={styles.mapEmptyText}>
+                    Captura la ubicación para ver aquí el punto del hallazgo.
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </SectionCard>
       );
     }
 
-    if (animalState === 'dead') {
+    if (animalState === "dead") {
       return (
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={90}
         >
           <SectionCard title="Paso 5. Resumen">
             <View style={styles.sectionContent}>
               <Text style={styles.sectionDescription}>
-                Lee el resumen y pulsa en Teléfonos de ayuda para llamar a los servicios de ayuda o emergencias más cercanos.
+                Lee el resumen y pulsa en Teléfonos de ayuda para llamar a los
+                servicios de ayuda o emergencias más cercanos.
               </Text>
 
-              <Text style={[styles.summaryBox, styles.summaryEditor]}>{generatedSummary}</Text>
+              <Text style={[styles.summaryBox, styles.summaryEditor]}>
+                {generatedSummary}
+              </Text>
 
               <View style={styles.warningBox}>
                 <Text style={styles.warningText}>
-                  Llama a Agentes Forestales, seguridad o emergencias según el caso. Puedes copiar el resumen si te lo piden.
+                  Llama a Agentes Forestales, seguridad o emergencias según el
+                  caso. Puedes copiar el resumen si te lo piden.
                 </Text>
-              </View>
-
-              <View style={styles.actionRow}>
-                <Pressable style={styles.iconActionButton} onPress={copySummary}>
-                  <Text style={styles.iconActionEmoji}>📋</Text>
-                  <Text style={styles.iconActionLabel}>Copiar</Text>
-                </Pressable>
-
-                <Pressable style={styles.iconActionButton} onPress={handleOpenHelp}>
-                  <Text style={styles.iconActionEmoji}>📞</Text>
-                  <Text style={styles.iconActionLabel}>Ayuda</Text>
-                </Pressable>
-
-                <Pressable style={[styles.iconActionButton, styles.iconActionButtonPrimary]} onPress={finishFlow}>
-                  <Text style={styles.iconActionEmoji}>✅</Text>
-                  <Text style={styles.iconActionLabelPrimary}>Finalizar</Text>
-                </Pressable>
               </View>
             </View>
           </SectionCard>
@@ -964,44 +1462,36 @@ export default function HomeScreen() {
 
     return (
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoid}
         keyboardVerticalOffset={90}
       >
         <SectionCard title="Paso 5. Resumen">
           <View style={styles.sectionContent}>
-            <Text style={styles.sectionDescription}>
-              Lee el resumen y utiliza las opciones disponibles para enviar, copiar o finalizar el aviso.
-            </Text>
-
-            <Text style={[styles.summaryBox, styles.summaryEditor]}>{generatedSummary}</Text>
-
-            <View style={styles.warningBox}>
-              <Text style={styles.warningText}>
-                Importante: la foto y el vídeo no se adjuntan automáticamente. Deberás enviarlos manualmente desde WhatsApp.
+            <View style={styles.step5Instructions}>
+              <Text style={styles.bulletText}>
+                • Revisa si el resumen es correcto o retrocede para corregir.
+              </Text>
+              <Text style={styles.bulletText}>
+                • Usa <Text style={styles.bulletStrong}>WhatsApp</Text> para enviarlo a GREFA Madrid o a otro contacto que elijas.
+              </Text>
+              <Text style={styles.bulletText}>
+                • Usa <Text style={styles.bulletStrong}>Ayuda</Text> para buscar el centro más cercano a tu provincia o servicios de emergencias.
+              </Text>
+              <Text style={styles.bulletText}>
+                • Usa <Text style={styles.bulletStrong}>Finalizar</Text> si ya has informado a un especialista o para descartar el aviso.
               </Text>
             </View>
 
-            <View style={styles.actionRow}>
-              <Pressable style={[styles.iconActionButton, styles.iconActionButtonPrimary]} onPress={() => setShowWhatsAppOptions(true)}>
-                <Text style={styles.iconActionEmoji}>🟢</Text>
-                <Text style={styles.iconActionLabelPrimary}>WhatsApp</Text>
-              </Pressable>
+            <Text style={[styles.summaryBox, styles.summaryEditor]}>
+              {generatedSummary}
+            </Text>
 
-              <Pressable style={styles.iconActionButton} onPress={copySummary}>
-                <Text style={styles.iconActionEmoji}>📋</Text>
-                <Text style={styles.iconActionLabel}>Copiar</Text>
-              </Pressable>
-
-              <Pressable style={styles.iconActionButton} onPress={handleOpenHelp}>
-                <Text style={styles.iconActionEmoji}>📞</Text>
-                <Text style={styles.iconActionLabel}>Ayuda</Text>
-              </Pressable>
-
-              <Pressable style={[styles.iconActionButton, styles.iconActionButtonPrimarySoft]} onPress={finishFlow}>
-                <Text style={styles.iconActionEmoji}>✅</Text>
-                <Text style={styles.iconActionLabelPrimary}>Finalizar</Text>
-              </Pressable>
+            <View style={styles.warningBox}>
+              <Text style={styles.warningText}>
+                Importante: la foto y el vídeo no se adjuntan automáticamente.
+                Deberás enviarlos manualmente desde WhatsApp.
+              </Text>
             </View>
           </View>
         </SectionCard>
@@ -1010,35 +1500,45 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
+    <SafeAreaView style={styles.screen} edges={["bottom"]}>
+      <Stack.Screen options={{ title: "Rescate fauna - Asistente" }} />
+
+      {showStep5ActionBar ? renderStep5ActionBar() : null}
+
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={[
           styles.container,
-          { paddingBottom: Math.max(300, insets.bottom + 260) },
+          {
+            paddingTop: showStep5ActionBar ? 84 : 12,
+            paddingBottom: Math.max(220, insets.bottom + 180),
+          },
         ]}
         keyboardShouldPersistTaps="handled"
+        onScroll={(event) => setScrollY(event.nativeEvent.contentOffset.y)}
+        onContentSizeChange={(_, height) => setScrollContentHeight(height)}
+        onLayout={(event) => setScrollLayoutHeight(event.nativeEvent.layout.height)}
+        scrollEventThrottle={16}
       >
-        {!showContacts && !showProvinces && !selectedProvince && (
-          <View style={styles.hero}>
-            <Text style={styles.badge}>SOS Fauna · Asistente</Text>
-            <Text style={styles.heroText}>
-              {showWhatsAppOptions
-                ? 'El resumen está listo para WhatsApp. Pulsa la flecha izquierda para volver o Cancelar para descartar el aviso.'
-                : step === 5
-                  ? animalState === 'dead'
-                    ? 'Lee el resumen y llama al servicio más adecuado pulsando el botón Ayuda.'
-                    : 'Usa WhatsApp para enviar la información a GREFA o a otro contacto. Si lo prefieres, pulsa Ayuda para localizar teléfonos de asistencia especializados. Pulsa Finalizar cuando hayas terminado.'
-                  : 'Envía el aviso y obtén orientación básica. Avanza o retrocede con las flechas laterales.'}
-            </Text>
-            {!showWhatsAppOptions ? (
-              <Text style={styles.stepIndicator}>Paso {step} de 5</Text>
-            ) : null}
-          </View>
-        )}
-
         {renderStep()}
       </ScrollView>
+
+      {canShowStep1ScrollHint ? (
+        <Pressable
+          style={styles.floatingScrollHint}
+          onPress={() =>
+            scrollViewRef.current?.scrollTo({
+              y: isNearBottom ? 0 : Math.max(0, scrollContentHeight - scrollLayoutHeight),
+              animated: true,
+            })
+          }
+        >
+          <Text style={styles.floatingScrollHintText}>
+            {isNearBottom ? "↑" : "↓"}
+          </Text>
+        </Pressable>
+      ) : null}
 
       {renderNavigationArrows()}
     </SafeAreaView>
@@ -1048,7 +1548,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#f3f7f4',
+    backgroundColor: "#f3f7f4",
   },
   scrollView: {
     flex: 1,
@@ -1063,68 +1563,126 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   hero: {
-    backgroundColor: '#e7f5ea',
+    backgroundColor: "#e7f5ea",
     borderRadius: 18,
     padding: 16,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#cfe8d4',
+    borderColor: "#cfe8d4",
   },
   badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#14532d',
-    color: '#ffffff',
+    alignSelf: "flex-start",
+    backgroundColor: "#14532d",
+    color: "#ffffff",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   heroText: {
-    fontSize: 12,
-    lineHeight: 17,
-    color: '#374151',
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#374151",
   },
   stepIndicator: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#166534',
+    fontWeight: "700",
+    color: "#166534",
     marginTop: 4,
+  },
+  welcomeContent: {
+    gap: 14,
+  },
+  welcomeTitle: {
+    fontSize: 20,
+    lineHeight: 27,
+    fontWeight: "900",
+    color: "#14532d",
+  },
+  welcomeVersion: {
+    alignSelf: "flex-start",
+    backgroundColor: "#e7f5ea",
+    color: "#166534",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  welcomeScopeBox: {
+    backgroundColor: "#eef8f0",
+    borderWidth: 1,
+    borderColor: "#b7dfc0",
+    borderRadius: 14,
+    padding: 12,
+    gap: 6,
+  },
+  welcomeScopeText: {
+    fontSize: 16,
+    lineHeight: 23,
+    color: "#111827",
+    fontWeight: "700",
+  },
+  welcomeScopeSmall: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#374151",
+  },
+  welcomeFeatureList: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#dbe7dd",
+    borderRadius: 14,
+    padding: 12,
+    gap: 8,
+  },
+  welcomeFeature: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#374151",
+    fontWeight: "600",
+  },
+  welcomeFooter: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: "#6b7280",
+    textAlign: "center",
   },
   sectionContent: {
     gap: 12,
   },
   sectionGroup: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#dbe7dd',
+    borderColor: "#dbe7dd",
     borderRadius: 14,
     padding: 12,
     gap: 10,
   },
   sectionDescription: {
-    fontSize: 13,
-    color: '#4b5563',
-    lineHeight: 18,
+    fontSize: 15,
+    color: "#4b5563",
+    lineHeight: 22,
   },
   subheading: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: "#111827",
     marginTop: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   summaryEditor: {
     minHeight: 184,
     lineHeight: 21,
-    color: '#111827',
+    color: "#111827",
   },
   adviceBox: {
     fontSize: 18,
@@ -1132,217 +1690,413 @@ const styles = StyleSheet.create({
     minHeight: 320,
     paddingTop: 18,
     paddingBottom: 18,
-    backgroundColor: '#eef8f0',
-    borderColor: '#b7dfc0',
+    backgroundColor: "#eef8f0",
+    borderColor: "#b7dfc0",
   },
   primaryButton: {
-    backgroundColor: '#14532d',
+    backgroundColor: "#14532d",
     borderRadius: 14,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   primaryButtonText: {
-    color: '#ffffff',
-    fontWeight: '700',
+    color: "#ffffff",
+    fontWeight: "700",
     fontSize: 16,
   },
   secondaryButton: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: "#e5e7eb",
     borderRadius: 14,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   secondaryButtonSmall: {
-    backgroundColor: '#e5e7eb',
+    backgroundColor: "#e5e7eb",
     borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    alignItems: 'center',
+    alignItems: "center",
     minWidth: 96,
   },
   secondaryButtonText: {
-    color: '#111827',
-    fontWeight: '600',
+    color: "#111827",
+    fontWeight: "600",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   disabledButton: {
     opacity: 0.6,
   },
   helperText: {
-    color: '#4b5563',
+    color: "#4b5563",
     fontSize: 13,
     lineHeight: 18,
   },
   successBox: {
-    backgroundColor: '#dcfce7',
+    backgroundColor: "#dcfce7",
     borderWidth: 1,
-    borderColor: '#16a34a',
+    borderColor: "#16a34a",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
   successText: {
-    color: '#166534',
-    fontWeight: '700',
+    color: "#166534",
+    fontWeight: "700",
   },
   warningBox: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: "#fef3c7",
     borderWidth: 1,
-    borderColor: '#f59e0b',
+    borderColor: "#f59e0b",
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
   warningText: {
-    color: '#92400e',
-    fontWeight: '700',
+    color: "#92400e",
+    fontWeight: "700",
     lineHeight: 20,
   },
   flagGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   flag: {
     borderWidth: 1,
-    borderColor: '#cbd5e1',
+    borderColor: "#cbd5e1",
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   flagActive: {
-    backgroundColor: '#dcfce7',
-    borderColor: '#16a34a',
+    backgroundColor: "#dcfce7",
+    borderColor: "#16a34a",
   },
   flagText: {
-    color: '#111827',
-    fontWeight: '600',
+    color: "#111827",
+    fontWeight: "600",
   },
   flagTextActive: {
-    color: '#166534',
+    color: "#166534",
   },
   summaryBox: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
     borderRadius: 12,
     padding: 12,
     lineHeight: 22,
-    color: '#111827',
+    color: "#111827",
   },
   inlineActionRow: {
     marginTop: 8,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "flex-start",
   },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
+  step5ActionBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 20,
+    elevation: 8,
+    flexDirection: "row",
+    alignItems: "stretch",
     gap: 6,
-    flexWrap: 'nowrap',
-    marginTop: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#f3f7f4",
+    borderBottomWidth: 1,
+    borderBottomColor: "#dbe7dd",
   },
-  iconActionButton: {
+  menuActionButton: {
     flex: 1,
     minHeight: 48,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: "#e5e7eb",
     borderRadius: 14,
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 2,
   },
+  menuActionButtonPrimary: {
+    backgroundColor: "#14532d",
+  },
+  menuActionButtonPrimarySoft: {
+    backgroundColor: "#166534",
+  },
+  menuActionEmoji: {
+    fontSize: 15,
+  },
+  menuActionLabel: {
+    color: "#111827",
+    fontSize: 11,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  menuActionLabelPrimary: {
+    color: "#ffffff",
+    fontSize: 11,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  actionRow: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    justifyContent: "space-between",
+    rowGap: 10,
+    columnGap: 8,
+    flexWrap: "wrap",
+    marginTop: 4,
+  },
+  iconActionButton: {
+    flexBasis: "48%",
+    minHeight: 68,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+  },
+  iconActionButtonFull: {
+    flexBasis: "100%",
+  },
   iconActionButtonPrimary: {
-    backgroundColor: '#14532d',
+    backgroundColor: "#14532d",
   },
   iconActionButtonPrimarySoft: {
-    backgroundColor: '#166534',
+    backgroundColor: "#166534",
   },
   iconActionEmoji: {
-    fontSize: 12,
+    fontSize: 20,
   },
   iconActionLabel: {
-    color: '#111827',
-    fontSize: 9,
-    fontWeight: '700',
-    textAlign: 'center',
+    color: "#111827",
+    fontSize: 14,
+    fontWeight: "800",
+    textAlign: "center",
   },
   iconActionLabelPrimary: {
-    color: '#ffffff',
-    fontSize: 9,
-    fontWeight: '700',
-    textAlign: 'center',
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "800",
+    textAlign: "center",
   },
   bottomHelpRow: {
     marginTop: 8,
   },
   navRowCenter: {
     marginTop: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   contactRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
     borderRadius: 14,
     padding: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   contactTextBlock: {
     flex: 1,
   },
   contactName: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: "#111827",
   },
   contactNote: {
     fontSize: 13,
-    color: '#4b5563',
+    color: "#4b5563",
     marginTop: 2,
   },
   contactPhone: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#14532d',
+    fontWeight: "700",
+    color: "#14532d",
+  },
+
+  step5Instructions: {
+    backgroundColor: "#eef8f0",
+    borderWidth: 1,
+    borderColor: "#b7dfc0",
+    borderRadius: 12,
+    padding: 12,
+    gap: 8,
+  },
+  bulletText: {
+    color: "#374151",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  bulletStrong: {
+    color: "#14532d",
+    fontWeight: "900",
+  },
+  mapCard: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#dbe7dd",
+    borderRadius: 14,
+    padding: 12,
+    gap: 10,
+  },
+  mapTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  mapPreview: {
+    height: 170,
+    borderRadius: 14,
+    backgroundColor: "#e7f5ea",
+    borderWidth: 1,
+    borderColor: "#b7dfc0",
+    overflow: "hidden",
+  },
+  mapView: {
+    flex: 1,
+  },
+  mapGridLineHorizontal: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: "50%",
+    height: 1,
+    backgroundColor: "#b7dfc0",
+  },
+  mapGridLineVertical: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: "50%",
+    width: 1,
+    backgroundColor: "#b7dfc0",
+  },
+  mapPin: {
+    fontSize: 34,
+  },
+  mapZoomBadge: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    backgroundColor: "#ffffff",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    color: "#14532d",
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  mapCoords: {
+    color: "#374151",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  mapControlsRow: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  mapControlButton: {
+    width: 44,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: "#e5e7eb",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mapControlText: {
+    color: "#111827",
+    fontSize: 24,
+    fontWeight: "900",
+  },
+  mapOpenButton: {
+    flex: 1,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: "#14532d",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mapOpenButtonText: {
+    color: "#ffffff",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  mapEmptyBox: {
+    minHeight: 120,
+    borderRadius: 14,
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 14,
+  },
+  mapEmptyText: {
+    color: "#4b5563",
+    textAlign: "center",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  floatingScrollHint: {
+    position: "absolute",
+    right: 34,
+    top: "64%",
+    width: 32,
+    height: 50,
+    borderRadius: 999,
+    backgroundColor: "#14532d",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 30,
+    elevation: 6,
+  },
+  floatingScrollHintText: {
+    color: "#ffffff",
+    fontSize: 24,
+    fontWeight: "900",
   },
   sideNavOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     bottom: 0,
     left: 0,
     right: 0,
-    justifyContent: 'center',
-    pointerEvents: 'box-none',
+    justifyContent: "center",
+    pointerEvents: "box-none",
   },
   sideArrowLeft: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     width: 22,
     height: 120,
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
-    backgroundColor: '#14532d',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#14532d",
+    alignItems: "center",
+    justifyContent: "center",
     elevation: 3,
   },
   sideArrowRight: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     width: 22,
     height: 120,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
-    backgroundColor: '#14532d',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#14532d",
+    alignItems: "center",
+    justifyContent: "center",
     elevation: 3,
   },
   sideArrowPlaceholder: {
@@ -1350,9 +2104,9 @@ const styles = StyleSheet.create({
     height: 120,
   },
   sideArrowText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 28,
-    fontWeight: '800',
+    fontWeight: "800",
     lineHeight: 30,
   },
 });

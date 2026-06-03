@@ -1,50 +1,53 @@
-# Welcome to your Expo app 👋
+# SOS Fauna ESPAÑA
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**SOS Fauna** es una aplicación móvil de apoyo para avisos de fauna silvestre encontrada herida, en peligro o fallecida. Su objetivo es ayudar a cualquier persona a recopilar rápidamente la información básica del caso y facilitar el contacto con centros de recuperación, servicios de emergencia o entidades especializadas.
 
-## Get started
+> Esta aplicación no sustituye el criterio de veterinarios, agentes forestales, centros de recuperación ni servicios de emergencia.
 
-1. Install dependencies
+## Funcionalidades principales
 
-   ```bash
-   npm install
-   ```
+- Asistente paso a paso para registrar un aviso de fauna.
+- Selección del estado del animal: vivo o muerto.
+- Selección del tipo general de animal.
+- Registro de situaciones observadas como sangrado, cría, anilla/GPS, atrapamiento, debilidad, respiración agitada o dificultad para volar.
+- Consejos básicos de actuación según el caso.
+- Captura de foto, vídeo y ubicación GPS.
+- Visualización del punto de localización en mapa.
+- Generación automática de resumen del aviso.
+- Envío del resumen por WhatsApp a GREFA u otro contacto.
+- Copia del resumen al portapapeles.
+- Listado de teléfonos de ayuda nacionales y por provincias.
 
-2. Start the app
+## Flujo de uso
 
-   ```bash
-   npx expo start
-   ```
+1. Indicar si el animal está vivo o muerto.
+2. Seleccionar el tipo de animal y la situación observada.
+3. Leer recomendaciones básicas de actuación.
+4. Facilitar nombre y teléfono de contacto.
+5. Añadir foto, vídeo y/o ubicación.
+6. Revisar el resumen y enviarlo o copiarlo.
 
-In the output, you'll find options to open the app in a
+## Tecnologías
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- React Native
+- Expo
+- Expo Router
+- Expo Location
+- Expo Image Picker
+- Expo Media Library
+- Expo Clipboard
+- React Native Maps
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Actualizaciones
 
-## Get a fresh project
+Si la app se publica en Google Play, las actualizaciones se distribuyen publicando una nueva versión en Google Play Console. Los usuarios podrán recibirla automáticamente si tienen activadas las actualizaciones automáticas, o manualmente desde Google Play.
 
-When you're ready, run:
+Para versiones críticas, Android permite implementar avisos de actualización dentro de la app mediante Google Play In-App Updates.
 
-```bash
-npm run reset-project
-```
+## Aviso importante
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+La información generada por la app debe considerarse orientativa. Ante emergencias, riesgo para personas, animales en carretera, especies peligrosas o animales fallecidos en circunstancias sospechosas, se debe contactar con los servicios competentes.
 
-## Learn more
+## Licencia
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Este proyecto se distribuye bajo licencia MIT. Consulta el archivo `LICENSE`.
