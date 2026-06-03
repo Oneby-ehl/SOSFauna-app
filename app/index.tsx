@@ -23,8 +23,6 @@ import {
 } from "react-native-safe-area-context";
 
 import { Stack } from "expo-router";
-import MapView, { Marker } from "react-native-maps";
-
 import { SectionCard } from "@/components/SectionCard";
 import { provinceContacts } from "@/lib/provinceContacts";
 
@@ -171,7 +169,7 @@ function getAdvice(
   }
 
   if (animalType === "bat") {
-    return "No lo toques con la mano desnuda. Usa guantes o una tela. Colócalo en una caja de cartón cerrada y ventilada ventilada, sin ruidos y protegido del frío o del calor extremo. Evita manipularlo más de lo necesario. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+    return "No lo toques con la mano desnuda. Usa guantes o una tela. Colócalo en una caja de cartón cerrada y ventilada, sin ruidos y protegido del frío o del calor extremo. Evita manipularlo más de lo necesario. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
   }
 
   if (animalType === "smallMammal") {
@@ -272,21 +270,6 @@ export default function HomeScreen() {
   const [scrollY, setScrollY] = useState(0);
   const [scrollContentHeight, setScrollContentHeight] = useState(0);
   const [scrollLayoutHeight, setScrollLayoutHeight] = useState(0);
-  const [mapZoom, setMapZoom] = useState(15);
-
-  const mapRegion = useMemo(() => {
-    if (!coords) return null;
-
-    const delta = Math.max(0.002, 360 / Math.pow(2, mapZoom));
-
-    return {
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      latitudeDelta: delta,
-      longitudeDelta: delta,
-    };
-  }, [coords, mapZoom]);
-
   const [flags, setFlags] = useState<FlagsState>({
     bleeding: false,
     baby: false,
@@ -1417,55 +1400,27 @@ export default function HomeScreen() {
             <Text style={styles.helperText}>{locationText}</Text>
 
             <View style={styles.mapCard}>
-              <Text style={styles.mapTitle}>Mapa del punto indicado</Text>
+              <Text style={styles.mapTitle}>Ubicación del hallazgo</Text>
 
               {coords ? (
                 <>
-                  <View style={styles.mapPreview}>
-                    {mapRegion ? (
-                      <MapView
-                        style={styles.mapView}
-                        region={mapRegion}
-                        scrollEnabled={false}
-                        zoomEnabled={false}
-                        rotateEnabled={false}
-                        pitchEnabled={false}
-                        toolbarEnabled={false}
-                      >
-                        <Marker
-                          coordinate={{
-                            latitude: coords.latitude,
-                            longitude: coords.longitude,
-                          }}
-                        />
-                      </MapView>
-                    ) : null}
-                    <Text style={styles.mapZoomBadge}>Zoom {mapZoom}</Text>
+                  <View style={styles.mapLocationBox}>
+                    <Text style={styles.mapPin}>📍</Text>
+                    <Text style={styles.mapLocationTitle}>
+                      Punto capturado correctamente
+                    </Text>
+                    <Text style={styles.mapCoords}>
+                      {coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}
+                    </Text>
+                    <Text style={styles.mapEmptyText}>
+                      Puedes abrir la ubicación en Google Maps para ver calles,
+                      caminos y referencias cercanas.
+                    </Text>
                   </View>
 
-                  <Text style={styles.mapCoords}>
-                    {coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)}
-                  </Text>
-
-                  <View style={styles.mapControlsRow}>
-                    <Pressable
-                      style={styles.mapControlButton}
-                      onPress={() => setMapZoom((prev) => Math.max(8, prev - 1))}
-                    >
-                      <Text style={styles.mapControlText}>−</Text>
-                    </Pressable>
-
-                    <Pressable style={styles.mapOpenButton} onPress={openMaps}>
-                      <Text style={styles.mapOpenButtonText}>Abrir mapa</Text>
-                    </Pressable>
-
-                    <Pressable
-                      style={styles.mapControlButton}
-                      onPress={() => setMapZoom((prev) => Math.min(20, prev + 1))}
-                    >
-                      <Text style={styles.mapControlText}>+</Text>
-                    </Pressable>
-                  </View>
+                  <Pressable style={styles.mapOpenButton} onPress={openMaps}>
+                    <Text style={styles.mapOpenButtonText}>Abrir mapa</Text>
+                  </Pressable>
                 </>
               ) : (
                 <View style={styles.mapEmptyBox}>
@@ -2004,70 +1959,30 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#111827",
   },
-  mapPreview: {
-    height: 170,
+  mapLocationBox: {
+    minHeight: 130,
     borderRadius: 14,
-    backgroundColor: "#e7f5ea",
+    backgroundColor: "#eef8f0",
     borderWidth: 1,
     borderColor: "#b7dfc0",
-    overflow: "hidden",
-  },
-  mapView: {
-    flex: 1,
-  },
-  mapGridLineHorizontal: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: "50%",
-    height: 1,
-    backgroundColor: "#b7dfc0",
-  },
-  mapGridLineVertical: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: "50%",
-    width: 1,
-    backgroundColor: "#b7dfc0",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 14,
+    gap: 6,
   },
   mapPin: {
-    fontSize: 34,
+    fontSize: 30,
   },
-  mapZoomBadge: {
-    position: "absolute",
-    right: 10,
-    bottom: 10,
-    backgroundColor: "#ffffff",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+  mapLocationTitle: {
     color: "#14532d",
-    fontSize: 12,
-    fontWeight: "800",
+    fontSize: 15,
+    fontWeight: "900",
+    textAlign: "center",
   },
   mapCoords: {
     color: "#374151",
     fontSize: 13,
     fontWeight: "700",
-  },
-  mapControlsRow: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  mapControlButton: {
-    width: 44,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: "#e5e7eb",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mapControlText: {
-    color: "#111827",
-    fontSize: 24,
-    fontWeight: "900",
   },
   mapOpenButton: {
     flex: 1,
