@@ -124,11 +124,6 @@ const MADRID_PROVINCE_CONTACTS = [
     phone: "900 181 628",
     note: "Avisos e incidencias sobre fauna y medio natural",
   },
-  {
-    name: "Mis Amigas las Palomas",
-    phone: "640 267 284",
-    note: "Contacto de apoyo para palomas en Madrid",
-  },
 ];
 
 function canUseCannotFly(animalType: AnimalType) {
@@ -1087,18 +1082,73 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          <View style={styles.welcomeFeatureList}>
-            <Text style={styles.welcomeFeature}>• Orientación básica sobre qué hacer.</Text>
-            <Text style={styles.welcomeFeature}>• Captura de foto y vídeo.</Text>
-            <Text style={styles.welcomeFeature}>• Obtención de ubicación GPS.</Text>
-            <Text style={styles.welcomeFeature}>• Contactos de centros de recuperación y servicios de ayuda.</Text>
-          </View>
-
           <View style={styles.warningBox}>
             <Text style={styles.warningText}>
               La información proporcionada por esta aplicación es orientativa y no sustituye el criterio de veterinarios, agentes medioambientales ni servicios de emergencia.
             </Text>
           </View>
+
+          <View
+            style={{
+              backgroundColor: "#f3f4f6",
+              borderWidth: 1,
+              borderColor: "#d1d5db",
+              borderRadius: 12,
+              padding: 12,
+              gap: 6,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "700",
+                color: "#374151",
+              }}
+            >
+              Información importante
+            </Text>
+          
+            <Text
+              style={{
+                fontSize: 13,
+                lineHeight: 18,
+                color: "#4b5563",
+              }}
+            >
+              • Esta aplicación es un proyecto independiente de apoyo al rescate de fauna silvestre.
+            </Text>
+          
+            <Text
+              style={{
+                fontSize: 13,
+                lineHeight: 18,
+                color: "#4b5563",
+              }}
+            >
+              • No es una aplicación oficial de GREFA ni de ninguna administración pública.
+            </Text>
+          
+            <Text
+              style={{
+                fontSize: 13,
+                lineHeight: 18,
+                color: "#4b5563",
+              }}
+            >
+              • Los teléfonos mostrados proceden de fuentes públicas de organismos y entidades dedicadas a la atención de fauna silvestre.
+            </Text>
+          
+            <Text
+              style={{
+                fontSize: 13,
+                lineHeight: 18,
+                color: "#4b5563",
+              }}
+            >
+              • Los datos introducidos permanecen en el dispositivo y solo se comparten cuando el usuario decide enviarlos.
+            </Text>
+          </View>
+
 
           <Pressable
             style={styles.primaryButton}
