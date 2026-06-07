@@ -907,8 +907,14 @@ export default function HomeScreen() {
           style={styles.primaryButton}
           onPress={() => openWhatsAppWithNumber(GREFA_WHATSAPP)}
         >
-          <Text style={styles.primaryButtonText}>Enviar a GREFA</Text>
+          <Text style={styles.primaryButtonText}>GREFA (Madrid)</Text>
         </Pressable>
+
+        <View style={styles.warningBox}>
+          <Text style={styles.warningText}>
+            Solo para avisos gestionados en la Comunidad de Madrid. Para otras provincias utiliza Ayuda y busca el centro más cercano.
+          </Text>
+        </View>
 
         <TextInput
           placeholder="Otro número de WhatsApp"
