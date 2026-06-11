@@ -1060,7 +1060,7 @@ export default function HomeScreen() {
       style={styles.keyboardAvoid}
       keyboardVerticalOffset={90}
     >
-      <SectionCard title="SOS Fauna">
+      <SectionCard title="SOS Fauna España">
         <View style={styles.welcomeContent}>
           <Text style={styles.welcomeTitle}>
             Asistente de rescate de fauna silvestre
@@ -1110,7 +1110,7 @@ export default function HomeScreen() {
                 color: "#4b5563",
               }}
             >
-              • Esta aplicación es un proyecto independiente de apoyo al rescate de fauna silvestre.
+              • Proyecto independiente de apoyo al rescate de fauna silvestre.
             </Text>
           
             <Text
@@ -1130,7 +1130,7 @@ export default function HomeScreen() {
                 color: "#4b5563",
               }}
             >
-              • Los teléfonos mostrados proceden de fuentes públicas de organismos y entidades dedicadas a la atención de fauna silvestre.
+              • Los datos introducidos permanecen en el dispositivo y solo se comparten cuando el usuario decide enviarlos.
             </Text>
           
             <Text
@@ -1140,7 +1140,7 @@ export default function HomeScreen() {
                 color: "#4b5563",
               }}
             >
-              • Los datos introducidos permanecen en el dispositivo y solo se comparten cuando el usuario decide enviarlos.
+              • Consulte la política de privacidad para más información.
             </Text>
           </View>
 
