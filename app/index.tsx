@@ -912,12 +912,12 @@ export default function HomeScreen() {
 
         <View style={styles.warningBox}>
           <Text style={styles.warningText}>
-            Solo para avisos gestionados en la Comunidad de Madrid. Para otras provincias utiliza Ayuda y busca el centro más cercano.
+            Grefa (Madrid) es solo para avisos gestionados en la Comunidad de Madrid. Para otras provincias utiliza Ayuda del paso anterior y busca el centro más cercano.
           </Text>
         </View>
 
         <TextInput
-          placeholder="Otro número de WhatsApp"
+          placeholder="Enviar a otro contacto de WhatsApp"
           value={customWhatsAppNumber}
           onChangeText={setCustomWhatsAppNumber}
           keyboardType="phone-pad"
@@ -928,8 +928,14 @@ export default function HomeScreen() {
           style={styles.secondaryButton}
           onPress={() => openWhatsAppWithNumber(customWhatsAppNumber)}
         >
-          <Text style={styles.secondaryButtonText}>Enviar a otro número</Text>
+          <Text style={styles.secondaryButtonText}>Enviar a otro contacto WhatsApp</Text>
         </Pressable>
+
+        <View style={styles.warningBox}>
+          <Text style={styles.warningText}>
+            Si necesitas enviar la información recopilada a otro contacto de WhatsApp, introduce el número de WhatsApp y pulsa en Enviar a otro contacto WhatsApp
+          </Text>
+        </View>
 
         <Pressable
           style={[
