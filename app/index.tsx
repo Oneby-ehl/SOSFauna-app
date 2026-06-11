@@ -1518,7 +1518,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={["bottom"]}>
-      <Stack.Screen options={{ title: "Rescate fauna - Asistente" }} />
+      <Stack.Screen options={{ title: "Rescate SOS Fauna España - Asistente" }} />
 
       {showStep5ActionBar ? renderStep5ActionBar() : null}
 
