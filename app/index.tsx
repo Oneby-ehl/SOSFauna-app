@@ -133,6 +133,109 @@ function canUseCannotFly(animalType: AnimalType) {
   );
 }
 
+function getTrappedAdvice(animalType: AnimalType) {
+  const commonEnd =
+    " En el siguiente paso podrás hacer una foto del atrapamiento y capturar la ubicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+
+  if (animalType === "smallBird") {
+    return (
+      "Si el ave está atrapada, no tires de ella ni intentes liberarla a la fuerza, porque podrías causarle lesiones en alas, patas o cuello. Evita ruidos, personas alrededor y manipularla más de lo necesario. Si puedes hacerlo sin riesgo, cúbrela suavemente con una toalla, trapo, jersey o cualquier tela disponible para reducir el estrés. Si consigues liberarla sin causarle daño, colócala en una caja de cartón cerrada y ventilada, en silencio y protegida del frío o del calor extremo. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "largeBird") {
+    return (
+      "Si una rapaz o ave grande está atrapada, no intentes liberarla con las manos desnudas ni acercar la cara o los dedos al pico o a las garras. Puede lesionarte al defenderse. No tires de alas, patas ni plumas. Mantén distancia, reduce ruidos y evita que haya personas alrededor. Si es imprescindible intervenir por peligro inmediato y puedes hacerlo sin riesgo, usa una manta o toalla gruesa para cubrirla suavemente y disminuir el estrés. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "bat") {
+    return (
+      "Si el murciélago está atrapado, no lo toques con la mano desnuda. Usa guantes gruesos o una tela si fuera imprescindible moverlo por seguridad. No tires de las alas ni intentes despegarlo a la fuerza, porque son muy delicadas. Reduce la luz, el ruido y la presencia de personas alrededor. Si se libera sin daño, colócalo en una caja de cartón cerrada y muy bien ventilada, en silencio y protegido del frío o del calor extremo. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "smallMammal") {
+    return (
+      "Si el pequeño mamífero está atrapado, no tires de patas, cola ni cabeza para liberarlo. Puede sufrir lesiones o morder por miedo. Evita ruidos, personas alrededor y manipulaciones innecesarias. Si puedes hacerlo sin riesgo, cúbrelo suavemente con una toalla, trapo, jersey o cualquier tela disponible para reducir el estrés. Si consigues liberarlo sin causarle daño, colócalo en una caja de cartón cerrada y ventilada o en un recipiente seguro ventilado, en silencio y protegido del frío o del calor extremo. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "largeMammal") {
+    return (
+      "Si el mamífero grande está atrapado, no intentes capturarlo, liberarlo ni acercarte más de lo necesario. Puede reaccionar con fuerza por miedo, estrés o dolor y causar lesiones. Mantén distancia, evita acorralarlo, reduce ruidos y aleja a personas, perros y vehículos si puedes hacerlo sin riesgo. No intentes cubrirlo ni manipularlo salvo indicación de personal especializado. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "reptileAmphibian") {
+    return (
+      "Si el reptil o anfibio está atrapado, evita manipularlo salvo riesgo inmediato. No tires de patas, cola ni cuerpo para liberarlo, porque podrías causarle lesiones. Reduce ruidos y luz directa, evita el contacto directo y mantenlo protegido del frío o del calor extremo. Si se libera sin daño y es necesario contenerlo por seguridad, usa un recipiente seguro y ventilado. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  return (
+    "Si el animal está atrapado, no tires de él ni intentes liberarlo a la fuerza. Evita ruidos, la presencia de personas alrededor y manipularlo más de lo necesario. Si puedes hacerlo sin riesgo, cúbrelo suavemente con una toalla, trapo, jersey o cualquier tela disponible para reducir el estrés. Si consigues liberarlo sin causarle daño, mantenlo en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, en silencio y protegido del frío o del calor extremo. No le des comida ni agua sin indicación." +
+    commonEnd
+  );
+}
+function getBabyAdvice(animalType: AnimalType) {
+  const commonEnd =
+    " En el siguiente paso podrás hacer una foto del animal y capturar la ubicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+
+  if (animalType === "smallBird") {
+    return (
+      "Antes de recoger una cría de ave, intenta distinguir si se trata de un pollo o de un volantón. Un pollo suele tener poco plumaje, plumón visible o zonas sin plumas, y normalmente debería estar en el nido. Un volantón suele estar ya emplumado, puede saltar o moverse por el suelo o ramas bajas, y sus padres pueden seguir alimentándolo cerca mientras aprende a volar. Si está emplumado, activo y no presenta heridas, observa primero desde cierta distancia y no lo retires salvo peligro inmediato. Si es un pollo poco emplumado o sin plumas, puede necesitar ayuda. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "largeBird") {
+    return (
+      "No toda cría de rapaz o ave grande fuera del nido necesita recogerse inmediatamente. Puede estar en una fase de aprendizaje o seguir siendo atendida por los adultos cerca. Mantén distancia, evita ruidos y no la manipules salvo peligro inmediato. Si hay riesgo, heridas, debilidad o dudas, no intentes manejarla con las manos desnudas: una rapaz joven también puede defenderse con pico o garras. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "bat") {
+    return (
+      "Una cría de murciélago no siempre necesita ser trasladada a un centro de recuperación. Si localizas la colonia, puedes intentar dejar la cría cerca de ella al atardecer para favorecer la reunificación con los adultos. Hazlo únicamente si no presenta heridas ni signos de debilidad y consulta con un centro especializado ante cualquier duda. No la manipules con las manos desnudas. Si es necesario recogerla temporalmente, utiliza guantes o una tela y mantenla en una caja ventilada, tranquila y protegida del frío o del calor extremo. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "smallMammal") {
+    return (
+      "Muchas crías de pequeños mamíferos permanecen solas temporalmente mientras la madre busca alimento o se mantiene oculta cerca. Antes de recogerla, observa desde una distancia prudente si existe actividad de los progenitores y evita tocarla salvo peligro inmediato, heridas, debilidad o riesgo claro. Si debes retirarla por seguridad, manipúlala lo mínimo y mantenla en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, en silencio y protegida del frío o del calor extremo. No la alimentes salvo indicación expresa." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "largeMammal") {
+    return (
+      "Muchas crías de ciervo, corzo u otros mamíferos permanecen ocultas durante horas mientras la madre se mantiene alejada para no atraer depredadores. No la recojas ni la traslades salvo peligro inmediato, heridas evidentes o indicación de personal especializado. Mantén distancia, evita tocarla, aleja perros y personas si puedes hacerlo sin riesgo y observa la situación desde lejos. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  if (animalType === "reptileAmphibian") {
+    return (
+      "Las crías de reptiles y anfibios suelen ser independientes desde etapas muy tempranas. Evita manipularlas salvo riesgo inmediato, como carretera, piscina, obra, zona de paso o presencia de perros y gatos. Si necesitas moverla por seguridad, hazlo lo mínimo imprescindible, usando un recipiente seguro y ventilado, y déjala en una zona cercana, protegida y adecuada. No le des comida ni agua sin indicación." +
+      commonEnd
+    );
+  }
+
+  return (
+    "Si crees que puede tratarse de una cría, evita llevártela a casa o alimentarla. Muchas crías no están abandonadas aunque parezcan solas. Observa primero la situación desde cierta distancia, valora si hay heridas, debilidad o peligro inmediato, y consulta con un centro especializado antes de retirarla si tienes dudas. Si debes moverla por seguridad, mantenla en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, en silencio y protegida del frío o del calor extremo. No le des comida ni agua sin indicación." +
+    commonEnd
+  );
+}
+
 function getAdvice(
   animalState: AnimalState,
   animalType: AnimalType,
@@ -142,23 +245,26 @@ function getAdvice(
     return "No lo toques ni modifiques el escenario del cadáver porque puede servir como prueba para una investigación pericial o judicial. Observa si encuentras algo extraño alrededor y comunícalo a los agentes de seguridad, a los agentes forestales o a emergencias.";
   }
 
+  if (flags.trapped) {
+    return getTrappedAdvice(animalType);
+  }
+
+  if (flags.baby) {
+    return getBabyAdvice(animalType);
+  }
+
   if (animalType === "smallBird") {
     if (
       flags.bleeding ||
       flags.catDog ||
       flags.canNotMove ||
       flags.roadRisk ||
-      flags.trapped ||
       flags.cannotFly ||
       flags.weakness ||
       flags.breathing ||
       flags.other
     ) {
       return "Parece un caso que puede requerir valoración o ingreso. Colócalo en una caja de cartón cerrada y ventilada, en silencio, sin ruidos y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
-    }
-
-    if (flags.baby) {
-      return "Puede ser un volantón. Observa antes de recogerlo. Si no hay peligro inmediato, los padres pueden seguir atendiéndolo cerca. Si necesitas retirarlo, colócalo en una caja de cartón cerrada y ventilada, en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
     }
 
     return "Si no vuela o parece débil, colócalo en una caja de cartón cerrada y ventilada, en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo. Evita manipularlo más de lo necesario y no le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
@@ -178,7 +284,6 @@ function getAdvice(
       flags.catDog ||
       flags.canNotMove ||
       flags.roadRisk ||
-      flags.trapped ||
       flags.cannotFly ||
       flags.weakness ||
       flags.breathing ||
@@ -187,15 +292,11 @@ function getAdvice(
       return "Parece un caso que puede requerir valoración o ingreso. Manipula lo mínimo. Colócalo en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, tranquilo y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
     }
 
-    if (flags.baby) {
-      return "Si es una cría, manipúlala lo mínimo. Colócala en una caja de cartón cerrada y ventilada con calor suave, en silencio, sin ruidos y protegida del frío o del calor extremo. No la alimentes salvo indicación expresa. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
-    }
-
     return "Manipula lo mínimo. Colócalo en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, tranquilo y protegido del frío o del calor extremo. No le des comida ni agua sin indicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
   }
 
   if (animalType === "largeMammal") {
-    return "No intentes capturarlo ni acercarte más de lo necesario. Puede reaccionar con miedo o agresividad. Mantén distancia, evita acorralarlo y procura que quede apartado de ruido, estrés y peligro inmediato. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+    return "No intentes capturarlo ni acercarte más de lo necesario. Puede reaccionar con fuerza por miedo, estrés o dolor. Mantén distancia, evita acorralarlo y procura que quede apartado de ruido, estrés y peligro inmediato. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
   }
 
   if (animalType === "reptileAmphibian") {
@@ -1315,13 +1416,13 @@ export default function HomeScreen() {
             <Text style={styles.sectionDescription}>
               Sigue estas recomendaciones antes de actuar o mover al animal.
             </Text>
-
+    
             <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
           </View>
         </SectionCard>
       );
     }
-
+	
     if (step === 3) {
       return (
         <SectionCard title="Paso 3. Datos de contacto">
