@@ -816,6 +816,19 @@ export default function HomeScreen() {
             Teléfonos de ayuda por provincias
           </Text>
         </Pressable>
+		<View style={styles.infoBox}>
+		<Text style={styles.infoText}>
+			Fuentes de información:
+
+		{"\n\n"}• Emergencias 112: www.112.es
+		{"\n"}• Guardia Civil (SEPRONA): www.guardiacivil.es
+		{"\n"}• Policía Nacional: www.policia.es
+		{"\n"}• Agentes Forestales de la Comunidad de Madrid:
+		{"\n"}  www.comunidad.madrid/seguridad-emergencias-asem-112/agentes-forestales
+
+		{"\n\n"}SOS Fauna España es una aplicación independiente y no está afiliada ni representa a ninguna administración pública, servicio de emergencias o cuerpo policial.
+		</Text>
+		</View>
       </View>
     </SectionCard>
   );
@@ -2085,5 +2098,18 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "800",
     lineHeight: 30,
+  },
+  infoBox: {
+  backgroundColor: "#f3f4f6",
+  borderWidth: 1,
+  borderColor: "#d1d5db",
+  borderRadius: 12,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  },
+  infoText: {
+  color: "#4b5563",
+  fontSize: 13,
+  lineHeight: 18,
   },
 });
