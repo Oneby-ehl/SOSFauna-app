@@ -1854,7 +1854,7 @@ export default function HomeScreen() {
             Asistente de rescate de fauna silvestre
           </Text>
 
-          <Text style={styles.welcomeVersion}>Versión 1.0.0</Text>
+          <Text style={styles.welcomeVersion}>Versión 1.1.0</Text>
 
           <View style={styles.welcomeScopeBox}>
             <Text style={styles.welcomeScopeText}>
