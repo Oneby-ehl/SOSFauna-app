@@ -2135,15 +2135,6 @@ export default function HomeScreen() {
                 otro fin.
               </Text>
             </View>
-
-            <View style={styles.inlineActionRow}>
-              <Pressable
-                style={styles.secondaryButtonSmall}
-                onPress={resetFlow}
-              >
-                <Text style={styles.secondaryButtonText}>↺ Limpiar</Text>
-              </Pressable>
-            </View>
           </View>
         </SectionCard>
       );
