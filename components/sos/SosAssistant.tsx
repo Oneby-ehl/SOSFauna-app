@@ -1556,12 +1556,12 @@ export default function HomeScreen() {
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
             Fuentes de información:
-            {"\n\n"}• Emergencias 112: www.112.es
+            {"\n\n"}• Emergencias 112: www.proteccioncivil.es/catalogo/info112/
             {"\n"}• Guardia Civil (SEPRONA): www.guardiacivil.es
             {"\n"}• Policía Nacional: www.policia.es
             {"\n"}• Agentes Forestales de la Comunidad de Madrid:
             {"\n"}{" "}
-            www.comunidad.madrid/seguridad-emergencias-asem-112/agentes-forestales
+            www.comunidad.madrid/centros/emisora-cuerpo-agentes-forestales
             {"\n\n"}SOS Fauna España es una aplicación independiente y no está
             afiliada ni representa a ninguna administración pública, servicio de
             emergencias o cuerpo policial.
