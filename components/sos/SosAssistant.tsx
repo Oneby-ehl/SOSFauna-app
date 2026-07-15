@@ -1912,8 +1912,8 @@ export default function HomeScreen() {
                 color: "#4b5563",
               }}
             >
-              • No es una aplicación oficial de GREFA ni de ninguna
-              administración pública.
+              • No es una aplicación oficial de ninguna administración pública, servicio de
+            emergencias, cuerpo policial o entidad mencionada en esta app.
             </Text>
 
             <Text

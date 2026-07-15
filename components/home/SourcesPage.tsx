@@ -113,7 +113,7 @@ export default function SourcesPage() {
 
           <Text style={styles.disclaimerText}>
             SOS Fauna España es un proyecto independiente. No es una aplicación
-            oficial de GREFA ni de ninguna administración pública, servicio de
+            oficial de ninguna administración pública, servicio de
             emergencias, cuerpo policial o entidad mencionada en esta página.
           </Text>
 
