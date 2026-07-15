@@ -1,1 +1,1 @@
-export { default } from "@/components/sos/SosAssistant";
+export { default } from "@/components/home/Home";
