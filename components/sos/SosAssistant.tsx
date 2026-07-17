@@ -3,7 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Keyboard,
@@ -22,7 +22,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { SectionCard } from "@/components/SectionCard";
 import { provinceContacts } from "@/lib/provinceContacts";
 
@@ -955,11 +955,21 @@ function isValidPhone(phone: string) {
 
   return countDigits(normalized) >= 9;
 }
-
+  function showMessage(title: string, message: string) {
+    if (Platform.OS === "web") {
+      window.alert(`${title}\n\n${message}`);
+      return;
+    }
+  
+    Alert.alert(title, message);
+  }
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [step, setStep] = useState<Step>(1);
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(
+  Platform.OS !== "web"
+  );
 
   const [showContacts, setShowContacts] = useState(false);
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
@@ -1071,6 +1081,7 @@ export default function HomeScreen() {
     !showWelcome &&
     step === 5 &&
     !showContacts &&
+    !showWhatsAppConfirmation &&
     !showWhatsAppOptions &&
     !showProvinces &&
     !selectedProvince;
@@ -1099,6 +1110,8 @@ export default function HomeScreen() {
     selectedProvince,
     showWelcome,
   ]);
+
+
 
   const generatedSummary = useMemo(() => {
     const mapsUrl = coords
@@ -1302,51 +1315,73 @@ export default function HomeScreen() {
   };
 
   const openWhatsAppWithNumber = async (number: string) => {
-    const cleaned = normalizeWhatsAppNumber(number);
+  const cleaned = normalizeWhatsAppNumber(number);
 
-    if (!cleaned || countDigits(cleaned) < 9) {
-      Alert.alert(
-        "Número no válido",
-        "Introduce un número de WhatsApp válido, con prefijo si hace falta.",
-      );
-      return;
-    }
-
-    const text = encodeURIComponent(generatedSummary);
-    const urls = [
-      `whatsapp://send?phone=${cleaned}&text=${text}`,
-      `https://wa.me/${cleaned}?text=${text}`,
-      `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`,
-    ];
-
-    for (const url of urls) {
-      try {
-        await Linking.openURL(url);
-        setLastWhatsAppNumber(cleaned);
-        setShowWhatsAppConfirmation(true);
-        setHasSentWhatsApp(true);
-        return;
-      } catch {
-        // Probar la siguiente opción
-      }
-    }
-
-    Alert.alert(
-      "No se pudo abrir WhatsApp",
-      "Comprueba que WhatsApp está instalado y vuelve a intentarlo.",
+  if (!cleaned || countDigits(cleaned) < 9) {
+    showMessage(
+      "Número no válido",
+      "Introduce un número de WhatsApp válido, con prefijo si hace falta.",
     );
-  };
+    return;
+  }
+
+  const text = encodeURIComponent(generatedSummary);
+
+  if (Platform.OS === "web") {
+  const url = `https://wa.me/${cleaned}?text=${text}`;
+
+  window.open(url, "_blank");
+
+  setLastWhatsAppNumber(cleaned);
+  setShowWhatsAppConfirmation(true);
+  setHasSentWhatsApp(true);
+
+  return;
+  }
+
+  const urls = [
+    `whatsapp://send?phone=${cleaned}&text=${text}`,
+    `https://wa.me/${cleaned}?text=${text}`,
+    `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`,
+  ];
+
+  for (const url of urls) {
+    try {
+      await Linking.openURL(url);
+      setLastWhatsAppNumber(cleaned);
+      setShowWhatsAppConfirmation(true);
+      setHasSentWhatsApp(true);
+      return;
+    } catch {
+      // Probar la siguiente opción
+    }
+  }
+
+  showMessage(
+    "No se pudo abrir WhatsApp",
+    "Comprueba que WhatsApp está instalado y vuelve a intentarlo.",
+  );
+};
 
   const openMaps = async () => {
-    if (!coords) return;
+  if (!coords) return;
 
-    const url = `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
-    await Linking.openURL(url);
+  const url = `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
+
+  if (Platform.OS === "web") {
+    window.open(url, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  await Linking.openURL(url);
   };
 
   const copySummary = async () => {
     await Clipboard.setStringAsync(generatedSummary);
-    Alert.alert("Resumen copiado", "El resumen se ha copiado al portapapeles.");
+    showMessage(
+      "Resumen copiado",
+      "El resumen se ha copiado al portapapeles.",
+    );
   };
 
   const callNumber = async (phoneNumber: string) => {
@@ -1393,99 +1428,100 @@ export default function HomeScreen() {
     });
   };
 
-  const confirmCancelFlow = () => {
-    Alert.alert(
-      "Cancelar aviso",
-      "¿Estás seguro de que deseas cancelar este aviso?\n\nSe perderá toda la información introducida y volverás a la pantalla inicial.",
-      [
-        {
-          text: "No",
-          style: "cancel",
-        },
-        {
-          text: "Sí",
-          onPress: () => resetFlow(true),
-        },
-      ],
-    );
-  };
+const finishFlow = () => {
+  const confirmationMessage =
+    "¿Deseas finalizar este aviso?\n\nSi continúas, se eliminará toda la información introducida y volverás a la pantalla inicial.";
 
-  const finishFlow = () => {
-    Alert.alert(
-      "Finalizar aviso",
-      "¿Estás seguro de que deseas finalizar este aviso?\n\nSi continúas se eliminará toda la información introducida y volverás a la pantalla inicial.",
-      [
-        {
-          text: "No",
-          style: "cancel",
-        },
-        {
-          text: "Sí",
-          onPress: () => {
-            Alert.alert(
-              "Gracias",
-              "Gracias por colaborar y ayudar a los animales.",
-              [
-                {
-                  text: "Aceptar",
-                  onPress: () => resetFlow(true),
-                },
-              ],
-            );
-          },
-        },
-      ],
-    );
-  };
+  const thankYouMessage =
+    "Gracias por colaborar y ayudar a los animales.";
 
-  const validateStep = () => {
-    if (step === 3) {
-      if (!fullName.trim()) {
-        Alert.alert(
-          "Falta el nombre",
-          "Introduce tu nombre y apellidos antes de continuar.",
-        );
-        return false;
-      }
+  if (Platform.OS === "web") {
+    const confirmed = window.confirm(confirmationMessage);
 
-      if (!phone.trim()) {
-        Alert.alert(
-          "Falta el teléfono",
-          "Introduce un teléfono de contacto antes de continuar.",
-        );
-        return false;
-      }
-
-      if (!isValidPhone(phone)) {
-        Alert.alert(
-          "Teléfono no válido",
-          "Introduce un teléfono válido, con al menos 9 dígitos.",
-        );
-        return false;
-      }
+    if (confirmed) {
+      window.alert(thankYouMessage);
+      resetFlow(false);
+      router.replace("/");
     }
 
-    if (step === 4) {
-      if (!photoUri && !videoUri && !locationCaptured) {
-        Alert.alert(
-          "Información incompleta",
-          "Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.",
-        );
-        return false;
-      }
+    return;
+  }
+
+  Alert.alert(
+    "Finalizar aviso",
+    confirmationMessage,
+    [
+      {
+        text: "No",
+        style: "cancel",
+      },
+      {
+        text: "Sí",
+        onPress: () => {
+          Alert.alert(
+            "Gracias",
+            thankYouMessage,
+            [
+              {
+                text: "Aceptar",
+                onPress: () => resetFlow(true),
+              },
+            ]
+          );
+        },
+      },
+    ]
+  );
+};
+
+const validateStep = () => {
+  if (step === 3) {
+    if (!fullName.trim()) {
+      showMessage(
+        "Falta el nombre",
+        "Introduce tu nombre y apellidos antes de continuar.",
+      );
+      return false;
     }
 
-    return true;
-  };
+    if (!phone.trim()) {
+      showMessage(
+        "Falta el teléfono",
+        "Introduce un teléfono de contacto antes de continuar.",
+      );
+      return false;
+    }
+
+    if (!isValidPhone(phone)) {
+      showMessage(
+        "Teléfono no válido",
+        "Introduce un teléfono válido, con al menos 9 dígitos.",
+      );
+      return false;
+    }
+  }
+
+  if (step === 4) {
+    if (!photoUri && !videoUri && !locationCaptured) {
+      showMessage(
+        "Información incompleta",
+        "Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.",
+      );
+      return false;
+    }
+  }
+
+  return true;
+};
 
   const goNext = () => {
     if (!validateStep()) return;
     if (step < 5) setStep((prev) => (prev + 1) as Step);
   };
 
-  const goBack = () => {
-    if (showWhatsAppOptions) {
-      setShowWhatsAppOptions(false);
+  const goBack = useCallback(() => {
+    if (showWhatsAppConfirmation) {
+      setShowWhatsAppConfirmation(false);
       return;
     }
 
@@ -1496,6 +1532,7 @@ export default function HomeScreen() {
 
     if (showProvinces) {
       setShowProvinces(false);
+      setShowContacts(true);
       return;
     }
 
@@ -1504,10 +1541,62 @@ export default function HomeScreen() {
       return;
     }
 
+    if (showWhatsAppOptions) {
+      setShowWhatsAppOptions(false);
+      return;
+    }
+
     if (step > 1) {
       setStep((prev) => (prev - 1) as Step);
     }
-  };
+  }, [
+    selectedProvince,
+    showContacts,
+    showProvinces,
+    showWhatsAppConfirmation,
+    showWhatsAppOptions,
+    step,
+  ]);
+
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+
+    let allowNavigation = false;
+    const guardedUrl = window.location.href;
+
+    const addGuardEntry = () => {
+      window.history.pushState(
+        { sosFaunaBackGuard: true },
+        "",
+        guardedUrl,
+      );
+    };
+
+    const guardTimer = window.setTimeout(addGuardEntry, 0);
+
+    const handlePopState = () => {
+      if (allowNavigation) return;
+
+      const confirmed = window.confirm(
+        "¿Deseas salir de este aviso?\n\nSe perderá toda la información introducida y volverás a la pantalla inicial.",
+      );
+
+      if (confirmed) {
+        allowNavigation = true;
+        router.replace("/");
+        return;
+      }
+
+      addGuardEntry();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.clearTimeout(guardTimer);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [router]);
 
   const handleOpenHelp = () => {
     setHasOpenedHelpPhones(true);
@@ -1682,7 +1771,7 @@ export default function HomeScreen() {
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
           El resumen está listo para WhatsApp. Pulsa la flecha izquierda para
-          volver, o Cancelar para descartar el aviso.
+          volver a las opciones del aviso.
         </Text>
 
         <Pressable
@@ -1736,9 +1825,6 @@ export default function HomeScreen() {
           <Text style={styles.primaryButtonText}>Finalizar</Text>
         </Pressable>
 
-        <Pressable style={styles.secondaryButton} onPress={confirmCancelFlow}>
-          <Text style={styles.secondaryButtonText}>Cancelar</Text>
-        </Pressable>
       </View>
     </SectionCard>
   );
@@ -1815,6 +1901,7 @@ export default function HomeScreen() {
 
     const isOverlayOpen =
       showContacts ||
+      showWhatsAppConfirmation ||
       showWhatsAppOptions ||
       showProvinces ||
       !!selectedProvince;
@@ -1822,23 +1909,29 @@ export default function HomeScreen() {
     const canShowForwardArrow = !isOverlayOpen && step < 5;
 
     return (
-      <View pointerEvents="box-none" style={styles.sideNavOverlay}>
+      <>
         {canShowBackArrow ? (
-          <Pressable style={styles.sideArrowLeft} onPress={goBack}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Volver"
+            style={styles.sideArrowLeft}
+            onPress={goBack}
+          >
             <Text style={styles.sideArrowText}>‹</Text>
           </Pressable>
-        ) : (
-          <View style={styles.sideArrowPlaceholder} />
-        )}
+        ) : null}
 
         {canShowForwardArrow ? (
-          <Pressable style={styles.sideArrowRight} onPress={goNext}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Continuar"
+            style={styles.sideArrowRight}
+            onPress={goNext}
+          >
             <Text style={styles.sideArrowText}>›</Text>
           </Pressable>
-        ) : (
-          <View style={styles.sideArrowPlaceholder} />
-        )}
-      </View>
+        ) : null}
+      </>
     );
   };
 
@@ -2309,8 +2402,11 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.screen} edges={["bottom"]}>
       <Stack.Screen
-        options={{ title: "Rescate SOS Fauna España - Asistente" }}
-      />
+         options={{
+           title: "Rescate SOS Fauna España - Asistente",
+           headerLeft: Platform.OS === "web" ? () => null : undefined,
+         }}
+       />
 
       {showStep5ActionBar ? renderStep5ActionBar() : null}
 
@@ -2839,42 +2935,35 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "900",
   },
-  sideNavOverlay: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    justifyContent: "center",
-    pointerEvents: "box-none",
-  },
   sideArrowLeft: {
     position: "absolute",
+    zIndex: 100,
+    elevation: 20,
+    top: "50%",
     left: 0,
-    width: 22,
+    width: 26,
     height: 120,
+    marginTop: -60,
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
     backgroundColor: "#14532d",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 3,
   },
   sideArrowRight: {
     position: "absolute",
+    zIndex: 100,
+    elevation: 20,
+    top: "50%",
     right: 0,
-    width: 22,
+    width: 26,
     height: 120,
+    marginTop: -60,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
     backgroundColor: "#14532d",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 3,
-  },
-  sideArrowPlaceholder: {
-    width: 22,
-    height: 120,
   },
   sideArrowText: {
     color: "#ffffff",
