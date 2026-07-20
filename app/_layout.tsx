@@ -9,7 +9,14 @@ export default function RootLayout() {
         contentStyle: { backgroundColor: '#ffffff' },
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Rescate fauna' }} />
+      <Stack.Screen
+  name="index"
+  options={{
+    title: "SOS Fauna España",
+    headerBackVisible: false,
+    headerLeft: () => null,
+  }}
+/>
     </Stack>
   );
 }

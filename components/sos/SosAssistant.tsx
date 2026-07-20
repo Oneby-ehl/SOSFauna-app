@@ -1,3 +1,8 @@
+import type { RescueCase } from "@/types/rescueCase";
+import {
+  persistCurrentCase,
+  completeCurrentCase,
+} from "@/services/rescueCaseService";
 import * as Clipboard from "expo-clipboard";
 import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
@@ -85,6 +90,23 @@ const FLAG_LABELS: Array<{ key: keyof FlagsState; label: string }> = [
   { key: "breathing", label: "Respiración agitada" },
   { key: "other", label: "Otro" },
 ];
+
+function createInitialFlags(): FlagsState {
+  return {
+    bleeding: false,
+    baby: false,
+    catDog: false,
+    canNotMove: false,
+    roadRisk: false,
+    ringGps: false,
+    trapped: false,
+    cannotFly: false,
+    weakness: false,
+    normalAppearance: false,
+    breathing: false,
+    other: false,
+  };
+}
 
 const NATIONAL_HELP_CONTACTS = [
   { name: "Emergencias", phone: "112", note: "Emergencias generales" },
@@ -663,9 +685,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
       "• Los adultos pueden continuar alimentándolo y vigilándolo desde las proximidades.\n" +
       "• Observa primero la situación desde una distancia prudente, siempre que no exista peligro inmediato.\n\n" +
       (additionalRisk
-        ? "🚨 SITUACIÓN OBSERVADA\n" +
-          getObservedSigns(flags, true) +
-          "\n\n"
+        ? "🚨 SITUACIÓN OBSERVADA\n" + getObservedSigns(flags, true) + "\n\n"
         : "🚨 PUEDE NECESITAR AYUDA SI\n" +
           "• Presenta heridas, sangrado, debilidad o respiración anómala.\n" +
           "• No puede mantenerse erguida o desplazarse con normalidad.\n" +
@@ -955,21 +975,25 @@ function isValidPhone(phone: string) {
 
   return countDigits(normalized) >= 9;
 }
-  function showMessage(title: string, message: string) {
-    if (Platform.OS === "web") {
-      window.alert(`${title}\n\n${message}`);
-      return;
-    }
-  
-    Alert.alert(title, message);
+
+function showMessage(title: string, message: string) {
+  if (Platform.OS === "web") {
+    window.alert(`${title}\n\n${message}`);
+    return;
   }
-export default function HomeScreen() {
+
+  Alert.alert(title, message);
+}
+
+type SosAssistantProps = {
+  initialCase?: RescueCase | null;
+};
+
+export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [step, setStep] = useState<Step>(1);
-  const [showWelcome, setShowWelcome] = useState(
-  Platform.OS !== "web"
-  );
+  const [currentCase, setCurrentCase] = useState<RescueCase | null>(initialCase);
+  const [step, setStep] = useState<Step>((initialCase?.step as Step) ?? 1);
 
   const [showContacts, setShowContacts] = useState(false);
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
@@ -982,44 +1006,40 @@ export default function HomeScreen() {
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] =
     useState(false);
   const [lastWhatsAppNumber, setLastWhatsAppNumber] = useState("");
-  const [hasOpenedHelpPhones, setHasOpenedHelpPhones] = useState(false);
 
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [animalState, setAnimalState] = useState<AnimalState>("alive");
-  const [animalType, setAnimalType] = useState<AnimalType>("unknown");
+  const [fullName, setFullName] = useState(initialCase?.fullName ?? "");
+  const [phone, setPhone] = useState(initialCase?.phone ?? "");
+  const [animalState, setAnimalState] = useState<AnimalState>(
+    (initialCase?.animalState as AnimalState) ?? "alive",
+  );
+  const [animalType, setAnimalType] = useState<AnimalType>(
+    (initialCase?.animalType as AnimalType) ?? "unknown",
+  );
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [videoUri, setVideoUri] = useState<string | null>(null);
 
   const [locationText, setLocationText] = useState(
-    "Ubicación no capturada todavía.",
+    initialCase?.locationText ?? "Ubicación no capturada todavía.",
   );
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
-  } | null>(null);
-  const [locationCaptured, setLocationCaptured] = useState(false);
+  } | null>(initialCase?.coords ?? null);
+  const [locationCaptured, setLocationCaptured] = useState(
+    initialCase?.locationCaptured ?? false,
+  );
   const [locationLoading, setLocationLoading] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const shouldConfirmExitRef = useRef(initialCase !== null);
+  const saveCurrentProgressRef = useRef<() => Promise<void>>(async () => {});
   const [scrollY, setScrollY] = useState(0);
   const [scrollContentHeight, setScrollContentHeight] = useState(0);
   const [scrollLayoutHeight, setScrollLayoutHeight] = useState(0);
-  const [flags, setFlags] = useState<FlagsState>({
-    bleeding: false,
-    baby: false,
-    catDog: false,
-    canNotMove: false,
-    roadRisk: false,
-    ringGps: false,
-    trapped: false,
-    cannotFly: false,
-    weakness: false,
-    normalAppearance: false,
-    breathing: false,
-    other: false,
-  });
+  const [flags, setFlags] = useState<FlagsState>(
+    initialCase?.flags ?? createInitialFlags(),
+  );
 
   const advice = useMemo(
     () => getAdvice(animalState, animalType, flags),
@@ -1047,6 +1067,41 @@ export default function HomeScreen() {
         ?.label || "No indicado",
     [animalState],
   );
+
+  const hasMeaningfulProgress = useMemo(() => {
+    if (initialCase || currentCase) return true;
+
+    return (
+      step !== 1 ||
+      fullName.trim().length > 0 ||
+      phone.trim().length > 0 ||
+      animalState !== "alive" ||
+      animalType !== "unknown" ||
+      Object.values(flags).some(Boolean) ||
+      photoUri !== null ||
+      videoUri !== null ||
+      locationCaptured ||
+      coords !== null
+    );
+  }, [
+    animalState,
+    animalType,
+    coords,
+    currentCase,
+    flags,
+    fullName,
+    initialCase,
+    locationCaptured,
+    phone,
+    photoUri,
+    step,
+    videoUri,
+  ]);
+
+  useEffect(() => {
+    shouldConfirmExitRef.current = hasMeaningfulProgress;
+  }, [hasMeaningfulProgress]);
+
 
   const mergedProvinceContacts = useMemo(() => {
     const madridEntry = {
@@ -1078,7 +1133,6 @@ export default function HomeScreen() {
   }, [provinceSearch, mergedProvinceContacts]);
 
   const showStep5ActionBar =
-    !showWelcome &&
     step === 5 &&
     !showContacts &&
     !showWhatsAppConfirmation &&
@@ -1087,7 +1141,6 @@ export default function HomeScreen() {
     !selectedProvince;
 
   const canShowStep1ScrollHint =
-    !showWelcome &&
     step === 1 &&
     !showContacts &&
     !showWhatsAppOptions &&
@@ -1096,6 +1149,7 @@ export default function HomeScreen() {
     scrollContentHeight > scrollLayoutHeight + 40;
 
   const isNearBottom = scrollY + scrollLayoutHeight >= scrollContentHeight - 80;
+
 
   useEffect(() => {
     setScrollY(0);
@@ -1108,10 +1162,7 @@ export default function HomeScreen() {
     showWhatsAppOptions,
     showProvinces,
     selectedProvince,
-    showWelcome,
   ]);
-
-
 
   const generatedSummary = useMemo(() => {
     const mapsUrl = coords
@@ -1127,7 +1178,6 @@ export default function HomeScreen() {
       `Ubicación: ${locationText}`,
       `Mapa: ${mapsUrl}`,
       `Situación observada: ${selectedFlags}`,
-      flags.other ? "Situación adicional: Otro" : null,
       `Foto capturada: ${photoUri ? "sí" : "no"}`,
       `Vídeo capturado: ${videoUri ? "sí" : "no"}`,
     ]
@@ -1135,7 +1185,6 @@ export default function HomeScreen() {
       .join("\n");
   }, [
     coords,
-    flags.other,
     fullName,
     locationText,
     phone,
@@ -1186,6 +1235,9 @@ export default function HomeScreen() {
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setPhotoUri(uri);
+
+      await saveCurrentProgress();
+
       await saveToGallery(uri, "la foto");
     }
   };
@@ -1210,6 +1262,9 @@ export default function HomeScreen() {
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setVideoUri(uri);
+
+      await saveCurrentProgress();
+
       await saveToGallery(uri, "el vídeo");
     }
   };
@@ -1232,15 +1287,24 @@ export default function HomeScreen() {
         accuracy: Location.Accuracy.Balanced,
       });
 
-      setCoords({
+      const newCoords = {
         latitude: current.coords.latitude,
         longitude: current.coords.longitude,
+      };
+
+      const newLocationText =
+        `${current.coords.latitude.toFixed(5)}, ${current.coords.longitude.toFixed(5)}`;
+
+      setCoords(newCoords);
+      setLocationText(newLocationText);
+      setLocationCaptured(true);
+
+      await saveCurrentProgress(step, {
+        coords: newCoords,
+        locationText: newLocationText,
+        locationCaptured: true,
       });
 
-      setLocationText(
-        `${current.coords.latitude.toFixed(5)}, ${current.coords.longitude.toFixed(5)}`,
-      );
-      setLocationCaptured(true);
     } catch {
       Alert.alert(
         "No se pudo obtener la ubicación",
@@ -1315,73 +1379,70 @@ export default function HomeScreen() {
   };
 
   const openWhatsAppWithNumber = async (number: string) => {
-  const cleaned = normalizeWhatsAppNumber(number);
+    const cleaned = normalizeWhatsAppNumber(number);
 
-  if (!cleaned || countDigits(cleaned) < 9) {
-    showMessage(
-      "Número no válido",
-      "Introduce un número de WhatsApp válido, con prefijo si hace falta.",
-    );
-    return;
-  }
+    if (!cleaned || countDigits(cleaned) < 9) {
+      showMessage(
+        "Número no válido",
+        "Introduce un número de WhatsApp válido, con prefijo si hace falta.",
+      );
+      return;
+    }
 
-  const text = encodeURIComponent(generatedSummary);
+    const text = encodeURIComponent(generatedSummary);
 
-  if (Platform.OS === "web") {
-  const url = `https://wa.me/${cleaned}?text=${text}`;
+    if (Platform.OS === "web") {
+      const url = `https://wa.me/${cleaned}?text=${text}`;
 
-  window.open(url, "_blank");
+      window.open(url, "_blank");
 
-  setLastWhatsAppNumber(cleaned);
-  setShowWhatsAppConfirmation(true);
-  setHasSentWhatsApp(true);
-
-  return;
-  }
-
-  const urls = [
-    `whatsapp://send?phone=${cleaned}&text=${text}`,
-    `https://wa.me/${cleaned}?text=${text}`,
-    `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`,
-  ];
-
-  for (const url of urls) {
-    try {
-      await Linking.openURL(url);
       setLastWhatsAppNumber(cleaned);
       setShowWhatsAppConfirmation(true);
       setHasSentWhatsApp(true);
-      return;
-    } catch {
-      // Probar la siguiente opción
-    }
-  }
 
-  showMessage(
-    "No se pudo abrir WhatsApp",
-    "Comprueba que WhatsApp está instalado y vuelve a intentarlo.",
-  );
-};
+      return;
+    }
+
+    const urls = [
+      `whatsapp://send?phone=${cleaned}&text=${text}`,
+      `https://wa.me/${cleaned}?text=${text}`,
+      `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`,
+    ];
+
+    for (const url of urls) {
+      try {
+        await Linking.openURL(url);
+        setLastWhatsAppNumber(cleaned);
+        setShowWhatsAppConfirmation(true);
+        setHasSentWhatsApp(true);
+        return;
+      } catch {
+        // Probar la siguiente opción
+      }
+    }
+
+    showMessage(
+      "No se pudo abrir WhatsApp",
+      "Comprueba que WhatsApp está instalado y vuelve a intentarlo.",
+    );
+  };
 
   const openMaps = async () => {
-  if (!coords) return;
+    if (!coords) return;
 
-  const url = `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
+    const url = `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
 
-  if (Platform.OS === "web") {
-    window.open(url, "_blank", "noopener,noreferrer");
-    return;
-  }
+    if (Platform.OS === "web") {
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
 
-  await Linking.openURL(url);
+    await Linking.openURL(url);
   };
 
   const copySummary = async () => {
     await Clipboard.setStringAsync(generatedSummary);
-    showMessage(
-      "Resumen copiado",
-      "El resumen se ha copiado al portapapeles.",
-    );
+    showMessage("Resumen copiado", "El resumen se ha copiado al portapapeles.");
   };
 
   const callNumber = async (phoneNumber: string) => {
@@ -1389,68 +1450,82 @@ export default function HomeScreen() {
     await Linking.openURL(url);
   };
 
-  const resetFlow = (returnToWelcome = false) => {
-    setShowWelcome(returnToWelcome);
-    setStep(1);
-    setShowContacts(false);
-    setShowWhatsAppConfirmation(false);
-    setLastWhatsAppNumber("");
-    setShowWhatsAppOptions(false);
-    setShowProvinces(false);
-    setSelectedProvince(null);
-    setCustomWhatsAppNumber("");
-    setHasSentWhatsApp(false);
-    setHasOpenedHelpPhones(false);
-    setFullName("");
-    setPhone("");
-    setAnimalState("alive");
-    setAnimalType("unknown");
-    setPhotoUri(null);
-    setVideoUri(null);
-    setLocationText("Ubicación no capturada todavía.");
-    setCoords(null);
-    setLocationCaptured(false);
-    setLocationLoading(false);
-    setProvinceSearch("");
-    setFlags({
-      bleeding: false,
-      baby: false,
-      catDog: false,
-      canNotMove: false,
-      roadRisk: false,
-      ringGps: false,
-      trapped: false,
-      cannotFly: false,
-      weakness: false,
-      normalAppearance: false,
-      breathing: false,
-      other: false,
-    });
+const saveCurrentProgress = async (
+  nextStep: Step = step,
+  overrides: Partial<
+    Pick<
+      RescueCase,
+      | "fullName"
+      | "phone"
+      | "animalState"
+      | "animalType"
+      | "flags"
+      | "locationText"
+      | "coords"
+      | "locationCaptured"
+    >
+  > = {},
+) => {
+  const savedCase = await persistCurrentCase(
+    {
+      step: nextStep,
+      fullName,
+      phone,
+      animalState,
+      animalType,
+      flags,
+      locationText,
+      coords,
+      locationCaptured,
+      ...overrides,
+    },
+    currentCase,
+  );
+
+  setCurrentCase(savedCase);
+};
+
+  useEffect(() => {
+    saveCurrentProgressRef.current = () => saveCurrentProgress();
+  });
+
+  const completeAndReturnHome = async () => {
+    await completeCurrentCase(
+      {
+        step,
+        fullName,
+        phone,
+        animalState,
+        animalType,
+        flags,
+        locationText,
+        coords,
+        locationCaptured,
+      },
+      currentCase,
+    );
+
+    router.replace("/");
   };
 
-const finishFlow = () => {
-  const confirmationMessage =
-    "¿Deseas finalizar este aviso?\n\nSi continúas, se eliminará toda la información introducida y volverás a la pantalla inicial.";
+  const finishFlow = () => {
+    const confirmationMessage =
+      "¿Deseas finalizar este aviso?\n\nSi continúas, el aviso se guardará en el historial y volverás a la pantalla inicial.";
 
-  const thankYouMessage =
-    "Gracias por colaborar y ayudar a los animales.";
+    const thankYouMessage = "Gracias por colaborar y ayudar a los animales.";
 
-  if (Platform.OS === "web") {
-    const confirmed = window.confirm(confirmationMessage);
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(confirmationMessage);
 
-    if (confirmed) {
-      window.alert(thankYouMessage);
-      resetFlow(false);
-      router.replace("/");
+      if (confirmed) {
+        window.alert(thankYouMessage);
+        void completeAndReturnHome();
+      }
+
+      return;
     }
 
-    return;
-  }
-
-  Alert.alert(
-    "Finalizar aviso",
-    confirmationMessage,
-    [
+    Alert.alert("Finalizar aviso", confirmationMessage, [
       {
         text: "No",
         style: "cancel",
@@ -1458,65 +1533,67 @@ const finishFlow = () => {
       {
         text: "Sí",
         onPress: () => {
-          Alert.alert(
-            "Gracias",
-            thankYouMessage,
-            [
-              {
-                text: "Aceptar",
-                onPress: () => resetFlow(true),
-              },
-            ]
-          );
+          Alert.alert("Gracias", thankYouMessage, [
+            {
+              text: "Aceptar",
+              onPress: () => void completeAndReturnHome(),
+            },
+          ]);
         },
       },
-    ]
-  );
-};
+    ]);
+  };
 
-const validateStep = () => {
-  if (step === 3) {
-    if (!fullName.trim()) {
-      showMessage(
-        "Falta el nombre",
-        "Introduce tu nombre y apellidos antes de continuar.",
-      );
-      return false;
+  const validateStep = () => {
+    if (step === 3) {
+      if (!fullName.trim()) {
+        showMessage(
+          "Falta el nombre",
+          "Introduce tu nombre y apellidos antes de continuar.",
+        );
+        return false;
+      }
+
+      if (!phone.trim()) {
+        showMessage(
+          "Falta el teléfono",
+          "Introduce un teléfono de contacto antes de continuar.",
+        );
+        return false;
+      }
+
+      if (!isValidPhone(phone)) {
+        showMessage(
+          "Teléfono no válido",
+          "Introduce un teléfono válido, con al menos 9 dígitos.",
+        );
+        return false;
+      }
     }
 
-    if (!phone.trim()) {
-      showMessage(
-        "Falta el teléfono",
-        "Introduce un teléfono de contacto antes de continuar.",
-      );
-      return false;
+    if (step === 4) {
+      if (!photoUri && !videoUri && !locationCaptured) {
+        showMessage(
+          "Información incompleta",
+          "Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.",
+        );
+        return false;
+      }
     }
 
-    if (!isValidPhone(phone)) {
-      showMessage(
-        "Teléfono no válido",
-        "Introduce un teléfono válido, con al menos 9 dígitos.",
-      );
-      return false;
-    }
-  }
+    return true;
+  };
 
-  if (step === 4) {
-    if (!photoUri && !videoUri && !locationCaptured) {
-      showMessage(
-        "Información incompleta",
-        "Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.",
-      );
-      return false;
-    }
-  }
-
-  return true;
-};
-
-  const goNext = () => {
+    const goNext = async () => {
     if (!validateStep()) return;
-    if (step < 5) setStep((prev) => (prev + 1) as Step);
+  
+    if (step < 5) {
+      const nextStep = (step + 1) as Step;
+  
+      await saveCurrentProgress(nextStep);
+  
+      setStep(nextStep);
+    }
   };
 
   const goBack = useCallback(() => {
@@ -1565,11 +1642,7 @@ const validateStep = () => {
     const guardedUrl = window.location.href;
 
     const addGuardEntry = () => {
-      window.history.pushState(
-        { sosFaunaBackGuard: true },
-        "",
-        guardedUrl,
-      );
+      window.history.pushState({ sosFaunaBackGuard: true }, "", guardedUrl);
     };
 
     const guardTimer = window.setTimeout(addGuardEntry, 0);
@@ -1577,13 +1650,24 @@ const validateStep = () => {
     const handlePopState = () => {
       if (allowNavigation) return;
 
+      if (!shouldConfirmExitRef.current) {
+        allowNavigation = true;
+        router.replace("/");
+        return;
+      }
+
       const confirmed = window.confirm(
-        "¿Deseas salir de este aviso?\n\nSe perderá toda la información introducida y volverás a la pantalla inicial.",
+        "¿Deseas salir de este aviso?\n\nEl progreso quedará guardado y podrás continuarlo o eliminarlo desde la pantalla inicial.",
       );
 
       if (confirmed) {
         allowNavigation = true;
-        router.replace("/");
+
+        void (async () => {
+          await saveCurrentProgressRef.current();
+          router.replace("/");
+        })();
+
         return;
       }
 
@@ -1599,7 +1683,6 @@ const validateStep = () => {
   }, [router]);
 
   const handleOpenHelp = () => {
-    setHasOpenedHelpPhones(true);
     setShowContacts(true);
     setShowProvinces(false);
     setSelectedProvince(null);
@@ -1824,7 +1907,6 @@ const validateStep = () => {
         >
           <Text style={styles.primaryButtonText}>Finalizar</Text>
         </Pressable>
-
       </View>
     </SectionCard>
   );
@@ -1834,7 +1916,6 @@ const validateStep = () => {
       showWhatsAppOptions ||
       showContacts ||
       showProvinces ||
-      showWelcome ||
       selectedProvince ||
       step !== 5
     ) {
@@ -1897,8 +1978,6 @@ const validateStep = () => {
   };
 
   const renderNavigationArrows = () => {
-    if (showWelcome) return null;
-
     const isOverlayOpen =
       showContacts ||
       showWhatsAppConfirmation ||
@@ -1935,120 +2014,7 @@ const validateStep = () => {
     );
   };
 
-  const renderWelcome = () => (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.keyboardAvoid}
-      keyboardVerticalOffset={90}
-    >
-      <SectionCard title="SOS Fauna España">
-        <View style={styles.welcomeContent}>
-          <Text style={styles.welcomeTitle}>
-            Asistente de rescate de fauna silvestre
-          </Text>
-
-          <Text style={styles.welcomeVersion}>Versión 1.1.0</Text>
-
-          <View style={styles.welcomeScopeBox}>
-            <Text style={styles.welcomeScopeText}>
-              Aplicación de apoyo para comunicar incidencias con fauna
-              silvestre. Solo cubre España.
-            </Text>
-            <Text style={styles.welcomeScopeSmall}>
-              Los contactos y teléfonos incluidos están orientados al ámbito
-              español.
-            </Text>
-          </View>
-
-          <View style={styles.warningBox}>
-            <Text style={styles.warningText}>
-              La información proporcionada por esta aplicación es orientativa y
-              no sustituye el criterio de veterinarios, agentes medioambientales
-              ni servicios de emergencia.
-            </Text>
-          </View>
-
-          <View
-            style={{
-              backgroundColor: "#f3f4f6",
-              borderWidth: 1,
-              borderColor: "#d1d5db",
-              borderRadius: 12,
-              padding: 12,
-              gap: 6,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "700",
-                color: "#374151",
-              }}
-            >
-              Información importante
-            </Text>
-
-            <Text
-              style={{
-                fontSize: 13,
-                lineHeight: 18,
-                color: "#4b5563",
-              }}
-            >
-              • Proyecto independiente de apoyo al rescate de fauna silvestre.
-            </Text>
-
-            <Text
-              style={{
-                fontSize: 13,
-                lineHeight: 18,
-                color: "#4b5563",
-              }}
-            >
-              • No es una aplicación oficial de ninguna administración pública, servicio de
-            emergencias, cuerpo policial o entidad mencionada en esta app.
-            </Text>
-
-            <Text
-              style={{
-                fontSize: 13,
-                lineHeight: 18,
-                color: "#4b5563",
-              }}
-            >
-              • Los datos introducidos permanecen en el dispositivo y solo se
-              comparten cuando el usuario decide enviarlos.
-            </Text>
-
-            <Text
-              style={{
-                fontSize: 13,
-                lineHeight: 18,
-                color: "#4b5563",
-              }}
-            >
-              • Consulte la política de privacidad para más información.
-            </Text>
-          </View>
-
-          <Pressable
-            style={styles.primaryButton}
-            onPress={() => setShowWelcome(false)}
-          >
-            <Text style={styles.primaryButtonText}>Comenzar aviso</Text>
-          </Pressable>
-
-          <Text style={styles.welcomeFooter}>
-            Desarrollado como proyecto de apoyo a la conservación y rescate de
-            fauna silvestre.
-          </Text>
-        </View>
-      </SectionCard>
-    </KeyboardAvoidingView>
-  );
-
   const renderStep = () => {
-    if (showWelcome) return renderWelcome();
     if (showContacts) return renderContacts();
     if (showProvinces && !selectedProvince) return renderProvinceList();
     if (selectedProvince) return renderProvinceDetail();
@@ -2084,20 +2050,7 @@ const validateStep = () => {
 
                           if (option.key === "dead") {
                             setAnimalType("unknown");
-                            setFlags({
-                              bleeding: false,
-                              baby: false,
-                              catDog: false,
-                              canNotMove: false,
-                              roadRisk: false,
-                              ringGps: false,
-                              trapped: false,
-                              cannotFly: false,
-                              weakness: false,
-                              normalAppearance: false,
-                              breathing: false,
-                              other: false,
-                            });
+                            setFlags(createInitialFlags());
                           }
                         }}
                       >
@@ -2224,7 +2177,9 @@ const validateStep = () => {
 
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
-                Tus datos se guardan únicamente en este dispositivo para permitir recuperar el aviso y consultar el historial. No se envían ni se comparten automáticamente.
+                Tus datos se guardan únicamente en este dispositivo para
+                permitir recuperar el aviso y consultar el historial. No se
+                envían ni se comparten automáticamente.
               </Text>
             </View>
           </View>
@@ -2401,11 +2356,11 @@ const validateStep = () => {
   return (
     <SafeAreaView style={styles.screen} edges={["bottom"]}>
       <Stack.Screen
-         options={{
-           title: "Rescate SOS Fauna España - Asistente",
-           headerLeft: Platform.OS === "web" ? () => null : undefined,
-         }}
-       />
+        options={{
+          title: "Rescate SOS Fauna España - Asistente",
+          headerLeft: Platform.OS === "web" ? () => null : undefined,
+        }}
+      />
 
       {showStep5ActionBar ? renderStep5ActionBar() : null}
 

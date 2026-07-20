@@ -1,5 +1,14 @@
-import { Link, Stack } from "expo-router";
+import { Link, Stack, useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useState } from "react";
+import type { RescueCase } from "@/types/rescueCase";
 import {
+  discardCurrentCase,
+  recoverCurrentCase,
+} from "@/services/rescueCaseService";
+import { getHistory } from "@/services/rescueStorage";
+import {
+  Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -46,8 +55,72 @@ function Step({ number, title, description }: StepProps) {
 }
 
 export default function LandingPage() {
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const isCompact = width < 760;
+  const [pendingCase, setPendingCase] = useState<RescueCase | null>(null);
+  const [hasHistory, setHasHistory] = useState(false);
+  const [checkingCase, setCheckingCase] = useState(true);
+
+  const refreshLandingData = useCallback(async () => {
+    try {
+      setCheckingCase(true);
+
+      const [currentCase, history] = await Promise.all([
+        recoverCurrentCase(),
+        getHistory(),
+      ]);
+
+      setPendingCase(currentCase);
+      setHasHistory(history.length > 0);
+    } finally {
+      setCheckingCase(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshLandingData();
+    }, [refreshLandingData]),
+  );
+
+  const openNewCase = async () => {
+    await discardCurrentCase();
+    setPendingCase(null);
+    router.push({ pathname: "/aviso", params: { mode: "new" } });
+  };
+
+  const handleStartNewCase = () => {
+    if (!pendingCase) {
+      void openNewCase();
+      return;
+    }
+
+    const message =
+      "Hay un aviso sin finalizar.\n\n¿Deseas eliminarlo y comenzar uno nuevo?";
+
+    if (Platform.OS === "web") {
+      if (window.confirm(message)) void openNewCase();
+      return;
+    }
+
+    Alert.alert("Aviso sin finalizar", message, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar y comenzar",
+        style: "destructive",
+        onPress: () => void openNewCase(),
+      },
+    ]);
+  };
+
+  const handleContinueCase = () => {
+    router.push({ pathname: "/aviso", params: { mode: "continue" } });
+  };
+
+  const handleOpenHistory = () => {
+    router.push("/history");
+  };
 
   return (
     <ScrollView
@@ -61,11 +134,13 @@ export default function LandingPage() {
         <View style={styles.headerInner}>
           <Text style={styles.brand}>SOS Fauna España</Text>
 
-          <Link href="/aviso" asChild>
-            <Pressable style={styles.headerButton}>
-              <Text style={styles.headerButtonText}>Comenzar aviso</Text>
-            </Pressable>
-          </Link>
+          <Pressable
+            style={styles.headerButton}
+            onPress={handleStartNewCase}
+            disabled={checkingCase}
+          >
+            <Text style={styles.headerButtonText}>Comenzar aviso</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -83,12 +158,12 @@ export default function LandingPage() {
 			  la información necesaria y contactar con los recursos adecuados.
             </Text>
 
-            <View style={styles.heroActions}>
-              <Link href="/aviso" asChild>
-                <Pressable style={styles.primaryButton}>
-                  <Text style={styles.primaryButtonText}>Comenzar aviso</Text>
-                </Pressable>
-              </Link>
+            <View style={styles.heroGuidance}>
+              <Text style={styles.heroGuidanceTitle}>Actúa con calma</Text>
+              <Text style={styles.heroGuidanceText}>
+                Evita manipular al animal salvo que exista un riesgo inmediato.
+                Mantén la distancia y sigue las recomendaciones del asistente.
+              </Text>
 
               <Text style={styles.heroNote}>
                 Gratuito, sin registro y pensado para incidencias en España.
@@ -98,11 +173,46 @@ export default function LandingPage() {
 
           <View style={styles.heroPanel}>
             <Text style={styles.heroPanelIcon}>🦉</Text>
-            <Text style={styles.heroPanelTitle}>Actúa con calma</Text>
-            <Text style={styles.heroPanelText}>
-              Evita manipular al animal salvo que exista un riesgo inmediato.
-              Mantén la distancia y sigue las recomendaciones del asistente.
-            </Text>
+
+            <View style={styles.heroActions}>
+              {pendingCase ? (
+                <Text style={styles.pendingNote}>
+                  Tienes un aviso sin finalizar guardado en este dispositivo.
+                </Text>
+              ) : null}
+
+              {pendingCase ? (
+                <Pressable
+                  style={[styles.caseButton, styles.continueButton]}
+                  onPress={handleContinueCase}
+                >
+                  <Text style={styles.continueButtonText}>
+                    Continuar aviso anterior
+                  </Text>
+                </Pressable>
+              ) : null}
+
+              <Pressable
+                style={[styles.caseButton, styles.primaryButton]}
+                onPress={handleStartNewCase}
+                disabled={checkingCase}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {checkingCase ? "Comprobando…" : "Comenzar nuevo aviso"}
+                </Text>
+              </Pressable>
+
+              {hasHistory ? (
+                <Pressable
+                  style={[styles.caseButton, styles.historyButton]}
+                  onPress={handleOpenHistory}
+                >
+                  <Text style={styles.historyButtonText}>
+                    Ver avisos recientes
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
           </View>
         </View>
 
@@ -181,11 +291,9 @@ export default function LandingPage() {
           <Text style={styles.noticeTitle}>Información importante</Text>
 
           <Text style={styles.noticeText}>
-            SOS Fauna España es una herramienta independiente de apoyo y no
-            representa a ninguna administración pública ni servicio de
-            emergencias. No sustituye las instrucciones de veterinarios,
-            agentes medioambientales, SEPRONA, 112 o centros de recuperación de
-            fauna silvestre.
+            Herramienta independiente de apoyo para incidencias con fauna
+            silvestre en España. No sustituye las indicaciones de los servicios
+            de emergencia o profesionales especializados.
           </Text>
         </View>
       </View>
@@ -310,21 +418,72 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 29,
   },
-  heroActions: {
-    alignItems: "flex-start",
-    gap: 14,
-    marginTop: 4,
+  heroGuidance: {
+    maxWidth: 680,
+    backgroundColor: "#eef8f0",
+    borderWidth: 1,
+    borderColor: "#cfe8d4",
+    borderRadius: 18,
+    padding: 20,
+    gap: 9,
   },
-  primaryButton: {
-    backgroundColor: "#14532d",
+  heroGuidanceTitle: {
+    color: "#14532d",
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  heroGuidanceText: {
+    color: "#34483a",
+    fontSize: 16,
+    lineHeight: 25,
+  },
+  heroActions: {
+    width: "100%",
+    alignItems: "stretch",
+    gap: 14,
+  },
+  caseButton: {
+    width: "100%",
+    minHeight: 58,
     borderRadius: 14,
     paddingHorizontal: 28,
     paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryButton: {
+    backgroundColor: "#14532d",
   },
   primaryButtonText: {
     color: "#ffffff",
     fontSize: 17,
     fontWeight: "900",
+  },
+  continueButton: {
+    backgroundColor: "#e4f4e7",
+    borderWidth: 1,
+    borderColor: "#86c995",
+  },
+  continueButtonText: {
+    color: "#14532d",
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  historyButton: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#9ab7a0",
+  },
+  historyButtonText: {
+    color: "#14532d",
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  pendingNote: {
+    color: "#166534",
+    fontSize: 13,
+    lineHeight: 20,
+    fontWeight: "700",
   },
   heroNote: {
     color: "#6b756d",
@@ -333,25 +492,15 @@ const styles = StyleSheet.create({
   },
   heroPanel: {
     flex: 0.75,
-    minWidth: 260,
+    minWidth: 280,
     backgroundColor: "#dfeee2",
     borderRadius: 28,
     padding: 32,
     justifyContent: "center",
-    gap: 14,
+    gap: 22,
   },
   heroPanelIcon: {
     fontSize: 48,
-  },
-  heroPanelTitle: {
-    color: "#14532d",
-    fontSize: 24,
-    fontWeight: "900",
-  },
-  heroPanelText: {
-    color: "#34483a",
-    fontSize: 16,
-    lineHeight: 26,
   },
   section: {
     gap: 24,
