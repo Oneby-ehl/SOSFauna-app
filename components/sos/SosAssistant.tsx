@@ -2224,8 +2224,7 @@ const validateStep = () => {
 
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
-                Tus datos no se almacenan en esta app ni se usan para ningún
-                otro fin.
+                Tus datos se guardan únicamente en este dispositivo para permitir recuperar el aviso y consultar el historial. No se envían ni se comparten automáticamente.
               </Text>
             </View>
           </View>
