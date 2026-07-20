@@ -79,8 +79,8 @@ export default function LandingPage() {
             </Text>
 
             <Text style={styles.heroDescription}>
-              Sigue una guía paso a paso para valorar la situación, recopilar
-              información útil y contactar con los recursos adecuados.
+              Te ayudaremos paso a paso a valorar la situación, recopilar 
+			  la información necesaria y contactar con los recursos adecuados.
             </Text>
 
             <View style={styles.heroActions}>
