@@ -30,6 +30,11 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { SectionCard } from "@/components/SectionCard";
 import { provinceContacts } from "@/lib/provinceContacts";
+import {
+  clearRememberedContact,
+  loadRememberedContact,
+  saveRememberedContact,
+} from "@/services/rescueStorage";
 
 type FlagsState = {
   bleeding: boolean;
@@ -1009,6 +1014,8 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
 
   const [fullName, setFullName] = useState(initialCase?.fullName ?? "");
   const [phone, setPhone] = useState(initialCase?.phone ?? "");
+  const [rememberContact, setRememberContact] = useState(false);
+  const [rememberContactReady, setRememberContactReady] = useState(false);
   const [animalState, setAnimalState] = useState<AnimalState>(
     (initialCase?.animalState as AnimalState) ?? "alive",
   );
@@ -1101,6 +1108,44 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   useEffect(() => {
     shouldConfirmExitRef.current = hasMeaningfulProgress;
   }, [hasMeaningfulProgress]);
+
+  useEffect(() => {
+    let active = true;
+
+    const prepareRememberedContact = async () => {
+      const rememberedContact = await loadRememberedContact();
+
+      if (!active) return;
+
+      if (rememberedContact) {
+        if (!initialCase) {
+          setFullName(rememberedContact.fullName);
+          setPhone(rememberedContact.phone);
+        }
+
+        setRememberContact(true);
+      }
+
+      setRememberContactReady(true);
+    };
+
+    void prepareRememberedContact();
+
+    return () => {
+      active = false;
+    };
+  }, [initialCase]);
+
+  useEffect(() => {
+    if (!rememberContactReady) return;
+
+    if (!rememberContact) {
+      void clearRememberedContact();
+      return;
+    }
+
+    void saveRememberedContact({ fullName, phone });
+  }, [fullName, phone, rememberContact, rememberContactReady]);
 
 
   const mergedProvinceContacts = useMemo(() => {
@@ -2175,6 +2220,28 @@ const saveCurrentProgress = async (
               style={styles.input}
             />
 
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: rememberContact }}
+              style={styles.rememberContactRow}
+              onPress={() => setRememberContact((current) => !current)}
+            >
+              <View
+                style={[
+                  styles.rememberContactBox,
+                  rememberContact && styles.rememberContactBoxChecked,
+                ]}
+              >
+                {rememberContact ? (
+                  <Text style={styles.rememberContactCheck}>✓</Text>
+                ) : null}
+              </View>
+
+              <Text style={styles.rememberContactText}>
+                Recordar mi nombre y teléfono en este dispositivo
+              </Text>
+            </Pressable>
+
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
                 Tus datos se guardan únicamente en este dispositivo para
@@ -2541,6 +2608,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     backgroundColor: "#ffffff",
+  },
+  rememberContactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 4,
+  },
+  rememberContactBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#14532d",
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rememberContactBoxChecked: {
+    backgroundColor: "#14532d",
+  },
+  rememberContactCheck: {
+    color: "#ffffff",
+    fontSize: 15,
+    lineHeight: 18,
+    fontWeight: "900",
+  },
+  rememberContactText: {
+    flex: 1,
+    color: "#374151",
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "700",
   },
   summaryEditor: {
     minHeight: 184,

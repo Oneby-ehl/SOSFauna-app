@@ -13,6 +13,7 @@ export default function RootLayout() {
   name="index"
   options={{
     title: "SOS Fauna España",
+    headerShown: false,
     headerBackVisible: false,
     headerLeft: () => null,
   }}

@@ -4,7 +4,13 @@ import type { RescueCase } from "@/types/rescueCase";
 
 const CURRENT_CASE_KEY = "@sos-fauna/current-case";
 const HISTORY_KEY = "@sos-fauna/history";
+const REMEMBERED_CONTACT_KEY = "@sos-fauna/remembered-contact";
 const MAX_HISTORY_ITEMS = 30;
+
+export type RememberedContact = {
+  fullName: string;
+  phone: string;
+};
 
 export async function saveCurrentCase(
   rescueCase: RescueCase,
@@ -94,4 +100,41 @@ export async function deleteHistoryItem(
 
 export async function clearHistory(): Promise<void> {
   await AsyncStorage.removeItem(HISTORY_KEY);
+}
+
+export async function loadRememberedContact(): Promise<RememberedContact | null> {
+  const storedValue = await AsyncStorage.getItem(REMEMBERED_CONTACT_KEY);
+
+  if (!storedValue) {
+    return null;
+  }
+
+  try {
+    const parsedValue = JSON.parse(storedValue);
+
+    if (
+      typeof parsedValue?.fullName === "string" &&
+      typeof parsedValue?.phone === "string"
+    ) {
+      return parsedValue as RememberedContact;
+    }
+  } catch {
+    // Invalid stored contact data is cleared below.
+  }
+
+  await AsyncStorage.removeItem(REMEMBERED_CONTACT_KEY);
+  return null;
+}
+
+export async function saveRememberedContact(
+  contact: RememberedContact,
+): Promise<void> {
+  await AsyncStorage.setItem(
+    REMEMBERED_CONTACT_KEY,
+    JSON.stringify(contact),
+  );
+}
+
+export async function clearRememberedContact(): Promise<void> {
+  await AsyncStorage.removeItem(REMEMBERED_CONTACT_KEY);
 }
