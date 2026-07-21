@@ -1,5 +1,5 @@
 import { Link, Stack, useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { RescueCase } from "@/types/rescueCase";
 import {
   discardCurrentCase,
@@ -57,10 +57,15 @@ function Step({ number, title, description }: StepProps) {
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const isCompact = width < 760;
+  const [hydrated, setHydrated] = useState(false);
+  const isCompact = !hydrated || width < 760;
   const [pendingCase, setPendingCase] = useState<RescueCase | null>(null);
   const [hasHistory, setHasHistory] = useState(false);
   const [checkingCase, setCheckingCase] = useState(true);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const refreshLandingData = useCallback(async () => {
     try {
