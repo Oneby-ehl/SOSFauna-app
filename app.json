@@ -27,7 +27,7 @@
       "output": "static"
     },
     "experiments": {
-      "baseUrl": "/SOSFauna-app"
+      "baseUrl": "/"
     },
     "extra": {
       "eas": {
