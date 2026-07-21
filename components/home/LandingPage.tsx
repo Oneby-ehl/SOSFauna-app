@@ -144,9 +144,9 @@ export default function LandingPage() {
         </View>
       </View>
 
-      <View style={styles.main}>
+      <View style={[styles.main, isCompact && styles.mainCompact]}>
         <View style={[styles.hero, isCompact && styles.heroCompact]}>
-          <View style={styles.heroContent}>
+          <View style={[styles.heroContent, isCompact && styles.heroContentCompact]}>
             <Text style={styles.badge}>Ayuda ante fauna silvestre</Text>
 
             <Text style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}>
@@ -158,6 +158,7 @@ export default function LandingPage() {
 			  la información necesaria y contactar con los recursos adecuados.
             </Text>
 
+            {!isCompact ? (
             <View style={styles.heroGuidance}>
               <Text style={styles.heroGuidanceTitle}>Actúa con calma</Text>
               <Text style={styles.heroGuidanceText}>
@@ -169,29 +170,61 @@ export default function LandingPage() {
                 Gratuito, sin registro y pensado para incidencias en España.
               </Text>
             </View>
+            ) : null}
           </View>
 
-          <View style={styles.heroPanel}>
-            <Text style={styles.heroPanelIcon}>🦉</Text>
+          <View style={[styles.heroPanel, isCompact && styles.heroPanelCompact]}>
+            <Text style={[styles.heroPanelIcon, isCompact && styles.heroPanelIconCompact]}>🦉</Text>
 
-            <View style={styles.heroActions}>
-              {pendingCase ? (
+            <View style={[styles.heroActions, isCompact && styles.heroActionsCompact]}>
+              {pendingCase && !isCompact ? (
                 <Text style={styles.pendingNote}>
                   Tienes un aviso sin finalizar guardado en este dispositivo.
                 </Text>
               ) : null}
 
+              {isCompact ? (
+                <Pressable
+                  style={[
+                    styles.caseButton,
+                    styles.caseButtonCompact,
+                    styles.primaryButton,
+                  ]}
+                  onPress={handleStartNewCase}
+                  disabled={checkingCase}
+                >
+                  <Text
+                    style={[
+                      styles.primaryButtonText,
+                      styles.caseButtonTextCompact,
+                    ]}
+                  >
+                    {checkingCase ? "Comprobando…" : "Comenzar nuevo aviso"}
+                  </Text>
+                </Pressable>
+              ) : null}
+
               {pendingCase ? (
                 <Pressable
-                  style={[styles.caseButton, styles.continueButton]}
+                  style={[
+                    styles.caseButton,
+                    isCompact && styles.caseButtonCompact,
+                    styles.continueButton,
+                  ]}
                   onPress={handleContinueCase}
                 >
-                  <Text style={styles.continueButtonText}>
+                  <Text
+                    style={[
+                      styles.continueButtonText,
+                      isCompact && styles.caseButtonTextCompact,
+                    ]}
+                  >
                     Continuar aviso anterior
                   </Text>
                 </Pressable>
               ) : null}
 
+              {!isCompact ? (
               <Pressable
                 style={[styles.caseButton, styles.primaryButton]}
                 onPress={handleStartNewCase}
@@ -201,19 +234,43 @@ export default function LandingPage() {
                   {checkingCase ? "Comprobando…" : "Comenzar nuevo aviso"}
                 </Text>
               </Pressable>
+              ) : null}
 
               {hasHistory ? (
                 <Pressable
-                  style={[styles.caseButton, styles.historyButton]}
+                  style={[
+                    styles.caseButton,
+                    isCompact && styles.caseButtonCompact,
+                    styles.historyButton,
+                  ]}
                   onPress={handleOpenHistory}
                 >
-                  <Text style={styles.historyButtonText}>
+                  <Text
+                    style={[
+                      styles.historyButtonText,
+                      isCompact && styles.caseButtonTextCompact,
+                    ]}
+                  >
                     Ver avisos recientes
                   </Text>
                 </Pressable>
               ) : null}
             </View>
           </View>
+
+          {isCompact ? (
+            <View style={[styles.heroGuidance, styles.heroGuidanceCompact]}>
+              <Text style={styles.heroGuidanceTitle}>Actúa con calma</Text>
+              <Text style={styles.heroGuidanceText}>
+                Evita manipular al animal salvo que exista un riesgo inmediato.
+                Mantén la distancia y sigue las recomendaciones del asistente.
+              </Text>
+
+              <Text style={styles.heroNote}>
+                Gratuito, sin registro y pensado para incidencias en España.
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         <View style={styles.section}>
@@ -374,6 +431,11 @@ const styles = StyleSheet.create({
     paddingVertical: 42,
     gap: 64,
   },
+  mainCompact: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    gap: 32,
+  },
   hero: {
     flexDirection: "row",
     alignItems: "stretch",
@@ -381,6 +443,8 @@ const styles = StyleSheet.create({
   },
   heroCompact: {
     flexDirection: "column",
+    alignItems: "stretch",
+    gap: 14,
   },
   heroContent: {
     flex: 1.6,
@@ -390,6 +454,18 @@ const styles = StyleSheet.create({
     borderColor: "#dce8de",
     padding: 40,
     gap: 22,
+  },
+  heroContentCompact: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    width: "100%",
+    alignSelf: "stretch",
+    backgroundColor: "transparent",
+    borderRadius: 0,
+    borderWidth: 0,
+    padding: 0,
+    gap: 12,
   },
   badge: {
     alignSelf: "flex-start",
@@ -427,6 +503,12 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 9,
   },
+  heroGuidanceCompact: {
+    maxWidth: "100%",
+    padding: 14,
+    borderRadius: 14,
+    gap: 6,
+  },
   heroGuidanceTitle: {
     color: "#14532d",
     fontSize: 20,
@@ -442,6 +524,9 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     gap: 14,
   },
+  heroActionsCompact: {
+    gap: 10,
+  },
   caseButton: {
     width: "100%",
     minHeight: 58,
@@ -450,6 +535,15 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
     justifyContent: "center",
+  },
+  caseButtonCompact: {
+    minHeight: 46,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  caseButtonTextCompact: {
+    fontSize: 15,
   },
   primaryButton: {
     backgroundColor: "#14532d",
@@ -499,8 +593,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 22,
   },
+  heroPanelCompact: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    minWidth: 0,
+    width: "100%",
+    alignSelf: "stretch",
+    padding: 18,
+    borderRadius: 18,
+    gap: 12,
+  },
   heroPanelIcon: {
     fontSize: 48,
+  },
+  heroPanelIconCompact: {
+    fontSize: 34,
   },
   section: {
     gap: 24,
