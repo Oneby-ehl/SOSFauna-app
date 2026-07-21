@@ -12,9 +12,30 @@ export default function Root({ children }: { children: ReactNode }) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         <meta name="robots" content="noindex,nofollow" />
+        <meta name="theme-color" content="#14532d" />
+        <link rel="manifest" href="/SOSFauna-app/manifest.json" />
+        <link
+          rel="apple-touch-icon"
+          href="/SOSFauna-app/icons/icon-192.png"
+        />
         <ScrollViewStyleReset />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/SOSFauna-app/sw.js', {
+      scope: '/SOSFauna-app/'
+    });
+  });
+}
+            `,
+          }}
+        />
+      </body>
     </html>
   );
 }
