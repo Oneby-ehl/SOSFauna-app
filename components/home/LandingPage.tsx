@@ -1,5 +1,5 @@
 import { Link, Stack, useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { RescueCase } from "@/types/rescueCase";
 import {
   discardCurrentCase,
@@ -39,6 +39,11 @@ type StepProps = {
   description: string;
 };
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
 function Step({ number, title, description }: StepProps) {
   return (
     <View style={styles.step}>
@@ -57,10 +62,41 @@ function Step({ number, title, description }: StepProps) {
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const isCompact = width < 760;
+  const [hydrated, setHydrated] = useState(false);
+  const isCompact = !hydrated || width < 760;
   const [pendingCase, setPendingCase] = useState<RescueCase | null>(null);
   const [hasHistory, setHasHistory] = useState(false);
   const [checkingCase, setCheckingCase] = useState(true);
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof window === "undefined") return;
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    const handleAppInstalled = () => {
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   const refreshLandingData = useCallback(async () => {
     try {
@@ -122,6 +158,14 @@ export default function LandingPage() {
     router.push("/history");
   };
 
+  const handleInstallApp = async () => {
+    if (!installPrompt) return;
+
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  };
+
   return (
     <ScrollView
       style={styles.screen}
@@ -147,14 +191,14 @@ export default function LandingPage() {
       <View style={[styles.main, isCompact && styles.mainCompact]}>
         <View style={[styles.hero, isCompact && styles.heroCompact]}>
           <View style={[styles.heroContent, isCompact && styles.heroContentCompact]}>
-            <Text style={styles.badge}>Ayuda ante fauna silvestre</Text>
+            <Text style={styles.badge}>Ayuda a la fauna silvestre</Text>
 
             <Text style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}>
               ¿Has encontrado un animal silvestre herido, atrapado o en peligro?
             </Text>
 
             <Text style={styles.heroDescription}>
-              Te ayudaremos paso a paso a valorar la situación, recopilar 
+              Te ayudamos paso a paso a valorar la situación, recopilar
 			  la información necesaria y contactar con los recursos adecuados.
             </Text>
 
@@ -163,98 +207,99 @@ export default function LandingPage() {
               <Text style={styles.heroGuidanceTitle}>Actúa con calma</Text>
               <Text style={styles.heroGuidanceText}>
                 Evita manipular al animal salvo que exista un riesgo inmediato.
-                Mantén la distancia y sigue las recomendaciones del asistente.
-              </Text>
-
-              <Text style={styles.heroNote}>
-                Gratuito, sin registro y pensado para incidencias en España.
+                Mantén una distancia prudente y observa la situación antes de intervenir.
+                Sigue las recomendaciones del asistente para valorar si realmente es necesario actuar.
               </Text>
             </View>
             ) : null}
+
           </View>
 
           <View style={[styles.heroPanel, isCompact && styles.heroPanelCompact]}>
-            <Text style={[styles.heroPanelIcon, isCompact && styles.heroPanelIconCompact]}>🦉</Text>
+            <View style={styles.heroOwlGroup}>
+              <Text style={[styles.heroPanelIcon, isCompact && styles.heroPanelIconCompact]}>🦉</Text>
+              <View style={styles.owlBase}>
+                <Text style={styles.owlBaseText}>🌿</Text>
+                <View style={styles.owlStone} />
+                <Text style={styles.owlBaseText}>🍃</Text>
+              </View>
+            </View>
 
             <View style={[styles.heroActions, isCompact && styles.heroActionsCompact]}>
-              {pendingCase && !isCompact ? (
-                <Text style={styles.pendingNote}>
-                  Tienes un aviso sin finalizar guardado en este dispositivo.
-                </Text>
-              ) : null}
-
-              {isCompact ? (
-                <Pressable
-                  style={[
-                    styles.caseButton,
-                    styles.caseButtonCompact,
-                    styles.primaryButton,
-                  ]}
-                  onPress={handleStartNewCase}
-                  disabled={checkingCase}
-                >
-                  <Text
-                    style={[
-                      styles.primaryButtonText,
-                      styles.caseButtonTextCompact,
-                    ]}
-                  >
-                    {checkingCase ? "Comprobando…" : "Comenzar nuevo aviso"}
-                  </Text>
-                </Pressable>
-              ) : null}
-
-              {pendingCase ? (
-                <Pressable
-                  style={[
-                    styles.caseButton,
-                    isCompact && styles.caseButtonCompact,
-                    styles.continueButton,
-                  ]}
-                  onPress={handleContinueCase}
-                >
-                  <Text
-                    style={[
-                      styles.continueButtonText,
-                      isCompact && styles.caseButtonTextCompact,
-                    ]}
-                  >
-                    Continuar aviso anterior
-                  </Text>
-                </Pressable>
-              ) : null}
-
-              {!isCompact ? (
               <Pressable
-                style={[styles.caseButton, styles.primaryButton]}
+                style={[
+                  styles.caseButton,
+                  isCompact && styles.caseButtonCompact,
+                  styles.primaryButton,
+                ]}
                 onPress={handleStartNewCase}
                 disabled={checkingCase}
               >
-                <Text style={styles.primaryButtonText}>
+                <Text
+                  style={[
+                    styles.primaryButtonText,
+                    isCompact && styles.caseButtonTextCompact,
+                  ]}
+                >
                   {checkingCase ? "Comprobando…" : "Comenzar nuevo aviso"}
                 </Text>
               </Pressable>
+
+              {pendingCase ? (
+                <View style={styles.pendingBlock}>
+                  <Text style={styles.pendingNote}>
+                    Tienes un aviso sin finalizar guardado en este dispositivo.
+                  </Text>
+
+                  <Pressable
+                    style={[
+                      styles.caseButton,
+                      isCompact && styles.caseButtonCompact,
+                      styles.continueButton,
+                    ]}
+                    onPress={handleContinueCase}
+                  >
+                    <Text
+                      style={[
+                        styles.continueButtonText,
+                        isCompact && styles.caseButtonTextCompact,
+                      ]}
+                    >
+                      Continuar aviso anterior
+                    </Text>
+                  </Pressable>
+                </View>
               ) : null}
 
               {hasHistory ? (
-                <Pressable
-                  style={[
-                    styles.caseButton,
-                    isCompact && styles.caseButtonCompact,
-                    styles.historyButton,
-                  ]}
-                  onPress={handleOpenHistory}
-                >
-                  <Text
+                <View style={styles.historyBlock}>
+                  <Pressable
                     style={[
-                      styles.historyButtonText,
-                      isCompact && styles.caseButtonTextCompact,
+                      styles.caseButton,
+                      isCompact && styles.caseButtonCompact,
+                      styles.historyButton,
                     ]}
+                    onPress={handleOpenHistory}
                   >
-                    Ver avisos recientes
+                    <Text
+                      style={[
+                        styles.historyButtonText,
+                        isCompact && styles.caseButtonTextCompact,
+                      ]}
+                    >
+                      Ver avisos recientes
+                    </Text>
+                  </Pressable>
+                  <Text style={styles.historyNote}>
+                    Se guardan los últimos 30 avisos en este dispositivo.
                   </Text>
-                </Pressable>
+                </View>
               ) : null}
+
+              <Text style={styles.heroNote}>
+                Gratuito · Sin registro{"\n"}
+                Diseñado para incidencias en España
+              </Text>
             </View>
           </View>
 
@@ -265,18 +310,13 @@ export default function LandingPage() {
                 Evita manipular al animal salvo que exista un riesgo inmediato.
                 Mantén la distancia y sigue las recomendaciones del asistente.
               </Text>
-
-              <Text style={styles.heroNote}>
-                Gratuito, sin registro y pensado para incidencias en España.
-              </Text>
             </View>
           ) : null}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionEyebrow}>¿Cómo puede ayudarte?</Text>
           <Text style={styles.sectionTitle}>
-            Toda la información esencial en un único proceso
+            Todo lo necesario para actuar con rapidez
           </Text>
 
           <View
@@ -286,21 +326,21 @@ export default function LandingPage() {
             ]}
           >
             <FeatureCard
-              icon="📍"
-              title="Ubicación"
-              description="Recoge las coordenadas del lugar donde se encuentra el animal."
+              icon="🧭"
+              title="Recomendaciones"
+              description="Recibe orientación adaptada al tipo de animal y a la situación antes de intervenir."
             />
 
             <FeatureCard
               icon="📷"
-              title="Fotos y vídeos"
-              description="Documenta el caso para facilitar su valoración por profesionales."
+              title="Información útil"
+              description="Añade fotografías, vídeos y ubicación para facilitar la valoración del caso."
             />
 
             <FeatureCard
-              icon="☎️"
-              title="Contactos útiles"
-              description="Consulta servicios de emergencia y centros de recuperación."
+             icon="☎️"
+             title="Recursos adecuados"
+             description="Prepara un resumen del aviso y localiza fácilmente los servicios a los que puedes dirigirte."
             />
           </View>
         </View>
@@ -308,12 +348,11 @@ export default function LandingPage() {
         <View style={[styles.section, styles.processSection]}>
           <View style={styles.processIntro}>
             <Text style={styles.sectionEyebrow}>Cómo funciona</Text>
-            <Text style={styles.sectionTitle}>
-              Cuatro pasos para preparar un aviso completo
+            <Text style={[styles.sectionTitle, styles.processTitle]}>
+              Cuatro pasos para actuar correctamente
             </Text>
-            <Text style={styles.sectionDescription}>
-              El asistente adapta las recomendaciones según el tipo de animal y
-              la situación que observes.
+            <Text style={[styles.sectionDescription, styles.processDescription]}>
+              Describe lo que ocurre, consulta las recomendaciones y prepara toda la información necesaria antes de contactar con el recurso más adecuado.
             </Text>
           </View>
 
@@ -326,33 +365,69 @@ export default function LandingPage() {
 
             <Step
               number="2"
-              title="Añade información"
-              description="Incluye ubicación, fotografías o vídeos cuando sea posible."
-            />
-
-            <Step
-              number="3"
               title="Consulta las recomendaciones"
               description="Recibe indicaciones adaptadas al caso antes de intervenir."
             />
 
             <Step
+              number="3"
+              title="Facilita la información necesaria"
+              description="Añade ubicación, fotografías y datos de contacto cuando sea posible."
+            />
+
+            <Step
               number="4"
-              title="Contacta con ayuda"
-              description="Prepara un resumen y localiza los recursos disponibles."
+              title="Contacta con el recurso adecuado"
+              description="Obtén un resumen del aviso y los recursos recomendados para actuar."
             />
           </View>
         </View>
+        <View style={[styles.section, styles.processSection]}>
+          <View style={styles.processIntro}>
+            <Text style={[styles.sectionTitle, styles.processTitle]}>
+              Ayudar también significa no intervenir cuando no es necesario
+            </Text>
 
-        <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>Información importante</Text>
+            <Text style={[styles.sectionDescription, styles.processDescription]}>
+              Muchas crías de aves, mamíferos y otros animales no están abandonadas, aunque parezcan solas.
+            </Text>
 
-          <Text style={styles.noticeText}>
-            Herramienta independiente de apoyo para incidencias con fauna
-            silvestre en España. No sustituye las indicaciones de los servicios
-            de emergencia o profesionales especializados.
-          </Text>
+            <Text style={[styles.sectionDescription, styles.processDescription]}>
+              Intervenir innecesariamente puede separarlas de sus padres o reducir sus posibilidades de supervivencia.
+            </Text>
+
+            <Text
+              style={[
+                styles.sectionDescription,
+                styles.processDescription,
+                {
+                  fontWeight: "700",
+                  color: "#14532d",
+                  marginTop: 6,
+                },
+              ]}
+            >
+              Por eso SOS Fauna te ayuda primero a valorar la situación para decidir si realmente es necesario intervenir.
+            </Text>
+          </View>
         </View>
+
+        {installPrompt ? (
+          <View style={styles.installSection}>
+            <Text style={styles.installTitle}>
+              ¿Quieres tener SOS Fauna siempre a mano?
+            </Text>
+            <Text style={styles.installText}>
+              Instálala en tu dispositivo para acceder más rápidamente cuando la necesites.
+            </Text>
+            <Pressable style={styles.installButton} onPress={handleInstallApp}>
+              <Text style={styles.installButtonText}>Instalar aplicación</Text>
+            </Pressable>
+            <Text style={styles.installNote}>
+              Ten la aplicación siempre a mano para acceder rápidamente cuando encuentres un animal silvestre.
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       <View style={styles.footer}>
@@ -362,9 +437,16 @@ export default function LandingPage() {
             <Text style={styles.footerText}>
               Asistencia guiada ante incidencias con fauna silvestre.
             </Text>
+            <Text style={styles.footerNote}>
+              📱 Aplicación Android próximamente
+            </Text>
           </View>
 
           <View style={styles.footerLinks}>
+             <Link href="/about">
+               <Text style={styles.footerLink}>Sobre SOS Fauna España</Text>
+             </Link>
+
              <Link href="/privacy">
                <Text style={styles.footerLink}>Política de privacidad</Text>
              </Link>
@@ -372,10 +454,10 @@ export default function LandingPage() {
              <Link href="/sources">
                <Text style={styles.footerLink}>Recursos oficiales</Text>
              </Link>
-           
-             <Text style={styles.footerLink}>
-               Aplicación Android próximamente
-             </Text>
+
+             <Link href="/contact">
+               <Text style={styles.footerLink}>Contacto</Text>
+             </Link>
            </View>
         </View>
       </View>
@@ -573,6 +655,18 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "900",
   },
+  pendingBlock: {
+    gap: 10,
+  },
+  historyBlock: {
+    gap: 8,
+  },
+  historyNote: {
+    color: "#5f6c63",
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: "center",
+  },
   pendingNote: {
     color: "#166534",
     fontSize: 13,
@@ -580,9 +674,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   heroNote: {
-    color: "#6b756d",
-    fontSize: 13,
-    lineHeight: 20,
+    color: "#4f5d54",
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: "center",
+    marginTop: 6,
   },
   heroPanel: {
     flex: 0.75,
@@ -609,6 +705,67 @@ const styles = StyleSheet.create({
   },
   heroPanelIconCompact: {
     fontSize: 34,
+  },
+  heroOwlGroup: {
+    alignSelf: "flex-start",
+    alignItems: "center",
+  },
+  owlBase: {
+    marginTop: -4,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    gap: 4,
+  },
+  owlBaseText: {
+    fontSize: 15,
+    lineHeight: 17,
+  },
+  owlStone: {
+    width: 28,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: "#b8c8b2",
+  },
+  installSection: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 4,
+  },
+  installTitle: {
+    color: "#14532d",
+    fontSize: 20,
+    lineHeight: 27,
+    fontWeight: "900",
+    textAlign: "center",
+  },
+  installText: {
+    color: "#526158",
+    fontSize: 15,
+    lineHeight: 23,
+    textAlign: "center",
+  },
+  installButton: {
+    backgroundColor: "#14532d",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  installButtonText: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  installNote: {
+    maxWidth: 560,
+    color: "#647066",
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: "center",
   },
   section: {
     gap: 24,
@@ -670,9 +827,19 @@ const styles = StyleSheet.create({
     padding: 34,
   },
   processIntro: {
+    width: "100%",
+    maxWidth: "100%",
     gap: 14,
   },
+  processTitle: {
+    maxWidth: 880,
+  },
+  processDescription: {
+    maxWidth: 860,
+  },
   steps: {
+    width: "100%",
+    maxWidth: "100%",
     gap: 22,
   },
   step: {
@@ -707,25 +874,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 23,
   },
-  notice: {
-    backgroundColor: "#fff8df",
-    borderWidth: 1,
-    borderColor: "#ead897",
-    borderRadius: 20,
-    padding: 28,
-    gap: 10,
-  },
-  noticeTitle: {
-    color: "#6f5610",
-    fontSize: 19,
-    fontWeight: "900",
-  },
-  noticeText: {
-    maxWidth: 920,
-    color: "#665925",
-    fontSize: 15,
-    lineHeight: 24,
-  },
   footer: {
     backgroundColor: "#123c24",
     marginTop: 16,
@@ -751,6 +899,12 @@ const styles = StyleSheet.create({
     color: "#d7e5da",
     fontSize: 14,
     lineHeight: 21,
+  },
+  footerNote: {
+    color: "#aec8b5",
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 12,
   },
   footerLinks: {
     gap: 10,

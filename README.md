@@ -1,6 +1,6 @@
 # SOS Fauna ESPAÑA
 
-**SOS Fauna** es una aplicación móvil de apoyo para avisos de fauna silvestre encontrada herida, en peligro o fallecida. Su objetivo es ayudar a cualquier persona a recopilar rápidamente la información básica del caso y facilitar el contacto con centros de recuperación, servicios de emergencia o entidades especializadas.
+**SOS Fauna España** es una aplicación web y móvil de apoyo para avisos de fauna silvestre encontrada herida, en peligro o fallecida. Su objetivo es ayudar a cualquier persona a recopilar rápidamente la información básica del caso y facilitar el contacto con los recursos adecuados.
 
 > Esta aplicación no sustituye el criterio de veterinarios, agentes forestales, centros de recuperación ni servicios de emergencia.
 
