@@ -66,6 +66,9 @@ type Step = 1 | 2 | 3 | 4 | 5;
 
 const GREFA_WHATSAPP = "34648539901";
 
+const COMMON_END =
+  "En el siguiente paso podrás facilitar una foto y la ubicación del hallazgo. Contacta con un centro especializado, con los Agentes Forestales o con Emergencias y facilita la información recopilada por el medio que prefieras.";
+
 const ANIMAL_OPTIONS: Array<{ key: AnimalType; label: string }> = [
   { key: "smallBird", label: "Ave pequeña" },
   { key: "largeBird", label: "Ave rapaz / ave grande" },
@@ -73,7 +76,7 @@ const ANIMAL_OPTIONS: Array<{ key: AnimalType; label: string }> = [
   { key: "smallMammal", label: "Pequeño mamífero" },
   { key: "largeMammal", label: "Mamífero grande" },
   { key: "reptileAmphibian", label: "Reptil / anfibio" },
-  { key: "unknown", label: "No lo sé" },
+  { key: "unknown", label: "No estoy seguro" },
 ];
 
 const ANIMAL_STATE_OPTIONS: Array<{ key: AnimalState; label: string }> = [
@@ -131,7 +134,7 @@ const NATIONAL_HELP_CONTACTS = [
 const MADRID_PROVINCE_CONTACTS = [
   {
     name: "GREFA guardia",
-    phone: "648 53 99 01",
+    phone: "627 461 457",
     note: "Guardia para avisos de fauna salvaje herida",
   },
   {
@@ -162,364 +165,365 @@ function canUseCannotFly(animalType: AnimalType) {
 
 function getTrappedAdvice(animalType: AnimalType) {
   const commonEnd =
-    " En el siguiente paso podrás hacer una foto del atrapamiento y capturar la ubicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+    COMMON_END;
 
   if (animalType === "smallBird") {
     return (
-      "🪤 AVE ATRAPADA\n\n" +
-      "🚨 RIESGO DE LESIONES\n" +
-      "• Una liberación brusca puede provocar lesiones en alas, patas o cuello.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No tires ni fuerces para liberar el ave.\n" +
-      "• No hagas fotos o vídeos con flash.\n" +
-      "• No ofrezcas comida o agua sin indicación.\n" +
-      "• Evita manipulaciones innecesarias.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Reduce el ruido y la presencia de personas alrededor.\n" +
-      "• Si puedes hacerlo sin riesgo, cúbrela suavemente con una toalla, trapo, jersey o cualquier tela disponible para reducir el estrés.\n" +
-      "• Si consigues liberarla sin causarle daño, colócala en una caja de cartón ventilada y mantenla cerrada para evitar fugas.\n" +
-      "• Déjala en un lugar tranquilo y protegida del frío o del calor extremo.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🪤 AVE ATRAPADA\n\n" +
+  "🚨 ACTÚA CON CALMA\n" +
+  "• Un intento de liberación precipitado puede provocar lesiones en las alas, las patas o el cuello.\n" +
+  "• Antes de intervenir, observa cómo está atrapada y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No tires del animal para liberarlo.\n" +
+  "• No fuerces las alas, las patas o el cuello.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Reduce los ruidos y evita que se acerquen personas o animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo, cúbrela suavemente con una toalla, un trapo, un jersey o cualquier otra tela disponible para reducir su estrés.\n" +
+  "• Si consigues liberarla sin causarle lesiones, introdúcela en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "largeBird") {
     return (
-      "🦉 RAPAZ O AVE GRANDE ATRAPADA\n\n" +
-      "⚠️ PRECAUCIÓN\n" +
-      "• Puede lesionarte con el pico o las garras.\n" +
-      "• No acerques la cara ni las manos desnudas.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No tires de alas, patas ni plumas. Puede lesionarte al defenderse.\n" +
-      "• No intentes liberarla si no puedes hacerlo con seguridad.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Mantén distancia.\n" +
-      "• Reduce ruidos y personas alrededor.\n" +
-      "• Si existe peligro inmediato y puedes actuar sin riesgo, cúbrela con una manta o toalla gruesa para reducir el estrés, o al menos si es posible la cabeza.\n" +
-      "• Si has logrado liberarla y ves que tiene heridas, no vuela o tiene alguna anomalía:\n" +
-      "  - Dejalá en un transportín, caja de cartón o recipiente similar.\n" +
-      "  - Asegura una ventilación adecuada.\n" +
-      "  - Evita que pueda escapar.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🪤 RAPAZ ATRAPADA\n\n" +
+  "🚨 ACTÚA CON CALMA\n" +
+  "• Una rapaz puede sentirse amenazada y usar sus garras y el pico, aunque parezca inmóvil o debilitada.\n" +
+  "• Antes de intervenir, observa cómo está atrapada y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No tires del animal para liberarlo.\n" +
+  "• No sujetes con fuerza las alas, las patas o el cuello.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo, cúbrela suavemente con una toalla, una manta o una tela gruesa para reducir su estrés y protegerte de las garras.\n" +
+  "• Si consigues liberarla sin causarle lesiones, observa si puede ser liberada en el acto. Si presenta alguna anomalía, introdúcela en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "bat") {
     return (
-      "🦇 MURCIÉLAGO ATRAPADO\n\n" +
-      "⚠️ PRECAUCIÓN\n" +
-      "• No lo manipules con las manos desnudas.\n" +
-      "• Incluso animales aparentemente sanos pueden morder al defenderse.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No tires de las alas.\n" +
-      "• No intentes despegarlo a la fuerza.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Utiliza guantes gruesos o una tela si fuera imprescindible moverlo.\n" +
-      "• Si se libera sin daño, colócalo en una caja ventilada.\n" +
-      "• Reduce la luz, el ruido y la presencia de personas alrededor.\n" +
-      "• Protégelo del frío o del calor extremo.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🪤 MURCIÉLAGO ATRAPADO\n\n" +
+  "🚨 ACTÚA CON CALMA\n" +
+  "• Antes de intervenir, observa cómo está atrapado y comprueba si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No lo manipules directamente con las manos desnudas.\n" +
+  "• No tires del animal para liberarlo.\n" +
+  "• Haz solo las fotos o vídeos necesarios para valorar el caso y evita utilizar flash.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+  "• Si es necesario manipularlo, utiliza guantes gruesos o una tela resistente para protegerte.\n" +
+  "• Si consigues liberarlo sin causarle lesiones, introdúcelo en una caja de cartón ventilada y bien cerrada, con una tela o papel absorbente en el fondo.\n" +
+  "• Mantén la caja en un lugar tranquilo, oscuro y protegido del frío y del calor.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "smallMammal") {
     return (
-      "🐾 MAMÍFERO PEQUEÑO ATRAPADO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Mantén distancia y observa desde lejos.\n" +
-      "• Evita acorralarlo y manipulaciones innecesarias.\n" +
-      "• Reduce ruidos.\n" +
-      "• Aleja a personas, perros y vehículos.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No tires de patas, cola ni cabeza para liberarlo. Puede sufrir lesiones o morder por miedo.\n" +
-      "• No intentes manipularlo salvo indicación de personal especializado.\n" +
-      "• No hagas fotos o vídeos con flash.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Si puedes hacerlo sin riesgo -con indicaciones de personal especializado-, cúbrelo suavemente con una toalla, trapo, jersey o cualquier tela disponible para reducir el estrés.\n" +
-      "• Si consigues liberarlo sin causarle daño, colócalo en una caja de cartón ventilada o transportín seguro.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🪤 MAMÍFERO PEQUEÑO ATRAPADO\n\n" +
+  "🚨 ACTÚA CON CALMA\n" +
+  "• Un mamífero atrapado puede sentirse amenazado siente miedo o dolor.\n" +
+  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No tires del animal para liberarlo.\n" +
+  "• No lo manipules directamente si existe riesgo de mordedura.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo, utiliza guantes gruesos o una tela resistente para manipularlo.\n" +
+  "• Si consigues liberarlo sin causarle lesiones, introdúcelo en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "largeMammal") {
     return (
-      "🦌 MAMÍFERO GRANDE ATRAPADO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Mantén distancia y observa desde lejos.\n" +
-      "• Evita acorralarlo.\n" +
-      "• Reduce ruidos.\n" +
-      "• Aleja a personas, perros y vehículos.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No intentes capturarlo, liberarlo ni acercarte más de lo necesario. Puede reaccionar con fuerza por miedo, estrés o dolor y causar lesiones.\n" +
-      "• No intentes cubrirlo ni manipularlo salvo indicación de personal especializado.\n" +
-      "• No lo traslades.\n" +
-      "• No hagas fotos o vídeos con flash.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Contacta cuanto antes con el centro de recuperación o los servicios de emergencia.\n\n" +
-      commonEnd
-    );
+  "🪤 MAMÍFERO GRANDE ATRAPADO\n\n" +
+  "🚨 ACTÚA CON CALMA\n" +
+  "• Un mamífero grande atrapado puede reaccionar de forma imprevisible e intentar escapar bruscamente, provocando lesiones tanto al animal como a las personas.\n" +
+  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No intentes liberarlo tú solo.\n" +
+  "• No te acerques si el animal está agitado o puede embestir, cocear o morder.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo, observa el tipo de atrapamiento para poder describirlo a los servicios de ayuda.\n" +
+  "• Contacta cuanto antes con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "reptileAmphibian") {
     return (
-      "🐸 REPTIL O ANFIBIO ATRAPADO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Mantén distancia y observa desde lejos.\n" +
-      "• No intentes manipularlo salvo indicación de personal especializado en caso de duda por peligrosidad.\n" +
-      "• Aleja a personas, perros y vehículos.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No tires de patas, cola ni cuerpo para liberarlo. Puede sufrir lesiones o morder por miedo o defenderse.\n" +
-      "• Evita el contacto directo salvo riesgo inmediato.\n" +
-      "• No hagas fotos o vídeos con flash.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Reduce ruidos y luz directa.\n" +
-      "• Mantenlo protegido del frío o del calor extremo.\n" +
-      "• Si se libera sin daño y es necesario contenerlo por seguridad, usa un recipiente seguro y ventilado.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🪤 REPTIL O ANFIBIO ATRAPADO\n\n" +
+  "🚨 ACTÚA CON CALMA\n" +
+  "• Un reptil o un anfibio atrapado puede sufrir lesiones si intentas liberarlo de forma brusca.\n" +
+  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No tires del animal para liberarlo.\n" +
+  "• No lo sujetes con fuerza ni manipules partes del cuerpo que puedan lesionarse.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo, intenta reducir su estrés mientras valoras la situación.\n" +
+  "• Si consigues liberarlo sin causarle lesiones, colócalo en una caja o recipiente ventilado y bien cerrado.\n" +
+  "• Mantén el recipiente en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   return (
-    "❓ NO SÉ QUÉ ANIMAL ES\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Mantén distancia y observa desde lejos.\n" +
-    "• No intentes manipularlo salvo indicación de personal especializado en caso de duda por peligrosidad.\n" +
-    "• Aleja a personas, perros y vehículos.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-    "❌ QUÉ NO HACER\n" +
-    "• No tires de él ni intentes liberarlo a la fuerza. Puede sufrir lesiones o morder por miedo o defenderse.\n" +
-    "• Evita el contacto directo salvo riesgo inmediato.\n" +
-    "• Reduce ruidos y luz directa.\n" +
-    "• No hagas fotos o vídeos con flash.\n" +
-    "• No le des comida ni agua sin indicación.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Mantenlo protegido del frío o del calor extremo.\n" +
-    "• Si puedes hacerlo sin riesgo, cúbrelo suavemente con una toalla, trapo, jersey o cualquier tela disponible para reducir el estrés.\n" +
-    "• Si consigues liberarlo sin causarle daño, mantenlo en una caja de cartón cerrada y ventilada o recipiente seguro ventilado, en silencio y protegido del frío o del calor extremo.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-    commonEnd
-  );
+  "🪤 ANIMAL ATRAPADO\n\n" +
+  "🚨 ACTÚA CON CALMA\n" +
+  "• Un animal atrapado puede lesionarse gravemente si intentas liberarlo de forma precipitada.\n" +
+  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No tires del animal para liberarlo.\n" +
+  "• No fuerces ninguna parte de su cuerpo.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo, cúbrelo suavemente con una tela para reducir su estrés, siempre que sea apropiado para la especie.\n" +
+  "• Si consigues liberarlo sin causarle lesiones, colócalo en una caja o recipiente ventilado y bien cerrado.\n" +
+  "• Mantén la caja o el recipiente en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
 }
 function getBabyAdvice(animalType: AnimalType) {
   const commonEnd =
-    " En el siguiente paso podrás hacer una foto del animal y capturar la ubicación. Contacta con un centro especializado como GREFA, Agentes Forestales o Emergencias, y facilita toda esta información resumida en el siguiente paso o envíala por WhatsApp.";
+    COMMON_END;
 
   if (animalType === "smallBird") {
-    return (
-      "🐣 POLLO O VOLANTÓN\n\n" +
-      "Antes de intervenir, intenta distinguir si se trata de un pollo o de un volantón. No todas las aves jóvenes encontradas en el suelo necesitan ayuda.\n\n" +
-      "🐥 POLLO\n" +
-      "• Tiene poco plumaje, plumón visible o zonas sin plumas.\n" +
-      "• Normalmente debería estar en el nido.\n" +
-      "• Si localizas el nido y puedes acceder con seguridad, devuélvelo con la mínima manipulación posible.\n" +
-      "• Si NO es posible devolverlo al nido, puede necesitar ayuda. Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      "🕊️ VOLANTÓN\n" +
-      "• Observa primero desde cierta distancia.\n" +
-      "• Suele estar ya emplumado.\n" +
-      "• Es normal encontrarlo fuera del nido.\n" +
-      "• Puede saltar o moverse por el suelo o ramas bajas.\n" +
-      "• Sus padres pueden seguir alimentándolo mientras aprende a volar.\n" +
-      "• No lo retires salvo que exista un peligro inmediato.\n" +
-      "• Si está decaído, presenta heridas o alguna anomalía, puede necesitar ayuda. Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      "🚨 EN CASO DE NECESITAR AYUDA:\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No le des comida ni agua sin indicación.\n" +
-      "• No lo manipules más de lo necesario.\n" +
-      "• No le extiendas las alas.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Si necesita ayuda, colócalo en una caja de cartón ventilada, manteniéndola cerrada para evitar fugas.\n" +
-      "• Déjalo en un lugar tranquilo, sin ruido y protegido del frío o del calor extremo.\n" +
-      "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-      "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+return (
+  "🐣 POLLO O VOLANTÓN\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Antes de actuar, intenta distinguir si se trata de un pollo o de un volantón. No todas las aves jóvenes encontradas en el suelo necesitan ayuda.\n\n" +
+
+  "🐥 POLLO\n" +
+  "• Tiene poco plumaje, plumón visible o zonas sin plumas.\n" +
+  "• Normalmente debería permanecer en el nido.\n" +
+  "• Si localizas el nido y puedes acceder con seguridad, devuélvelo con la mínima manipulación posible.\n" +
+  "• Si no es posible devolverlo al nido, puede necesitar ayuda. Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+
+  "🕊️ VOLANTÓN\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
+  "• Suele estar completamente emplumado.\n" +
+  "• Es normal encontrarlo fuera del nido.\n" +
+  "• Puede desplazarse por el suelo o por ramas bajas mientras aprende a volar.\n" +
+  "• Sus padres suelen continuar alimentándolo y protegiéndolo.\n" +
+  "• No lo retires salvo que exista un peligro inmediato.\n" +
+  "• Si presenta heridas, está muy débil o muestra un comportamiento anómalo, puede necesitar ayuda. Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+
+  "🚨 SI NECESITA AYUDA\n\n" +
+
+  "❌ QUÉ NO HACER\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No lo manipules más de lo necesario.\n" +
+  "• No le extiendas las alas.\n\n" +
+
+  "✅ QUÉ HACER\n" +
+  "• Colócalo en una caja de cartón ventilada y bien cerrada.\n" +
+  "• Mantén la caja en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+
+  commonEnd
+);
   }
 
   if (animalType === "largeBird") {
     return (
-      "🦉 CRÍA DE RAPAZ O AVE GRANDE\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• No toda cría de rapaz o ave grande fuera del nido necesita recogerse.\n" +
-      "• Puede encontrarse en una fase de aprendizaje.\n" +
-      "• Los adultos pueden seguir alimentándola y vigilándola cerca.\n" +
-      "• Algunas especies pueden permanecer varios días en el suelo o en ramas bajas mientras aprenden a volar.\n\n" +
-      "🚨 PUEDE NECESITAR AYUDA SI\n" +
-      "• Presenta heridas.\n" +
-      "• Está muy débil o decaída.\n" +
-      "• Existe peligro inmediato.\n" +
-      "• Lleva mucho tiempo expuesta en una zona peligrosa.\n" +
-      "• Tienes dudas razonables sobre su estado.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No la manipules sin necesidad.\n" +
-      "• No la recojas automáticamente por estar en el suelo.\n" +
-      "• No le des comida ni agua sin indicación.\n" +
-      "• No acerques la cara ni las manos desnudas.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Mantén distancia y observa primero.\n" +
-      "• Reduce ruidos y presencia de personas.\n" +
-      "• Si puedes hacerlo sin riesgo, introdúcela en un transportín o caja de cartón ventilada.\n" +
-      "• Mantén el recipiente en un lugar tranquilo y, si es posible, cúbrelo parcialmente con una toalla o tela sin bloquear la ventilación para reducir el estrés.\n" +
-      "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-      "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🦉 CRÍA DE RAPAZ O AVE GRANDE\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• No toda cría de rapaz o ave grande encontrada fuera del nido necesita ser recogida.\n" +
+  "• Puede encontrarse en una fase de aprendizaje.\n" +
+  "• Los adultos pueden continuar alimentándola y vigilándola desde las proximidades.\n" +
+  "• Algunas especies permanecen varios días en el suelo o en ramas bajas mientras aprenden a volar.\n\n" +
+  "🚨 PUEDE NECESITAR AYUDA SI\n" +
+  "• Presenta heridas.\n" +
+  "• Está muy débil.\n" +
+  "• Existe un peligro inmediato.\n" +
+  "• Lleva mucho tiempo expuesta en una zona peligrosa.\n" +
+  "• Tienes dudas razonables sobre su estado.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la manipules sin necesidad.\n" +
+  "• No la recojas automáticamente por estar en el suelo.\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No acerques la cara ni las manos desnudas.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
+  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo, introdúcela en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo y, si es posible, cúbrelo parcialmente con una toalla o tela sin bloquear la ventilación para reducir el estrés.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "bat") {
-    return (
-      "🦇 CRÍA DE MURCIÉLAGO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Una cría de murciélago no siempre necesita ser trasladada a un centro de recuperación.\n" +
-      "• Si localizas la colonia, puedes intentar dejar la cría cerca de ella al atardecer para favorecer la reunificación con los adultos.\n" +
-      "• Hazlo únicamente si no presenta heridas ni signos de debilidad.\n" +
-      "• Consulta con un centro especializado ante cualquier duda.\n\n" +
-      "🚨 PUEDE NECESITAR AYUDA SI\n" +
-      "• Presenta heridas.\n" +
-      "• Está débil o decaída.\n" +
-      "• Ha sido atacada por un gato u otro animal.\n" +
-      "• Se encuentra en una situación de peligro.\n" +
-      "• Tienes dudas razonables sobre su estado.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No la manipules con las manos desnudas.\n" +
-      "• No le des comida ni agua sin indicación.\n" +
-      "• No la mantengas expuesta al sol, al frío o a fuentes de calor directas.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Utiliza guantes o una tela para manipularla si es necesario.\n" +
-      "• Si necesita ayuda, mantenla en una caja ventilada y bien cerrada.\n" +
-      "• Déjala en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-      "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-      "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-      "• Contacta con un centro especializado para recibir orientación.\n\n" +
-      commonEnd
-    );
+  const commonEnd =
+    COMMON_END;
+
+ return (
+  "🦇 CRÍA DE MURCIÉLAGO\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Una cría de murciélago no siempre necesita ser trasladada a un centro de recuperación.\n" +
+  "• Si localizas la colonia, puedes intentar dejar la cría cerca de ella al atardecer para favorecer la reunificación con los adultos.\n" +
+  "• Hazlo únicamente si no presenta heridas ni está muy débil.\n" +
+  "• Si tienes dudas, consulta con el centro de recuperación más cercano.\n\n" +
+  "🚨 PUEDE NECESITAR AYUDA SI\n" +
+  "• Presenta heridas.\n" +
+  "• Está muy débil.\n" +
+  "• Ha sido atacada por un gato u otro animal.\n" +
+  "• Se encuentra en una situación de peligro.\n" +
+  "• Tienes dudas razonables sobre su estado.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la manipules con las manos desnudas.\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No la mantengas expuesta al sol, al frío o a fuentes de calor directas.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Utiliza guantes o una tela si necesitas recogerla.\n" +
+  "• Si necesita ayuda, colócala en una caja de cartón ventilada y bien cerrada, con una tela o papel absorbente en el fondo.\n" +
+  "• Mantén la caja en un lugar tranquilo, oscuro y protegido del frío o del calor extremo.\n" +
+  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "smallMammal") {
     return (
-      "🐭 CRÍA DE PEQUEÑO MAMÍFERO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Muchas crías de pequeños mamíferos permanecen solas temporalmente mientras la madre busca alimento o se mantiene oculta cerca.\n" +
-      "• Observa desde una distancia prudente antes de intervenir.\n" +
-      "• Evita tocarla o recogerla salvo que exista peligro inmediato.\n\n" +
-      "🚨 PUEDE NECESITAR AYUDA SI\n" +
-      "• Presenta heridas.\n" +
-      "• Está débil o decaída.\n" +
-      "• Ha sido atacada por un gato, perro u otro animal.\n" +
-      "• Existe un riesgo claro para su seguridad.\n" +
-      "• Tienes dudas razonables sobre su estado.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No la recojas automáticamente por estar sola.\n" +
-      "• No la manipules más de lo necesario.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Observa primero si los progenitores continúan atendiéndola.\n" +
-      "• Si necesita ayuda, colócala en una caja de cartón cerrada y ventilada o en otro recipiente seguro ventilado.\n" +
-      "• Mantén el recipiente en un lugar tranquilo y protegido del frío o del calor extremo.\n" +
-      "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-      "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🐭 CRÍA DE PEQUEÑO MAMÍFERO\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Muchas crías de pequeños mamíferos permanecen solas temporalmente mientras la madre busca alimento o se mantiene oculta en las proximidades.\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
+  "• No la recojas salvo que exista un peligro inmediato.\n\n" +
+  "🚨 PUEDE NECESITAR AYUDA SI\n" +
+  "• Presenta heridas.\n" +
+  "• Está muy débil.\n" +
+  "• Ha sido atacada por un gato, un perro u otro animal.\n" +
+  "• Se encuentra en una situación de peligro.\n" +
+  "• Tienes dudas razonables sobre su estado.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la recojas automáticamente por estar sola.\n" +
+  "• No la manipules más de lo necesario.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Observa primero si la madre continúa atendiéndola.\n" +
+  "• Si necesita ayuda, colócala en una caja de cartón ventilada y bien cerrada.\n" +
+  "• Mantén la caja en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "largeMammal") {
     return (
-      "🦌 CRÍA DE GRAN MAMÍFERO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Muchas crías de ciervo, corzo u otros mamíferos permanecen ocultas durante horas mientras la madre se mantiene alejada para no atraer depredadores.\n" +
-      "• Permanecer sola no significa necesariamente que esté abandonada.\n" +
-      "• Observa la situación desde una distancia prudente.\n\n" +
-      "🚨 PUEDE NECESITAR AYUDA SI\n" +
-      "• Presenta heridas evidentes.\n" +
-      "• Está débil o decaída.\n" +
-      "• Existe peligro inmediato.\n" +
-      "• Ha sido atacada por perros u otros animales o atropellada.\n" +
-      "• Tienes dudas razonables sobre su estado.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No la recojas ni la traslades sin necesidad.\n" +
-      "• No la manipules ni intentes acariciarla.\n" +
-      "• No le des comida ni agua sin indicación.\n" +
-      "• No te acerques más de lo necesario.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Mantén distancia y observa desde lejos.\n" +
-      "• Reduce ruidos y evita la presencia innecesaria de personas, perros o vehículos cerca de la cría.\n" +
-      "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-      "• Si se encuentra cerca de una carretera o zona de tráfico, extremar la precaución y solicita ayuda especializada.\n" +
-      "• Si necesita ayuda, contacta con agentes medioambientales o con un centro especializado para recibir orientación.\n" +
-      "• Sigue siempre las indicaciones del personal especializado.\n\n" +
-      commonEnd
-    );
+  "🦌 CRÍA DE GRAN MAMÍFERO\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Muchas crías de ciervo, corzo u otros grandes mamíferos permanecen ocultas durante horas mientras la madre se mantiene alejada para no atraer depredadores.\n" +
+  "• Permanecer sola no significa necesariamente que haya sido abandonada.\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n\n" +
+  "🚨 PUEDE NECESITAR AYUDA SI\n" +
+  "• Presenta heridas evidentes.\n" +
+  "• Está muy débil.\n" +
+  "• Se encuentra en una situación de peligro.\n" +
+  "• Ha sido atacada por un perro u otro animal o ha sufrido un atropello.\n" +
+  "• Tienes dudas razonables sobre su estado.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la recojas ni la traslades sin necesidad.\n" +
+  "• No la manipules ni intentes acariciarla.\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No te acerques más de lo necesario.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén una distancia prudente y observa desde lejos.\n" +
+  "• Reduce los ruidos y evita la presencia de personas, animales domésticos y vehículos.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Si se encuentra cerca de una carretera o de una zona con tráfico, prioriza tu seguridad y solicita ayuda.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
+  "• Sigue siempre las indicaciones del personal especializado.\n\n" +
+  commonEnd
+);
   }
 
   if (animalType === "reptileAmphibian") {
     return (
-      "🦎 CRÍA DE REPTIL O ANFIBIO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Las crías de reptiles y anfibios suelen ser independientes desde etapas muy tempranas.\n" +
-      "• La presencia de una cría sola no significa necesariamente que necesite ayuda.\n" +
-      "• Observa la situación antes de intervenir.\n\n" +
-      "🚨 PUEDE NECESITAR AYUDA SI\n" +
-      "• Presenta heridas.\n" +
-      "• Está atrapada o no puede desplazarse.\n" +
-      "• Se encuentra en una carretera, piscina, obra o zona de paso peligrosa.\n" +
-      "• Existe riesgo por la presencia de perros, gatos u otros animales.\n" +
-      "• Tienes dudas razonables sobre su estado.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No la manipules sin necesidad.\n" +
-      "• No la traslades a grandes distancias.\n" +
-      "• No manipules serpientes o culebras directamente con las manos si no puedes identificarlas con seguridad.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Si se trata de una serpiente o culebra y existe riesgo de mordedura, evita manipularla y solicita ayuda especializada.\n" +
-      "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-      "• Si necesitas moverla por seguridad, utiliza un recipiente seguro y ventilado.\n" +
-      "• Déjala en una zona adecuada y lo más cercana posible al lugar donde fue encontrada.\n" +
-      "• Evita manipular al animal en exceso para hacer fotos o vídeos y no utilices flash.\n" +
-      "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-      commonEnd
-    );
+  "🦎 CRÍA DE REPTIL O ANFIBIO\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Las crías de reptiles y anfibios suelen ser independientes desde etapas muy tempranas.\n" +
+  "• Encontrar una cría sola no significa necesariamente que necesite ayuda.\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n\n" +
+  "🚨 PUEDE NECESITAR AYUDA SI\n" +
+  "• Presenta heridas.\n" +
+  "• Está atrapada o no puede desplazarse.\n" +
+  "• Se encuentra en una carretera, piscina, obra o cualquier otra zona de peligro.\n" +
+  "• Existe riesgo por la presencia de perros, gatos u otros animales.\n" +
+  "• Tienes dudas razonables sobre su estado.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la manipules sin necesidad.\n" +
+  "• No la traslades a grandes distancias.\n" +
+  "• No manipules serpientes o culebras con las manos si no puedes identificarlas con seguridad.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Si se trata de una serpiente o culebra y existe riesgo de mordedura, mantén la distancia y solicita ayuda especializada.\n" +
+  "• Si necesitas moverla por seguridad, utiliza un recipiente seguro y ventilado.\n" +
+  "• Déjala en una zona adecuada, lo más cercana posible al lugar donde fue encontrada.\n" +
+  "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
   }
 
   return (
-    "❓ NO SÉ SI ES UNA CRÍA\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Muchas crías no están abandonadas aunque parezcan solas.\n" +
-    "• Evita llevártela a casa o alimentarla.\n" +
-    "• Observa primero la situación desde cierta distancia.\n\n" +
-    "🚨 PUEDE NECESITAR AYUDA SI\n" +
-    "• Presenta heridas.\n" +
-    "• Está débil o decaída.\n" +
-    "• Existe peligro inmediato.\n" +
-    "• Ha sido atacada por un perro, gato u otro animal.\n" +
-    "• Tienes dudas razonables sobre su estado.\n\n" +
-    "❌ QUÉ NO HACER\n" +
-    "• No la recojas automáticamente por estar sola.\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• No la manipules más de lo necesario.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-    "• Observa primero la situación desde cierta distancia.\n" +
-    "• Si debes moverla por seguridad, mantenla en una caja de cartón cerrada y ventilada o recipiente seguro ventilado.\n" +
-    "• Mantén el recipiente en un lugar tranquilo y protegido del frío o del calor extremo.\n" +
-    "• Evita manipular al animal en exceso para hacer fotos o vídeos y no utilices flash.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
-    commonEnd
-  );
+  "❓ NO ESTOY SEGURO - ES UNA CRÍA\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Muchas crías no están abandonadas aunque parezcan solas.\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
+  "• Evita llevártela a casa o alimentarla.\n\n" +
+  "🚨 PUEDE NECESITAR AYUDA SI\n" +
+  "• Presenta heridas.\n" +
+  "• Está muy débil.\n" +
+  "• Existe un peligro inmediato.\n" +
+  "• Ha sido atacada por un perro, gato u otro animal.\n" +
+  "• Tienes dudas razonables sobre su estado.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la recojas automáticamente por estar sola.\n" +
+  "• No la manipules más de lo necesario.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
+  "• Si debes moverla por seguridad, mantenla en una caja de cartón ventilada y bien cerrada.\n" +
+  "• Mantén la caja en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  commonEnd
+);
 }
 
 function hasPhysicalWarning(flags: FlagsState) {
@@ -558,243 +562,297 @@ function getObservedSigns(flags: FlagsState, includeCannotFly = false) {
 }
 
 function addSupplementalAdvice(baseAdvice: string, flags: FlagsState) {
+  const supplementalBlocks: string[] = [];
   let advice = baseAdvice.trimEnd();
 
   if (flags.ringGps) {
-    advice +=
-      "\n\n🔎 ANILLA O DISPOSITIVO GPS\n" +
-      "• No retires la anilla ni el dispositivo.\n" +
-      "• Si puedes hacerlo sin manipular al animal en exceso, fotografía números, letras o marcas visibles.\n" +
-      "• Comunica esta información al centro especializado o a los agentes medioambientales.";
+    supplementalBlocks.push(
+      "🔎 ANILLA O DISPOSITIVO DE SEGUIMIENTO\n" +
+        "• La anilla o el dispositivo puede aportar información importante sobre el animal y su seguimiento.\n" +
+        "• No retires ni manipules la anilla o el dispositivo.\n" +
+        "• Si puedes hacerlo sin molestar al animal, fotografía los números, letras, marcas o etiquetas visibles.\n" +
+        "• Anota también cualquier información que puedas leer y comunícala al centro de recuperación o a los agentes medioambientales.",
+    );
   }
 
   if (flags.normalAppearance && !hasAnyConcern(flags) && !flags.cannotFly) {
-    advice +=
-      "\n\nℹ️ APARIENCIA NORMAL\n" +
-      "• Si el animal se comporta con normalidad y no existe peligro inmediato, observa desde cierta distancia antes de intervenir.\n" +
-      "• Evita recogerlo o trasladarlo sin necesidad.";
+    supplementalBlocks.push(
+      "ℹ️ APARIENCIA NORMAL\n" +
+        "• Si el animal se desplaza y se comporta con normalidad, y no existe un peligro inmediato, observa la situación desde una distancia prudente.\n" +
+        "• Evita recogerlo o cambiarlo de lugar sin necesidad.\n" +
+        "• En muchos casos, la mejor ayuda es permitir que continúe su comportamiento natural.\n" +
+        "• Si la situación cambia o detectas alguna anomalía, vuelve al paso anterior y marca las opciones correspondientes.",
+    );
   }
 
-  return advice;
+  if (advice.endsWith(COMMON_END)) {
+    advice = advice.slice(0, -COMMON_END.length).trimEnd();
+  }
+
+  return [advice, ...supplementalBlocks, COMMON_END].join("\n\n");
 }
 
 function getSmallBirdAdvice(flags: FlagsState) {
   if (hasPhysicalWarning(flags)) {
     const signs = getObservedSigns(flags, true);
+    const commonEnd =
+    COMMON_END;
 
     return (
-      "🐦 AVE PEQUEÑA QUE PUEDE NECESITAR AYUDA\n\n" +
-      "🚨 SEÑALES OBSERVADAS\n" +
-      signs +
-      "\n\n❌ QUÉ NO HACER\n" +
-      "• No le des comida ni agua sin indicación.\n" +
-      "• No intentes extenderle las alas ni comprobar lesiones mediante manipulaciones.\n" +
-      "• No la persigas ni la lances al aire para comprobar si vuela.\n" +
-      "• Evita hacer fotos o vídeos innecesarios y no utilices flash.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Manipúlala lo mínimo imprescindible.\n" +
-      "• Colócala en una caja de cartón cerrada y ventilada o en un transportín seguro.\n" +
-      "• Mantén el recipiente en un lugar tranquilo y protegido del frío o del calor extremo.\n" +
-      "• Si ha sido atacada por un gato o perro, necesita valoración aunque no observes heridas evidentes.\n" +
-      "• Contacta con un centro especializado, Agentes Forestales o Emergencias para recibir orientación.\n" +
-      "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación."
-    );
+  "🐦 AVE PEQUEÑA QUE PUEDE NECESITAR AYUDA\n\n" +
+  "🚨 SEÑALES OBSERVADAS\n" +
+  signs +
+  "\n\n❌ QUÉ NO HACER\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No intentes extenderle las alas ni comprobar lesiones mediante manipulaciones.\n" +
+  "• No la persigas ni la lances al aire para comprobar si vuela.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Manipúlala únicamente si es necesario.\n" +
+  "• Colócala en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Si ha sido atacada por un gato o un perro, necesita valoración aunque no observes heridas evidentes.\n" +
+  "• Contacta con el centro de recuperación más cercano o con los agentes medioambientales para recibir orientación.\n" +
+  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+  commonEnd
+  );
   }
 
   if (flags.cannotFly) {
+	  const commonEnd =
+    COMMON_END;
+
     return (
-      "🐦 AVE QUE NO VUELA\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Un ave que no vuela no siempre necesita ser rescatada de inmediato.\n" +
-      "• Puede tratarse de un volantón que está aprendiendo a volar o de un ave que necesita ayuda.\n" +
-      "• Observa primero la situación desde cierta distancia.\n" +
-      "• Si tienes dudas sobre si se trata de una cría, pollo o volantón, vuelve al paso anterior y selecciona la opción 'Es cría'.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No le des comida ni agua sin indicación.\n" +
-      "• No la manipules más de lo necesario.\n" +
-      "• No la persigas ni intentes forzar el vuelo.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-      "• Reduce ruidos y evita utilizar flash.\n" +
-      "• Observa si presenta heridas, debilidad, dificultad para moverse o un comportamiento anómalo.\n" +
-      "• Si observas alguno de estos signos, colócala en una caja de cartón cerrada y ventilada o en un transportín seguro.\n" +
-      "• Contacta con un centro especializado, Agentes Forestales o Emergencias para recibir orientación.\n" +
-      "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación."
-    );
+  "🐦 AVE QUE NO VUELA\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Un ave que no vuela no siempre necesita ser rescatada de inmediato.\n" +
+  "• Puede tratarse de un volantón que está aprendiendo a volar o de un ave que realmente necesite ayuda.\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
+  "• Si tienes dudas sobre si se trata de una cría, un pollo o un volantón, vuelve al paso anterior y selecciona la opción «Es cría».\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No la manipules más de lo necesario.\n" +
+  "• No la persigas ni intentes forzar el vuelo.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+  "• Observa si presenta heridas, está muy débil, tiene dificultad para moverse o muestra un comportamiento anómalo.\n" +
+  "• Si observas alguno de estos signos, colócala en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
+  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+  commonEnd
+);
   }
 
   if (hasImmediateRisk(flags) || flags.other) {
+	  const commonEnd =
+    COMMON_END;
+
     return (
-      "🐦 AVE PEQUEÑA EN SITUACIÓN DE RIESGO\n\n" +
-      "🚨 SITUACIÓN OBSERVADA\n" +
-      getObservedSigns(flags) +
-      "\n\n❌ QUÉ NO HACER\n" +
-      "• No la persigas ni la manipules más de lo necesario.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Prioriza tu seguridad y evita detenerte en una zona de tráfico sin protección.\n" +
-      "• Si puedes apartarla del peligro sin riesgo, muévela únicamente a un punto cercano y seguro.\n" +
-      "• Contacta con un centro especializado, Agentes Forestales o Emergencias para recibir orientación."
-    );
+  "🐦 AVE PEQUEÑA EN SITUACIÓN DE RIESGO\n\n" +
+  "🚨 SEÑALES OBSERVADAS\n" +
+  getObservedSigns(flags) +
+  "\n\n❌ QUÉ NO HACER\n" +
+  "• No la persigas ni la manipules más de lo necesario.\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No pongas en riesgo tu propia seguridad para intentar rescatarla.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Prioriza siempre tu seguridad, especialmente si te encuentras en una carretera o zona con tráfico.\n" +
+  "• Si puedes apartarla del peligro sin asumir riesgos, muévela únicamente a un lugar cercano y seguro.\n" +
+  "• Si necesita ayuda, colócala en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+  commonEnd
+);
   }
 
-  return (
-    "🐦 AVE PEQUEÑA\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Observa primero su comportamiento y el entorno desde cierta distancia.\n" +
-    "• No todas las aves encontradas en el suelo necesitan ser recogidas.\n\n" +
-    "❌ QUÉ NO HACER\n" +
-    "• No la recojas automáticamente.\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• No la manipules para comprobar si está sana.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Comprueba si existe peligro inmediato o alguna señal de lesión, debilidad o dificultad para moverse.\n" +
-    "• Si parece una cría, vuelve al paso anterior y selecciona la opción 'Es cría'.\n" +
-    "• Si observas alguna anomalía, vuelve al paso anterior y marca las opciones correspondientes."
-  );
+  const commonEnd =
+    COMMON_END;
+
+ return (
+  "🐦 AVE PEQUEÑA\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• No todas las aves pequeñas encontradas en el suelo necesitan ayuda.\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
+  "• Si no existe un peligro inmediato, evita recogerla.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la recojas automáticamente por estar en el suelo.\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• No la manipules para comprobar si está sana.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Comprueba si presenta heridas, está muy débil, tiene dificultad para moverse o se encuentra en una situación de peligro.\n" +
+  "• Si crees que puede tratarse de una cría, vuelve al paso anterior y selecciona la opción «Es cría».\n" +
+  "• Si observas cualquiera de estas señales, vuelve al paso anterior y marca las opciones correspondientes.\n\n"+
+  commonEnd
+);
 }
 
 function getLargeBirdAdvice(flags: FlagsState) {
   if (hasPhysicalWarning(flags)) {
+	  const commonEnd =
+    COMMON_END;
+
     return (
-      "🦅 RAPAZ O AVE GRANDE QUE PUEDE NECESITAR AYUDA\n\n" +
-      "🚨 SEÑALES OBSERVADAS\n" +
-      getObservedSigns(flags, true) +
-      "\n\n⚠️ PRECAUCIÓN\n" +
-      "• Una rapaz o ave grande puede lesionarte con el pico, las alas o las garras.\n" +
-      "• Mantén una distancia prudente y evita acercar la cara o las manos.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No intentes sujetarla por las alas, las patas, el cuello o las plumas.\n" +
-      "• No la persigas ni intentes comprobar si puede volar lanzándola al aire.\n" +
-      "• No le des comida ni agua sin indicación.\n" +
-      "• No la manipules más de lo necesario ni utilices flash.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos.\n" +
-      "• Contacta cuanto antes con un centro especializado, Agentes Forestales o Emergencias para recibir orientación.\n" +
-      "• Si te indican que debes contenerla y puedes hacerlo sin riesgo, utiliza una manta o toalla gruesa para cubrirla.\n" +
-      "• Introdúcela en un transportín o caja de cartón resistente, cerrada y bien ventilada.\n" +
-      "• Mantén el recipiente en un lugar tranquilo y protegido del frío o del calor extremo.\n" +
-      "• Si ha sido atacada por un gato o perro, necesita valoración aunque no observes heridas evidentes.\n" +
-      "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación."
-    );
+  "🦅 RAPAZ O AVE GRANDE QUE PUEDE NECESITAR AYUDA\n\n" +
+  "🚨 SEÑALES OBSERVADAS\n" +
+  getObservedSigns(flags, true) +
+  "\n\n⚠️ PRECAUCIÓN\n" +
+  "• Una rapaz o ave grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
+  "• Mantén una distancia prudente y evita acercar la cara o las manos.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No intentes sujetarla por las alas, las patas, el cuello o las plumas.\n" +
+  "• No la persigas ni intentes comprobar si puede volar lanzándola al aire.\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos.\n" +
+  "• Si puedes hacerlo sin riesgo y te indican que debes contenerla, cúbrela con una manta o toalla gruesa.\n" +
+  "• Introdúcela en una caja de cartón resistente, ventilada y bien cerrada o en un transportín seguro.\n" +
+  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Si ha sido atacada por un gato o un perro, necesita valoración aunque no observes heridas evidentes.\n" +
+  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
+  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+  commonEnd
+);
   }
 
   if (flags.cannotFly) {
     const additionalRisk = hasImmediateRisk(flags) || flags.other;
+	const commonEnd =
+    COMMON_END;
 
     return (
-      "🦅 RAPAZ O AVE GRANDE QUE NO VUELA\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• Una rapaz o ave grande que no vuela no siempre necesita ser rescatada de inmediato.\n" +
-      "• Puede tratarse de un ejemplar joven en fase de aprendizaje o emancipación.\n" +
-      "• Los adultos pueden continuar alimentándolo y vigilándolo desde las proximidades.\n" +
-      "• Observa primero la situación desde una distancia prudente, siempre que no exista peligro inmediato.\n\n" +
-      (additionalRisk
-        ? "🚨 SITUACIÓN OBSERVADA\n" + getObservedSigns(flags, true) + "\n\n"
-        : "🚨 PUEDE NECESITAR AYUDA SI\n" +
-          "• Presenta heridas, sangrado, debilidad o respiración anómala.\n" +
-          "• No puede mantenerse erguida o desplazarse con normalidad.\n" +
-          "• Tiene un ala caída o en una posición anómala.\n" +
-          "• Ha sufrido un ataque de gato o perro.\n" +
-          "• Permanece expuesta en una carretera, zona de paso o lugar peligroso.\n" +
-          "• Tras observarla a distancia, muestra un comportamiento claramente anómalo.\n\n") +
-      "❌ QUÉ NO HACER\n" +
-      "• No la recojas automáticamente por estar en el suelo o no volar.\n" +
-      "• No la persigas ni la lances al aire para comprobar si vuela.\n" +
-      "• No acerques la cara ni las manos desnudas.\n" +
-      "• No intentes sujetarla por las alas, las patas o el cuello.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Mantén alejadas a personas y animales domésticos y reduce los ruidos.\n" +
-      "• Observa si los adultos se mantienen cerca o continúan atendiéndola.\n" +
-      (additionalRisk
-        ? "• Si existe peligro inmediato, prioriza tu seguridad y solicita ayuda especializada antes de intervenir.\n"
-        : "• Si no presenta anomalías y se encuentra en un lugar seguro, evita intervenir y solicita orientación si tienes dudas.\n") +
-      "• Si necesita ayuda, contacta con un centro especializado, Agentes Forestales o Emergencias antes de manipularla.\n" +
-      "• Realiza únicamente las fotos o vídeos necesarios desde una distancia segura y no utilices flash.\n" +
-      "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación."
-    );
+  "🦅 RAPAZ O AVE GRANDE QUE NO VUELA\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Una rapaz o ave grande que no vuela no siempre necesita ser rescatada de inmediato.\n" +
+  "• Puede tratarse de un ejemplar joven en fase de aprendizaje o emancipación.\n" +
+  "• Los adultos pueden continuar alimentándolo y vigilándolo desde las proximidades.\n" +
+  "• Observa la situación desde una distancia prudente antes de intervenir, siempre que no exista un peligro inmediato.\n\n" +
+  (additionalRisk
+    ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags, true) + "\n\n"
+    : "🚨 PUEDE NECESITAR AYUDA SI\n" +
+      "• Presenta heridas, sangrado, está muy débil o respira con dificultad.\n" +
+      "• No puede mantenerse erguida o desplazarse con normalidad.\n" +
+      "• Tiene un ala caída o en una posición anómala.\n" +
+      "• Ha sido atacada por un gato o un perro.\n" +
+      "• Permanece expuesta en una carretera, zona de paso o lugar peligroso.\n" +
+      "• Tras observarla a distancia, muestra un comportamiento claramente anómalo.\n\n") +
+  "❌ QUÉ NO HACER\n" +
+  "• No la recojas automáticamente por estar en el suelo o no volar.\n" +
+  "• No la persigas ni la lances al aire para comprobar si puede volar.\n" +
+  "• No acerques la cara ni las manos desnudas.\n" +
+  "• No intentes sujetarla por las alas, las patas o el cuello.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos y reduce los ruidos.\n" +
+  "• Observa si los adultos permanecen cerca o continúan atendiéndola.\n" +
+  (additionalRisk
+    ? "• Si existe un peligro inmediato, prioriza tu seguridad y solicita ayuda antes de intervenir.\n"
+    : "• Si no presenta anomalías y se encuentra en un lugar seguro, evita intervenir y solicita orientación si tienes dudas.\n") +
+  "• Si necesita ayuda, contacta con el centro de recuperación más cercano antes de manipularla.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+  commonEnd
+);
   }
 
   if (hasImmediateRisk(flags) || flags.other) {
+	  const commonEnd =
+    COMMON_END;
+
     return (
-      "🦅 RAPAZ O AVE GRANDE EN SITUACIÓN DE RIESGO\n\n" +
-      "🚨 SITUACIÓN OBSERVADA\n" +
-      getObservedSigns(flags) +
-      "\n\n⚠️ PRECAUCIÓN\n" +
-      "• Una rapaz o ave grande puede lesionarte con el pico, las alas o las garras.\n" +
-      "• Mantén una distancia prudente y evita acorralarla.\n\n" +
-      "❌ QUÉ NO HACER\n" +
-      "• No te pongas en peligro ni intentes detener el tráfico por tu cuenta.\n" +
-      "• No la persigas ni intentes capturarla sin orientación.\n" +
-      "• No le des comida ni agua sin indicación.\n\n" +
-      "✅ QUÉ HACER\n" +
-      "• Aleja a personas y animales domésticos si puedes hacerlo con seguridad.\n" +
-      "• Si se encuentra en una carretera o zona de tráfico, prioriza tu seguridad y avisa a Emergencias o a los agentes competentes.\n" +
-      "• Contacta con un centro especializado, Agentes Forestales o Emergencias para recibir instrucciones.\n" +
-      "• Realiza únicamente las fotos o vídeos necesarios desde una distancia segura y no utilices flash."
-    );
+  "🦅 RAPAZ O AVE GRANDE EN SITUACIÓN DE RIESGO\n\n" +
+  "🚨 SEÑALES OBSERVADAS\n" +
+  getObservedSigns(flags) +
+  "\n\n⚠️ PRECAUCIÓN\n" +
+  "• Una rapaz o ave grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
+  "• Mantén una distancia prudente y evita acorralarla.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No pongas en riesgo tu propia seguridad ni intentes detener el tráfico por tu cuenta.\n" +
+  "• No la persigas ni intentes capturarla sin orientación.\n" +
+  "• No le des comida ni agua sin indicación.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Aleja a las personas y a los animales domésticos si puedes hacerlo con seguridad.\n" +
+  "• Si se encuentra en una carretera o zona con tráfico, prioriza siempre tu seguridad y avisa a Emergencias o a los agentes competentes.\n" +
+  "• Si necesita ayuda, contacta con el centro de recuperación más cercano para recibir orientación.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n"+
+  commonEnd
+);
   }
 
+  const commonEnd =
+    COMMON_END;
+
   return (
-    "🦅 RAPAZ O AVE GRANDE\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Mantén una distancia prudente y observa primero su comportamiento y el entorno.\n" +
-    "• Una rapaz o ave grande puede lesionarte con el pico, las alas o las garras.\n" +
-    "• Su presencia en el suelo o en una rama baja no significa necesariamente que necesite ser recogida.\n\n" +
-    "❌ QUÉ NO HACER\n" +
-    "• No la manipules para comprobar si está sana.\n" +
-    "• No acerques la cara ni las manos desnudas.\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• No utilices flash.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Comprueba desde lejos si presenta heridas, debilidad, dificultad para moverse o algún comportamiento anómalo.\n" +
-    "• Mantén alejadas a personas y animales domésticos y reduce los ruidos.\n" +
-    "• Si parece una cría o un ejemplar joven, vuelve al paso anterior y selecciona la opción 'Es cría'.\n" +
-    "• Si observas alguna anomalía, vuelve al paso anterior y marca las opciones correspondientes.\n" +
-    "• Si tienes dudas, contacta con un centro especializado, Agentes Forestales o Emergencias para recibir orientación."
-  );
+  "🦅 RAPAZ O AVE GRANDE\n\n" +
+  "⚠️ ANTES DE INTERVENIR\n" +
+  "• Mantén una distancia prudente y observa la situación antes de intervenir.\n" +
+  "• Una rapaz o ave grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
+  "• Su presencia en el suelo o en una rama baja no significa necesariamente que necesite ayuda.\n\n" +
+  "❌ QUÉ NO HACER\n" +
+  "• No la manipules para comprobar si está sana.\n" +
+  "• No acerques la cara ni las manos desnudas.\n" +
+  "• No le des comida ni agua sin indicación.\n" +
+  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
+  "✅ QUÉ HACER\n" +
+  "• Comprueba desde una distancia segura si presenta heridas, está muy débil, tiene dificultad para moverse o muestra un comportamiento anómalo.\n" +
+  "• Mantén alejadas a las personas y a los animales domésticos y reduce los ruidos.\n" +
+  "• Si crees que puede tratarse de una cría o de un ejemplar joven, vuelve al paso anterior y selecciona la opción «Es cría».\n" +
+  "• Si observas cualquiera de estas señales, vuelve al paso anterior y marca las opciones correspondientes.\n" +
+  "• Si tienes dudas, contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+  commonEnd
+);
 }
 
 function getBatAdvice(flags: FlagsState) {
   const needsHelp = hasAnyConcern(flags) || flags.cannotFly;
+const commonEnd =
+    COMMON_END;
 
   return (
     "🦇 MURCIÉLAGO\n\n" +
     "⚠️ ANTES DE INTERVENIR\n" +
-    "• No lo toques directamente con las manos desnudas, aunque parezca inmóvil.\n" +
-    "• Mantén alejados a niños y animales domésticos.\n" +
+    "• Encontrar un murciélago durante el día o en el suelo suele indicar que algo no va bien. Probablemente esté debilitado, desorientado o lesionado.\n" +
+    "• Un murciélago encontrado en el suelo suele ser un animal vulnerable, no una amenaza.\n" +
+    "• Mantén alejados a los niños y a los animales domésticos y observa la situación con calma.\n" +
     (needsHelp
       ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
-      : "• Observa si presenta heridas, debilidad, dificultad para moverse o si permanece en el suelo durante el día.\n\n") +
+      : "• Puede necesitar ayuda si presenta heridas, está muy débil, tiene dificultad para moverse o permanece en el suelo durante el día.\n\n") +
     (needsHelp
       ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags, true) + "\n\n"
       : "") +
     "❌ QUÉ NO HACER\n" +
-    "• No lo cojas con las manos desnudas.\n" +
     "• No intentes comprobar si puede volar lanzándolo al aire.\n" +
     "• No le des comida ni agua sin indicación.\n" +
-    "• No lo manipules más de lo necesario ni utilices flash.\n\n" +
+    "• No lo manipules más de lo necesario.\n\n" +
     "✅ QUÉ HACER\n" +
-    "• Si debes recogerlo y puedes hacerlo sin riesgo, utiliza guantes gruesos o una tela.\n" +
-    "• Colócalo en una caja de cartón cerrada y ventilada, con una tela o papel absorbente en el fondo.\n" +
+    "• Si es necesario moverlo para evitar un peligro inmediato, protege tus manos con guantes o, si no dispones de ellos, utiliza un trapo, una toalla o una prenda gruesa.\n" +
+    "• Manipúlalo únicamente el tiempo imprescindible y evita sujetarlo con fuerza.\n" +
+    "• Colócalo en una caja de cartón ventilada y bien cerrada, con una tela o papel absorbente en el fondo.\n" +
     "• Mantén la caja en un lugar tranquilo, oscuro y protegido del frío o del calor extremo.\n" +
-    "• Si ha tenido contacto con una persona o un animal doméstico, comunícalo al centro especializado.\n" +
-    "• Contacta con un centro especializado, Agentes Forestales o Emergencias para recibir orientación.\n" +
-    "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación."
+    "• Si ha tenido contacto con una persona o con un animal doméstico, comunícalo al centro de recuperación.\n" +
+    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
+    "• Los murciélagos desempeñan un papel esencial en los ecosistemas y ayudan al control natural de numerosos insectos.\n" +
+    "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+  commonEnd
   );
 }
 
 function getSmallMammalAdvice(flags: FlagsState) {
   const needsHelp = hasAnyConcern(flags);
+const commonEnd =
+    COMMON_END;
 
   return (
     "🐭 PEQUEÑO MAMÍFERO\n\n" +
     "⚠️ ANTES DE INTERVENIR\n" +
-    "• Mantén distancia y observa su comportamiento antes de acercarte.\n" +
+    "• Mantén una distancia prudente y observa su comportamiento antes de intervenir.\n" +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar valoración especializada.\n\n"
-      : "• Si no presenta anomalías ni existe peligro inmediato, evita recogerlo sin necesidad.\n\n") +
+      ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
+      : "• Si no presenta anomalías ni existe un peligro inmediato, evita recogerlo.\n\n") +
     (needsHelp
       ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags) + "\n\n"
       : "") +
@@ -802,28 +860,31 @@ function getSmallMammalAdvice(flags: FlagsState) {
     "• No lo manipules más de lo necesario.\n" +
     "• No lo sujetes por la cola, las patas o la cabeza.\n" +
     "• No le des comida ni agua sin indicación.\n" +
-    "• Evita hacer fotos o vídeos innecesarios y no utilices flash.\n\n" +
+    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
     "✅ QUÉ HACER\n" +
     (needsHelp
-      ? "• Si puedes hacerlo sin riesgo, colócalo en una caja de cartón cerrada y ventilada o en un recipiente seguro.\n" +
-        "• Mantén el recipiente en un lugar tranquilo y protegido del frío o del calor extremo.\n"
-      : "• Mantén alejadas a personas y animales domésticos y solicita orientación si tienes dudas.\n") +
-    "• Si ha sido atacado por un gato o perro, necesita valoración aunque no observes heridas evidentes.\n" +
-    "• Contacta con un centro especializado, Agentes Forestales o Emergencias para recibir orientación."
+      ? "• Si puedes hacerlo sin riesgo, colócalo en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
+        "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n"
+      : "• Mantén alejadas a las personas y a los animales domésticos y solicita orientación si tienes dudas.\n") +
+    "• Si ha sido atacado por un gato o un perro, necesita valoración aunque no observes heridas evidentes.\n" +
+    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+  commonEnd
   );
 }
 
 function getLargeMammalAdvice(flags: FlagsState) {
   const needsHelp = hasAnyConcern(flags);
+const commonEnd =
+    COMMON_END;
 
   return (
     "🦌 MAMÍFERO GRANDE\n\n" +
     "⚠️ ANTES DE INTERVENIR\n" +
-    "• Mantén distancia y observa desde lejos.\n" +
-    "• Puede reaccionar con fuerza por miedo, estrés o dolor.\n" +
+    "• Mantén una distancia prudente y observa la situación antes de intervenir.\n" +
+    "• Puede reaccionar de forma imprevisible por miedo, estrés o dolor.\n" +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar intervención especializada.\n\n"
-      : "• Si no existe peligro ni presenta anomalías, evita acercarte o intervenir.\n\n") +
+      ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
+      : "• Si no existe un peligro inmediato ni presenta anomalías, evita acercarte o intervenir.\n\n") +
     (needsHelp
       ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags) + "\n\n"
       : "") +
@@ -831,25 +892,28 @@ function getLargeMammalAdvice(flags: FlagsState) {
     "• No intentes capturarlo, sujetarlo ni trasladarlo.\n" +
     "• No lo acorrales ni bloquees su vía de escape.\n" +
     "• No le des comida ni agua sin indicación.\n" +
-    "• No te acerques para hacer fotos o vídeos y no utilices flash.\n\n" +
+    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
     "✅ QUÉ HACER\n" +
-    "• Reduce ruidos y aleja a personas, perros y vehículos.\n" +
-    "• Si está en una carretera, prioriza tu seguridad y avisa a Emergencias o a los agentes competentes.\n" +
-    "• Contacta cuanto antes con un centro especializado, Agentes Forestales o Emergencias.\n" +
-    "• Sigue siempre las indicaciones del personal especializado."
+    "• Reduce los ruidos y aleja a las personas, los perros y los vehículos si puedes hacerlo con seguridad.\n" +
+    "• Si se encuentra en una carretera o zona con tráfico, prioriza siempre tu seguridad y avisa a Emergencias o a los agentes competentes.\n" +
+    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
+    "• Sigue siempre las indicaciones del personal especializado.\n\n"+
+  commonEnd
   );
 }
 
 function getReptileAmphibianAdvice(flags: FlagsState) {
   const needsHelp = hasAnyConcern(flags);
+const commonEnd =
+    COMMON_END;
 
   return (
     "🐸 REPTIL O ANFIBIO\n\n" +
     "⚠️ ANTES DE INTERVENIR\n" +
-    "• Observa la situación antes de actuar y evita el contacto directo si no puedes identificar el animal con seguridad.\n" +
+    "• Observa la situación desde una distancia prudente antes de intervenir y evita el contacto directo si no puedes identificar el animal con seguridad.\n" +
     (needsHelp
       ? "• Las señales seleccionadas indican que puede necesitar ayuda o ser apartado de un peligro inmediato.\n\n"
-      : "• Si se desplaza con normalidad y no existe peligro, evita manipularlo o trasladarlo.\n\n") +
+      : "• Si se desplaza con normalidad y no existe un peligro inmediato, evita manipularlo o trasladarlo.\n\n") +
     (needsHelp
       ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags) + "\n\n"
       : "") +
@@ -859,38 +923,41 @@ function getReptileAmphibianAdvice(flags: FlagsState) {
     "• No lo traslades a grandes distancias.\n" +
     "• No le des comida ni agua sin indicación.\n\n" +
     "✅ QUÉ HACER\n" +
-    "• Reduce ruidos y evita la presencia de personas y animales domésticos.\n" +
+    "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
     "• Si debes moverlo por seguridad y puedes hacerlo sin riesgo, utiliza un recipiente seguro y ventilado.\n" +
-    "• Déjalo en una zona adecuada y lo más cercana posible al lugar donde fue encontrado.\n" +
-    "• Evita manipularlo en exceso para hacer fotos o vídeos y no utilices flash.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación."
+    "• Déjalo en una zona adecuada, lo más cercana posible al lugar donde fue encontrado.\n" +
+    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+  commonEnd
   );
 }
 
 function getUnknownAnimalAdvice(flags: FlagsState) {
   const needsHelp = hasAnyConcern(flags) || flags.cannotFly;
+const commonEnd =
+    COMMON_END;
 
   return (
-    "❓ ANIMAL SIN IDENTIFICAR\n\n" +
+    "❓ NO ESTOY SEGURO\n\n" +
     "⚠️ ANTES DE INTERVENIR\n" +
-    "• Mantén distancia y observa desde lejos.\n" +
-    "• No intentes manipularlo si no puedes valorar con seguridad qué animal es.\n" +
+    "• No pasa nada. No es necesario identificar exactamente al animal para poder ayudar.\n" +
+    "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
     (needsHelp
       ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
-      : "• Si no presenta anomalías ni existe peligro inmediato, evita intervenir.\n\n") +
+      : "• Si no presenta anomalías ni existe un peligro inmediato, evita intervenir.\n\n") +
     (needsHelp
       ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags, true) + "\n\n"
       : "") +
     "❌ QUÉ NO HACER\n" +
-    "• No lo toques con las manos desnudas.\n" +
-    "• No intentes liberarlo, sujetarlo o trasladarlo sin conocer los riesgos.\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• No utilices flash.\n\n" +
+    "• No lo manipules ni lo traslades sin necesidad.\n" +
+    "• No intentes liberarlo a la fuerza.\n" +
+    "• No le des comida ni agua sin indicación.\n\n" +
     "✅ QUÉ HACER\n" +
-    "• Aleja a personas y animales domésticos.\n" +
-    "• Si existe peligro inmediato, solicita ayuda antes de intervenir.\n" +
-    "• Realiza únicamente las fotos o vídeos necesarios desde una distancia segura.\n" +
-    "• Contacta con un centro especializado, Agentes Forestales o Emergencias para recibir orientación."
+    "• Mantén alejadas a las personas y a los animales domésticos.\n" +
+    "• Si existe un peligro inmediato, prioriza tu seguridad y solicita ayuda antes de intervenir.\n" +
+    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
+    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+  commonEnd
   );
 }
 
@@ -899,21 +966,30 @@ function getAdvice(
   animalType: AnimalType,
   flags: FlagsState,
 ) {
-  if (animalState === "dead") {
-    return (
-      "☠️ ANIMAL MUERTO\n\n" +
-      "⚠️ ANTES DE INTERVENIR\n" +
-      "• No toques ni muevas el cadáver ni alteres el entorno donde se encuentra.\n" +
-      "• Puede contener información importante para una investigación pericial o judicial.\n\n" +
-      "🔍 QUÉ OBSERVAR\n" +
-      "• Comprueba desde una distancia segura si existen cebos, recipientes, tendidos eléctricos, posibles impactos de disparo, lazos, trampas u otros elementos sospechosos.\n" +
-      "• Si sospechas de un posible envenenamiento, evita tocar el animal, los cebos o cualquier sustancia cercana.\n\n" +
-      "📸 QUÉ HACER\n" +
-      "• Si puedes hacerlo con seguridad, realiza fotografías del animal y de la zona sin modificar nada.\n" +
-      "• Comunica el hallazgo a los agentes medioambientales, fuerzas de seguridad o servicios de emergencias.\n" +
-      "• Informa de cualquier circunstancia que consideres relevante."
-    );
-  }
+     if (animalState === "dead") {
+		 const commonEnd =
+    COMMON_END;
+
+     return (
+    "☠️ ANIMAL MUERTO\n\n" +
+    "⚠️ ANTES DE INTERVENIR\n" +
+    "• Encontrar un animal muerto puede resultar impactante. Antes de actuar, observa la situación con calma y evita modificar el entorno.\n" +
+    "• Lo que observes puede ayudar a identificar la causa de la muerte y a prevenir que otros animales sufran el mismo problema.\n\n" +
+    "🔍 QUÉ OBSERVAR\n" +
+    "• Comprueba desde una distancia segura si hay más animales muertos o afectados en la zona.\n" +
+    "• Fíjate si existen posibles causas visibles, como tendidos eléctricos, vallados, carreteras, cristaleras, trampas, cebos o restos sospechosos, sin acercarte ni manipular nada.\n" +
+    "• Comprueba también si existe algún riesgo para las personas o los animales domésticos.\n\n" +
+    "❌ QUÉ NO HACER\n" +
+    "• No toques ni muevas el cadáver, salvo que exista un peligro inmediato y recibas indicaciones para hacerlo.\n" +
+    "• No manipules cebos, recipientes, sustancias u otros objetos sospechosos.\n" +
+    "• No alteres el lugar del hallazgo.\n\n" +
+    "✅ QUÉ HACER\n" +
+    "• Realiza únicamente las fotografías o vídeos necesarios para documentar el animal y el entorno, sin modificar la escena.\n" +
+    "• Facilita la ubicación exacta del hallazgo. Esta información puede ser fundamental para que los profesionales localicen el lugar, investiguen la causa y adopten las medidas necesarias.\n" +
+    "• Comunica el hallazgo a los Agentes Forestales, agentes medioambientales, fuerzas y cuerpos de seguridad o servicios de emergencias, aportando toda la información que hayas podido observar.\n\n"+
+  commonEnd
+  );
+   }
 
   // Prioridad 1: el atrapamiento requiere instrucciones específicas de liberación y seguridad.
   if (flags.trapped) {
@@ -1002,11 +1078,13 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
 
   const [showContacts, setShowContacts] = useState(false);
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
+  const [showHelpSources, setShowHelpSources] = useState(false);
   const [showProvinces, setShowProvinces] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [provinceSearch, setProvinceSearch] = useState("");
 
   const [customWhatsAppNumber, setCustomWhatsAppNumber] = useState("");
+  const [showOtherContact, setShowOtherContact] = useState(false);
   const [hasSentWhatsApp, setHasSentWhatsApp] = useState(false);
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] =
     useState(false);
@@ -1222,7 +1300,7 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       `Tipo de animal: ${selectedAnimalLabel}`,
       `Ubicación: ${locationText}`,
       `Mapa: ${mapsUrl}`,
-      `Situación observada: ${selectedFlags}`,
+      `Señales observadas: ${selectedFlags}`,
       `Foto capturada: ${photoUri ? "sí" : "no"}`,
       `Vídeo capturado: ${videoUri ? "sí" : "no"}`,
     ]
@@ -1421,6 +1499,10 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     }
 
     setAnimalType(nextAnimalType);
+
+    if (animalState === "dead") {
+      setStep(2);
+    }
   };
 
   const openWhatsAppWithNumber = async (number: string) => {
@@ -1744,46 +1826,76 @@ const saveCurrentProgress = async (
     <SectionCard title="Teléfonos de ayuda">
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          Aquí tienes primero los teléfonos nacionales y, debajo, el acceso a
-          contactos por provincias.
+          Elige el servicio adecuado según la urgencia y la ubicación del animal.
         </Text>
+
+        <Text style={styles.sectionDescription}>
+          Llama al 112 si existe peligro inmediato para personas, tráfico o seguridad. Para otros casos, contacta con el servicio más adecuado.
+        </Text>
+
+        <Text style={styles.subheading}>Ayuda inmediata</Text>
 
         {NATIONAL_HELP_CONTACTS.map((contact) => (
           <Pressable
             key={contact.name}
-            style={styles.contactRow}
+            style={[
+              styles.contactRow,
+              contact.phone === "112" && styles.contactRowEmergency,
+            ]}
             onPress={() => callNumber(contact.phone)}
           >
             <View style={styles.contactTextBlock}>
-              <Text style={styles.contactName}>{contact.name}</Text>
+              <Text style={styles.contactName}>
+                {contact.phone === "112"
+                  ? "🚨 Emergencias"
+                  : contact.phone === "062"
+                    ? "🌿 SEPRONA"
+                    : contact.phone === "092"
+                      ? "🚓 Policía Municipal / Local"
+                      : "👮 Policía Nacional"}
+              </Text>
               <Text style={styles.contactNote}>{contact.note}</Text>
             </View>
-            <Text style={styles.contactPhone}>{contact.phone}</Text>
+            <View style={styles.contactPhonePill}>
+              <Text style={styles.contactPhonePillText}>{contact.phone}</Text>
+            </View>
           </Pressable>
         ))}
 
+        <Text style={styles.subheading}>Ayuda por provincias</Text>
+
         <Pressable
-          style={styles.secondaryButton}
+          style={styles.primaryButton}
           onPress={handleOpenProvincePhones}
         >
-          <Text style={styles.secondaryButtonText}>
-            Teléfonos de ayuda por provincias
+          <Text style={styles.primaryButtonText}>
+            📍 Buscar ayuda en mi provincia
           </Text>
         </Pressable>
-        <View style={styles.infoBox}>
-          <Text style={styles.infoText}>
-            Fuentes de información:
-            {"\n\n"}• Emergencias 112: www.proteccioncivil.es/catalogo/info112/
-            {"\n"}• Guardia Civil (SEPRONA): www.guardiacivil.es
-            {"\n"}• Policía Nacional: www.policia.es
-            {"\n"}• Agentes Forestales de la Comunidad de Madrid:
-            {"\n"}{" "}
-            www.comunidad.madrid/centros/emisora-cuerpo-agentes-forestales
-            {"\n\n"}SOS Fauna España es una aplicación independiente y no está
-            afiliada ni representa a ninguna administración pública, servicio de
-            emergencias o cuerpo policial.
-          </Text>
-        </View>
+
+        <Pressable
+          style={styles.secondaryButton}
+          onPress={() => setShowHelpSources((current) => !current)}
+        >
+          <Text style={styles.secondaryButtonText}>Fuentes y aviso legal</Text>
+        </Pressable>
+
+        {showHelpSources ? (
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              Fuentes de información:
+              {"\n\n"}• Emergencias 112: www.proteccioncivil.es/catalogo/info112/
+              {"\n"}• Guardia Civil (SEPRONA): www.guardiacivil.es
+              {"\n"}• Policía Nacional: www.policia.es
+              {"\n"}• Agentes Forestales de la Comunidad de Madrid:
+              {"\n"}{" "}
+              www.comunidad.madrid/centros/emisora-cuerpo-agentes-forestales
+              {"\n\n"}SOS Fauna España es una aplicación independiente y no está
+              afiliada ni representa a ninguna administración pública, servicio de
+              emergencias o cuerpo policial.
+            </Text>
+          </View>
+        ) : null}
       </View>
     </SectionCard>
   );
@@ -1895,56 +2007,63 @@ const saveCurrentProgress = async (
   );
 
   const renderWhatsAppOptions = () => (
-    <SectionCard title="Enviar por WhatsApp">
+    <SectionCard title="Enviar el aviso">
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          El resumen está listo para WhatsApp. Pulsa la flecha izquierda para
-          volver a las opciones del aviso.
+          Elige cómo deseas enviar este aviso.
         </Text>
 
-        <Pressable
-          style={styles.primaryButton}
-          onPress={() => openWhatsAppWithNumber(GREFA_WHATSAPP)}
-        >
-          <Text style={styles.primaryButtonText}>GREFA (Madrid)</Text>
-        </Pressable>
+        <View style={styles.sectionGroup}>
+          <Pressable
+            style={styles.primaryButton}
+            onPress={() => openWhatsAppWithNumber(GREFA_WHATSAPP)}
+          >
+            <Text style={styles.primaryButtonText}>Enviar a GREFA (Madrid)</Text>
+          </Pressable>
 
-        <View style={styles.warningBox}>
-          <Text style={styles.warningText}>
-            Grefa (Madrid) es solo para avisos gestionados en la Comunidad de
-            Madrid. Para otras provincias utiliza Ayuda del paso anterior y
-            busca el centro más cercano.
-          </Text>
+          <View style={styles.warningBox}>
+            <Text style={styles.warningText}>
+              ℹ️ Solo para avisos localizados en la Comunidad de Madrid.
+            </Text>
+          </View>
         </View>
 
-        <TextInput
-          placeholder="Enviar a otro contacto de WhatsApp"
-          value={customWhatsAppNumber}
-          onChangeText={setCustomWhatsAppNumber}
-          keyboardType="phone-pad"
-          style={styles.input}
-        />
-
         <Pressable
-          style={styles.secondaryButton}
-          onPress={() => openWhatsAppWithNumber(customWhatsAppNumber)}
+          style={[styles.secondaryButton, styles.sendOtherContactButton]}
+          onPress={() => setShowOtherContact((current) => !current)}
         >
-          <Text style={styles.secondaryButtonText}>
-            Enviar a otro contacto WhatsApp
-          </Text>
+          <Text style={styles.secondaryButtonText}>Enviar a otro contacto</Text>
         </Pressable>
 
-        <View style={styles.warningBox}>
+        {showOtherContact ? (
+          <>
+            <TextInput
+              placeholder="Enviar a otro contacto de WhatsApp"
+              value={customWhatsAppNumber}
+              onChangeText={setCustomWhatsAppNumber}
+              keyboardType="phone-pad"
+              style={styles.input}
+            />
+
+            <Pressable
+              style={styles.secondaryButton}
+              onPress={() => openWhatsAppWithNumber(customWhatsAppNumber)}
+            >
+              <Text style={styles.secondaryButtonText}>Enviar por WhatsApp</Text>
+            </Pressable>
+          </>
+        ) : null}
+
+        <View style={[styles.warningBox, styles.sendPhotoNotice]}>
           <Text style={styles.warningText}>
-            Si necesitas enviar la información recopilada a otro contacto de
-            WhatsApp, introduce el número de WhatsApp y pulsa en Enviar a otro
-            contacto WhatsApp
+            ℹ️ Importante: La foto y el vídeo no se adjuntan automáticamente al mensaje de WhatsApp. Si deseas enviarlos, deberás añadirlos manualmente desde WhatsApp antes de enviar el aviso.
           </Text>
         </View>
 
         <Pressable
           style={[
             styles.primaryButton,
+            styles.sendFinishButton,
             !hasSentWhatsApp && styles.disabledButton,
           ]}
           onPress={finishFlow}
@@ -1965,30 +2084,6 @@ const saveCurrentProgress = async (
       step !== 5
     ) {
       return null;
-    }
-
-    if (animalState === "dead") {
-      return (
-        <View style={styles.step5ActionBar}>
-          <Pressable style={styles.menuActionButton} onPress={copySummary}>
-            <Text style={styles.menuActionEmoji}>📋</Text>
-            <Text style={styles.menuActionLabel}>Copiar</Text>
-          </Pressable>
-
-          <Pressable style={styles.menuActionButton} onPress={handleOpenHelp}>
-            <Text style={styles.menuActionEmoji}>📞</Text>
-            <Text style={styles.menuActionLabel}>Ayuda</Text>
-          </Pressable>
-
-          <Pressable
-            style={[styles.menuActionButton, styles.menuActionButtonPrimary]}
-            onPress={finishFlow}
-          >
-            <Text style={styles.menuActionEmoji}>✅</Text>
-            <Text style={styles.menuActionLabelPrimary}>Finalizar</Text>
-          </Pressable>
-        </View>
-      );
     }
 
     return (
@@ -2076,12 +2171,11 @@ const saveCurrentProgress = async (
           <SectionCard title="Paso 1. Tipo y situación del animal">
             <View style={styles.sectionContent}>
               <Text style={styles.sectionDescription}>
-                Indica primero si el animal está vivo o muerto. Después completa
-                solo los datos que correspondan.
+                Indica qué ocurre y observa algunas señales sencillas. No necesitas identificar exactamente al animal para poder ayudar.
               </Text>
 
               <View style={styles.sectionGroup}>
-                <Text style={styles.subheading}>Estado del animal</Text>
+                <Text style={styles.subheading}>¿El animal está vivo o muerto?</Text>
                 <View style={styles.flagGrid}>
                   {ANIMAL_STATE_OPTIONS.map((option) => {
                     const active = animalState === option.key;
@@ -2113,17 +2207,9 @@ const saveCurrentProgress = async (
                 </View>
               </View>
 
-              {animalState === "dead" ? (
-                <View style={styles.warningBox}>
-                  <Text style={styles.warningText}>
-                    Si el animal está muerto, no lo toques ni modifiques el
-                    lugar. Continúa para ver qué hacer.
-                  </Text>
-                </View>
-              ) : (
-                <>
+              <>
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>Tipo de animal</Text>
+                    <Text style={styles.subheading}>¿Qué animal has encontrado?</Text>
                     <View style={styles.flagGrid}>
                       {ANIMAL_OPTIONS.map((option) => {
                         const active = animalType === option.key;
@@ -2148,8 +2234,9 @@ const saveCurrentProgress = async (
                     </View>
                   </View>
 
+                  {animalState !== "dead" ? (
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>Situación observada</Text>
+                    <Text style={styles.subheading}>¿Qué observas?</Text>
                     <View style={styles.flagGrid}>
                       {FLAG_LABELS.map(({ key, label }) => {
                         const active = flags[key];
@@ -2173,8 +2260,8 @@ const saveCurrentProgress = async (
                       })}
                     </View>
                   </View>
+                  ) : null}
                 </>
-              )}
             </View>
           </SectionCard>
         </KeyboardAvoidingView>
@@ -2186,7 +2273,7 @@ const saveCurrentProgress = async (
         <SectionCard title="Paso 2. Qué hacer ahora">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Sigue estas recomendaciones antes de actuar o mover al animal.
+              Antes de intervenir, lee estas recomendaciones.
             </Text>
 
             <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
@@ -2259,18 +2346,24 @@ const saveCurrentProgress = async (
         <SectionCard title="Paso 4. Foto, vídeo y ubicación">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Captura una foto y/o un vídeo y obtén la ubicación del hallazgo.
+              Facilita una foto, un vídeo o la ubicación del hallazgo. Esta información puede ayudar a valorar mejor la situación y localizar el lugar si fuera necesario.
             </Text>
+
+            <Text style={styles.sectionDescription}>
+              La ubicación es la información más importante. La foto y el vídeo pueden ayudar, pero son opcionales.
+            </Text>
+
+            <Text style={styles.subheading}>¿Qué deseas aportar?</Text>
 
             <Pressable style={styles.primaryButton} onPress={pickPhoto}>
               <Text style={styles.primaryButtonText}>
-                {photoUri ? "Cambiar foto" : "Hacer foto"}
+                {photoUri ? "Repetir foto" : "Hacer foto"}
               </Text>
             </Pressable>
 
             <Pressable style={styles.primaryButton} onPress={pickVideo}>
               <Text style={styles.primaryButtonText}>
-                {videoUri ? "Cambiar vídeo" : "Grabar vídeo"}
+                {videoUri ? "Repetir vídeo" : "Grabar vídeo"}
               </Text>
             </Pressable>
 
@@ -2289,27 +2382,20 @@ const saveCurrentProgress = async (
               </Text>
             </Pressable>
 
-            {locationCaptured ? (
-              <View style={styles.successBox}>
-                <Text style={styles.successText}>
-                  Ubicación capturada correctamente
-                </Text>
-              </View>
-            ) : null}
-
-            <Text style={styles.helperText}>
-              {photoUri
-                ? "Foto capturada y guardada en el dispositivo"
-                : "Sin foto todavía."}
-            </Text>
-
-            <Text style={styles.helperText}>
-              {videoUri
-                ? "Vídeo capturado y guardado en el dispositivo"
-                : "Sin vídeo todavía."}
-            </Text>
-
-            <Text style={styles.helperText}>{locationText}</Text>
+            <View style={styles.sectionGroup}>
+              <Text style={styles.subheading}>Estado de la información</Text>
+              <Text style={styles.helperText}>
+                {photoUri ? "📷 Foto: Añadida ✓" : "📷 Foto: No añadida"}
+              </Text>
+              <Text style={styles.helperText}>
+                {videoUri ? "🎥 Vídeo: Añadido ✓" : "🎥 Vídeo: No añadido"}
+              </Text>
+              <Text style={styles.helperText}>
+                {locationCaptured
+                  ? "📍 Ubicación: Capturada ✓"
+                  : "📍 Ubicación: No capturada"}
+              </Text>
+            </View>
 
             <View style={styles.mapCard}>
               <Text style={styles.mapTitle}>Ubicación del hallazgo</Text>
@@ -2317,9 +2403,8 @@ const saveCurrentProgress = async (
               {coords ? (
                 <>
                   <View style={styles.mapLocationBox}>
-                    <Text style={styles.mapPin}>📍</Text>
                     <Text style={styles.mapLocationTitle}>
-                      Punto capturado correctamente
+                      📍 Ubicación capturada
                     </Text>
                     <Text style={styles.mapCoords}>
                       {coords.latitude.toFixed(5)},{" "}
@@ -2332,7 +2417,9 @@ const saveCurrentProgress = async (
                   </View>
 
                   <Pressable style={styles.mapOpenButton} onPress={openMaps}>
-                    <Text style={styles.mapOpenButtonText}>Abrir mapa</Text>
+                    <Text style={styles.mapOpenButtonText}>
+                      Abrir en Google Maps
+                    </Text>
                   </Pressable>
                 </>
               ) : (
@@ -2407,13 +2494,6 @@ const saveCurrentProgress = async (
             <Text style={[styles.summaryBox, styles.summaryEditor]}>
               {generatedSummary}
             </Text>
-
-            <View style={styles.warningBox}>
-              <Text style={styles.warningText}>
-                Importante: la foto y el vídeo no se adjuntan automáticamente.
-                Deberás enviarlos manualmente desde WhatsApp.
-              </Text>
-            </View>
           </View>
         </SectionCard>
       </KeyboardAvoidingView>
@@ -2666,6 +2746,15 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 16,
   },
+  sendOtherContactButton: {
+    marginTop: 16,
+  },
+  sendPhotoNotice: {
+    marginTop: 6,
+  },
+  sendFinishButton: {
+    marginTop: 10,
+  },
   secondaryButton: {
     backgroundColor: "#e5e7eb",
     borderRadius: 14,
@@ -2867,6 +2956,10 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: "#ffffff",
   },
+  contactRowEmergency: {
+    backgroundColor: "#fef3c7",
+    borderColor: "#f59e0b",
+  },
   contactTextBlock: {
     flex: 1,
   },
@@ -2884,6 +2977,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     color: "#14532d",
+  },
+  contactPhonePill: {
+    backgroundColor: "#14532d",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  contactPhonePillText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "900",
   },
 
   step5Instructions: {
