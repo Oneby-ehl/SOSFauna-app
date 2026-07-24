@@ -29,7 +29,7 @@ export type RescueCoordinates = {
   longitude: number;
 };
 
-export type RescueStep = 1 | 2 | 3 | 4 | 5;
+export type RescueStep = 1 | 2 | 3 | 4;
 
 export type RescueCase = {
   id: string;
@@ -39,14 +39,12 @@ export type RescueCase = {
 
   step: RescueStep;
 
-  fullName: string;
-  phone: string;
-
   animalState: RescueAnimalState;
   animalType: RescueAnimalType;
   flags: RescueFlags;
 
   locationText: string;
+  approximateLocation?: string;
   coords: RescueCoordinates | null;
   locationCaptured: boolean;
 };

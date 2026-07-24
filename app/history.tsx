@@ -91,11 +91,75 @@ function formatObservedSituation(flagLabels: string[]): string {
     : "Sin incidencias destacables.";
 }
 
+function normalizeUsefulText(value: string | null | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized && normalized.length > 0 ? normalized : undefined;
+}
+
+function formatCoordinates(coords: NonNullable<RescueCase["coords"]>): string {
+  return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+}
+
+function getStoredLocationFallback(rescueCase: RescueCase) {
+  const locationText = normalizeUsefulText(rescueCase.locationText);
+
+  if (!locationText || locationText === "Ubicación no capturada todavía.") {
+    return undefined;
+  }
+
+  return locationText;
+}
+
+function buildLocationSummaryLines(rescueCase: RescueCase): string[] {
+  const approximateLocation = normalizeUsefulText(rescueCase.approximateLocation);
+  const lines: string[] = [];
+
+  if (approximateLocation) {
+    lines.push(`Referencia del lugar: ${approximateLocation}`);
+  }
+
+  if (rescueCase.coords) {
+    lines.push(
+      `Coordenadas: ${formatCoordinates(rescueCase.coords)}`,
+      `Mapa: https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
+    );
+  } else {
+    const fallbackLocation = getStoredLocationFallback(rescueCase);
+
+    if (fallbackLocation) {
+      lines.push(`Referencia del lugar: ${fallbackLocation}`);
+    }
+  }
+
+  return lines;
+}
+
+function getHistoryLocationFields(rescueCase: RescueCase) {
+  const approximateLocation = normalizeUsefulText(rescueCase.approximateLocation);
+  const fields: string[] = [];
+
+  if (approximateLocation) {
+    fields.push(`Referencia del lugar: ${approximateLocation}`);
+  }
+
+  if (rescueCase.coords) {
+    fields.push(
+      `Coordenadas: ${formatCoordinates(rescueCase.coords)}`,
+      `Mapa: https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
+    );
+  } else {
+    const fallbackLocation = getStoredLocationFallback(rescueCase);
+
+    if (fallbackLocation) {
+      fields.push(`Referencia del lugar: ${fallbackLocation}`);
+    }
+  }
+
+  return fields;
+}
+
 function buildCaseSummary(rescueCase: RescueCase): string {
   const flagLabels = getActiveFlagLabels(rescueCase.flags);
-  const coordinates = rescueCase.coords
-    ? `${rescueCase.coords.latitude.toFixed(6)}, ${rescueCase.coords.longitude.toFixed(6)}`
-    : "No disponibles";
 
   return [
     "SOS Fauna España",
@@ -110,10 +174,7 @@ function buildCaseSummary(rescueCase: RescueCase): string {
         ? flagLabels.join(", ")
         : "Sin circunstancias adicionales seleccionadas"
     }`,
-    `Ubicación: ${rescueCase.locationText.trim() || "No indicada"}`,
-    `Coordenadas: ${coordinates}`,
-    `Persona de contacto: ${rescueCase.fullName.trim() || "No indicada"}`,
-    `Teléfono: ${rescueCase.phone.trim() || "No indicado"}`,
+    ...buildLocationSummaryLines(rescueCase),
   ].join("\n");
 }
 
@@ -132,6 +193,7 @@ function HistoryCard({
 }) {
   const flagLabels = getActiveFlagLabels(rescueCase.flags);
   const observedSituation = formatObservedSituation(flagLabels);
+  const locationFields = getHistoryLocationFields(rescueCase);
 
   return (
     <View style={styles.card}>
@@ -155,10 +217,11 @@ function HistoryCard({
       </Pressable>
 
       <View style={styles.cardSummary}>
-        <Text style={styles.summaryLabel}>Ubicación</Text>
-        <Text style={styles.summaryValue}>
-          {rescueCase.locationText.trim() || "No indicada"}
-        </Text>
+        {locationFields.map((field) => (
+          <Text key={field} style={styles.summaryValue}>
+            {field}
+          </Text>
+        ))}
 
         <Text style={styles.summaryLabel}>Situación</Text>
         <Text style={styles.summaryValue}>{observedSituation}</Text>
@@ -166,35 +229,6 @@ function HistoryCard({
 
       {expanded ? (
         <View style={styles.details}>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Persona de contacto</Text>
-            <Text style={styles.detailValue}>
-              {rescueCase.fullName.trim() || "No indicada"}
-            </Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Teléfono</Text>
-            <Text style={styles.detailValue}>
-              {rescueCase.phone.trim() || "No indicado"}
-            </Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Situación observada</Text>
-            <Text style={styles.detailValue}>{observedSituation}</Text>
-          </View>
-
-          {rescueCase.coords ? (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Coordenadas</Text>
-              <Text style={styles.detailValue}>
-                {rescueCase.coords.latitude.toFixed(6)},{" "}
-                {rescueCase.coords.longitude.toFixed(6)}
-              </Text>
-            </View>
-          ) : null}
-
           <View style={styles.detailActions}>
             <Pressable style={styles.copyButton} onPress={onCopy}>
               <View style={styles.buttonContent}>
@@ -583,19 +617,6 @@ const styles = StyleSheet.create({
     borderTopColor: "#dfe7df",
     padding: 22,
     gap: 18,
-  },
-  detailRow: {
-    gap: 5,
-  },
-  detailLabel: {
-    color: "#2f7a48",
-    fontSize: 13,
-    fontWeight: "900",
-  },
-  detailValue: {
-    color: "#3f4d43",
-    fontSize: 15,
-    lineHeight: 23,
   },
   detailActions: {
     flexDirection: "row",

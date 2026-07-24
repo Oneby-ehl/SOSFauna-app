@@ -16,12 +16,11 @@ import {
 
 type RescueCaseData = {
   step: RescueStep;
-  fullName: string;
-  phone: string;
   animalState: RescueAnimalState;
   animalType: RescueAnimalType;
   flags: RescueFlags;
   locationText: string;
+  approximateLocation?: string;
   coords: RescueCoordinates | null;
   locationCaptured: boolean;
 };

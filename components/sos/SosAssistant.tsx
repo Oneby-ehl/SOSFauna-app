@@ -11,7 +11,6 @@ import * as MediaLibrary from "expo-media-library";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -30,11 +29,6 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { SectionCard } from "@/components/SectionCard";
 import { provinceContacts } from "@/lib/provinceContacts";
-import {
-  clearRememberedContact,
-  loadRememberedContact,
-  saveRememberedContact,
-} from "@/services/rescueStorage";
 
 type FlagsState = {
   bleeding: boolean;
@@ -62,7 +56,7 @@ type AnimalType =
 
 type AnimalState = "alive" | "dead";
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4;
 
 const GREFA_WHATSAPP = "34648539901";
 
@@ -1029,10 +1023,6 @@ function getAdvice(
   return addSupplementalAdvice(advice, flags);
 }
 
-function normalizePhone(phone: string) {
-  return phone.replace(/[^\d+]/g, "");
-}
-
 function normalizeWhatsAppNumber(phone: string) {
   let normalized = phone.replace(/[^\d+]/g, "").trim();
 
@@ -1045,16 +1035,6 @@ function normalizeWhatsAppNumber(phone: string) {
 
 function countDigits(phone: string) {
   return (phone.match(/\d/g) || []).length;
-}
-
-function isValidPhone(phone: string) {
-  const normalized = normalizePhone(phone);
-  const plusCount = (normalized.match(/\+/g) || []).length;
-
-  if (plusCount > 1) return false;
-  if (normalized.includes("+") && !normalized.startsWith("+")) return false;
-
-  return countDigits(normalized) >= 9;
 }
 
 function showMessage(title: string, message: string) {
@@ -1070,11 +1050,117 @@ type SosAssistantProps = {
   initialCase?: RescueCase | null;
 };
 
+type RescueCoordinates = NonNullable<RescueCase["coords"]>;
+
+function normalizeInitialStep(step: number | undefined): Step {
+  if (!step) return 1;
+  if (step >= 5) return 4;
+  if (step >= 4) return 3;
+  if (step === 2 || step === 3) return step;
+  return 1;
+}
+
+function formatCoordinates(coords: RescueCoordinates) {
+  return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+}
+
+function normalizeUsefulText(value: string | null | undefined) {
+  const normalized = value?.trim();
+  return normalized && normalized.length > 0 ? normalized : undefined;
+}
+
+function appendUniqueLocationPart(parts: string[], value: string | null | undefined) {
+  const normalized = normalizeUsefulText(value);
+
+  if (
+    normalized &&
+    !parts.some((part) => part.toLowerCase() === normalized.toLowerCase())
+  ) {
+    parts.push(normalized);
+  }
+}
+
+function buildApproximateLocation(
+  address: Location.LocationGeocodedAddress,
+) {
+  const parts: string[] = [];
+  const primaryParts: string[] = [];
+
+  if (address.street) {
+    appendUniqueLocationPart(primaryParts, address.street);
+    appendUniqueLocationPart(primaryParts, address.streetNumber);
+  }
+
+  const primary = normalizeUsefulText(address.name);
+
+  if (primary && primary !== address.streetNumber) {
+    appendUniqueLocationPart(parts, primary);
+  } else if (primaryParts.length > 0) {
+    appendUniqueLocationPart(parts, primaryParts.join(", "));
+  }
+
+  appendUniqueLocationPart(parts, address.district);
+  appendUniqueLocationPart(parts, address.city);
+  appendUniqueLocationPart(parts, address.subregion);
+  appendUniqueLocationPart(parts, address.region);
+
+  return normalizeUsefulText(parts.slice(0, 3).join(", "));
+}
+
+async function reverseGeocodeWithTimeout(coords: RescueCoordinates) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    const timeout = new Promise<null>((resolve) => {
+      timeoutId = setTimeout(() => resolve(null), 3500);
+    });
+
+    const result = await Promise.race([
+      Location.reverseGeocodeAsync(coords),
+      timeout,
+    ]);
+
+    if (!result || result.length === 0) return undefined;
+
+    for (const address of result) {
+      const approximateLocation = buildApproximateLocation(address);
+      if (approximateLocation) return approximateLocation;
+    }
+  } catch {
+    return undefined;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+
+  return undefined;
+}
+
+function buildLocationSummaryLines(
+  approximateLocation: string | undefined,
+  coords: RescueCoordinates | null,
+) {
+  const lines: string[] = [];
+
+  if (approximateLocation) {
+    lines.push(`Referencia del lugar: ${approximateLocation}`);
+  }
+
+  if (coords) {
+    lines.push(
+      `Coordenadas: ${formatCoordinates(coords)}`,
+      `Mapa: https://maps.google.com/?q=${coords.latitude},${coords.longitude}`,
+    );
+  }
+
+  return lines;
+}
+
 export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [currentCase, setCurrentCase] = useState<RescueCase | null>(initialCase);
-  const [step, setStep] = useState<Step>((initialCase?.step as Step) ?? 1);
+  const currentCaseRef = useRef<RescueCase | null>(initialCase);
+  const [step, setStep] = useState<Step>(normalizeInitialStep(initialCase?.step));
 
   const [showContacts, setShowContacts] = useState(false);
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
@@ -1089,11 +1175,9 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] =
     useState(false);
   const [lastWhatsAppNumber, setLastWhatsAppNumber] = useState("");
+  const [showEmptyStep3Confirmation, setShowEmptyStep3Confirmation] =
+    useState(false);
 
-  const [fullName, setFullName] = useState(initialCase?.fullName ?? "");
-  const [phone, setPhone] = useState(initialCase?.phone ?? "");
-  const [rememberContact, setRememberContact] = useState(false);
-  const [rememberContactReady, setRememberContactReady] = useState(false);
   const [animalState, setAnimalState] = useState<AnimalState>(
     (initialCase?.animalState as AnimalState) ?? "alive",
   );
@@ -1107,6 +1191,9 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const [locationText, setLocationText] = useState(
     initialCase?.locationText ?? "Ubicación no capturada todavía.",
   );
+  const [approximateLocation, setApproximateLocation] = useState(
+    normalizeUsefulText(initialCase?.approximateLocation),
+  );
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
@@ -1119,6 +1206,9 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const shouldConfirmExitRef = useRef(initialCase !== null);
   const saveCurrentProgressRef = useRef<() => Promise<void>>(async () => {});
+  const flowCompletedRef = useRef(false);
+  const reverseGeocodeCacheRef = useRef<Record<string, string | null>>({});
+  const pendingReverseGeocodeRef = useRef<Set<string>>(new Set());
   const [scrollY, setScrollY] = useState(0);
   const [scrollContentHeight, setScrollContentHeight] = useState(0);
   const [scrollLayoutHeight, setScrollLayoutHeight] = useState(0);
@@ -1158,8 +1248,6 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
 
     return (
       step !== 1 ||
-      fullName.trim().length > 0 ||
-      phone.trim().length > 0 ||
       animalState !== "alive" ||
       animalType !== "unknown" ||
       Object.values(flags).some(Boolean) ||
@@ -1174,10 +1262,8 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     coords,
     currentCase,
     flags,
-    fullName,
     initialCase,
     locationCaptured,
-    phone,
     photoUri,
     step,
     videoUri,
@@ -1186,45 +1272,6 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   useEffect(() => {
     shouldConfirmExitRef.current = hasMeaningfulProgress;
   }, [hasMeaningfulProgress]);
-
-  useEffect(() => {
-    let active = true;
-
-    const prepareRememberedContact = async () => {
-      const rememberedContact = await loadRememberedContact();
-
-      if (!active) return;
-
-      if (rememberedContact) {
-        if (!initialCase) {
-          setFullName(rememberedContact.fullName);
-          setPhone(rememberedContact.phone);
-        }
-
-        setRememberContact(true);
-      }
-
-      setRememberContactReady(true);
-    };
-
-    void prepareRememberedContact();
-
-    return () => {
-      active = false;
-    };
-  }, [initialCase]);
-
-  useEffect(() => {
-    if (!rememberContactReady) return;
-
-    if (!rememberContact) {
-      void clearRememberedContact();
-      return;
-    }
-
-    void saveRememberedContact({ fullName, phone });
-  }, [fullName, phone, rememberContact, rememberContactReady]);
-
 
   const mergedProvinceContacts = useMemo(() => {
     const madridEntry = {
@@ -1255,8 +1302,8 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     );
   }, [provinceSearch, mergedProvinceContacts]);
 
-  const showStep5ActionBar =
-    step === 5 &&
+  const showSummaryActionBar =
+    step === 4 &&
     !showContacts &&
     !showWhatsAppConfirmation &&
     !showWhatsAppOptions &&
@@ -1288,18 +1335,11 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   ]);
 
   const generatedSummary = useMemo(() => {
-    const mapsUrl = coords
-      ? `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`
-      : "Sin ubicación";
-
     return [
       "AVISO DE RESCATE DE FAUNA",
-      `Nombre: ${fullName || "No indicado"}`,
-      `Teléfono: ${phone || "No indicado"}`,
       `Estado del animal: ${selectedAnimalStateLabel}`,
       `Tipo de animal: ${selectedAnimalLabel}`,
-      `Ubicación: ${locationText}`,
-      `Mapa: ${mapsUrl}`,
+      ...buildLocationSummaryLines(approximateLocation, coords),
       `Señales observadas: ${selectedFlags}`,
       `Foto capturada: ${photoUri ? "sí" : "no"}`,
       `Vídeo capturado: ${videoUri ? "sí" : "no"}`,
@@ -1307,10 +1347,8 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       .filter(Boolean)
       .join("\n");
   }, [
+    approximateLocation,
     coords,
-    fullName,
-    locationText,
-    phone,
     photoUri,
     selectedAnimalLabel,
     selectedAnimalStateLabel,
@@ -1416,18 +1454,21 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       };
 
       const newLocationText =
-        `${current.coords.latitude.toFixed(5)}, ${current.coords.longitude.toFixed(5)}`;
+        formatCoordinates(newCoords);
 
       setCoords(newCoords);
       setLocationText(newLocationText);
+      setApproximateLocation(undefined);
       setLocationCaptured(true);
 
       await saveCurrentProgress(step, {
         coords: newCoords,
         locationText: newLocationText,
+        approximateLocation: undefined,
         locationCaptured: true,
       });
 
+      void updateApproximateLocation(newCoords, newLocationText);
     } catch {
       Alert.alert(
         "No se pudo obtener la ubicación",
@@ -1582,12 +1623,11 @@ const saveCurrentProgress = async (
   overrides: Partial<
     Pick<
       RescueCase,
-      | "fullName"
-      | "phone"
       | "animalState"
       | "animalType"
       | "flags"
       | "locationText"
+      | "approximateLocation"
       | "coords"
       | "locationCaptured"
     >
@@ -1596,40 +1636,101 @@ const saveCurrentProgress = async (
   const savedCase = await persistCurrentCase(
     {
       step: nextStep,
-      fullName,
-      phone,
       animalState,
       animalType,
       flags,
       locationText,
+      approximateLocation,
       coords,
       locationCaptured,
       ...overrides,
     },
-    currentCase,
+    currentCaseRef.current,
   );
 
+  currentCaseRef.current = savedCase;
   setCurrentCase(savedCase);
+
+  return savedCase;
 };
 
+  const updateApproximateLocation = async (
+    nextCoords: RescueCoordinates,
+    nextLocationText: string,
+  ) => {
+    const coordsKey = formatCoordinates(nextCoords);
+
+    if (pendingReverseGeocodeRef.current.has(coordsKey)) return;
+
+    const hasCachedLocation = Object.prototype.hasOwnProperty.call(
+      reverseGeocodeCacheRef.current,
+      coordsKey,
+    );
+    const cachedLocation = reverseGeocodeCacheRef.current[coordsKey];
+    const savedStep = normalizeInitialStep(currentCaseRef.current?.step ?? step);
+
+    if (flowCompletedRef.current) return;
+
+    if (hasCachedLocation && !cachedLocation) return;
+
+    if (cachedLocation) {
+      setApproximateLocation(cachedLocation);
+      await saveCurrentProgress(savedStep, {
+        coords: nextCoords,
+        locationText: nextLocationText,
+        approximateLocation: cachedLocation,
+        locationCaptured: true,
+      });
+      return;
+    }
+
+    pendingReverseGeocodeRef.current.add(coordsKey);
+
+    try {
+      const nextApproximateLocation = await reverseGeocodeWithTimeout(nextCoords);
+
+      if (flowCompletedRef.current) return;
+
+      if (!nextApproximateLocation) {
+        reverseGeocodeCacheRef.current[coordsKey] = null;
+        return;
+      }
+
+      reverseGeocodeCacheRef.current[coordsKey] = nextApproximateLocation;
+      setApproximateLocation(nextApproximateLocation);
+
+      await saveCurrentProgress(savedStep, {
+        coords: nextCoords,
+        locationText: nextLocationText,
+        approximateLocation: nextApproximateLocation,
+        locationCaptured: true,
+      });
+    } finally {
+      pendingReverseGeocodeRef.current.delete(coordsKey);
+    }
+  };
+
   useEffect(() => {
-    saveCurrentProgressRef.current = () => saveCurrentProgress();
+    saveCurrentProgressRef.current = async () => {
+      await saveCurrentProgress();
+    };
   });
 
   const completeAndReturnHome = async () => {
+    flowCompletedRef.current = true;
+
     await completeCurrentCase(
       {
         step,
-        fullName,
-        phone,
         animalState,
         animalType,
         flags,
         locationText,
+        approximateLocation,
         coords,
         locationCaptured,
       },
-      currentCase,
+      currentCaseRef.current,
     );
 
     router.replace("/");
@@ -1671,59 +1772,31 @@ const saveCurrentProgress = async (
     ]);
   };
 
-  const validateStep = () => {
-    if (step === 3) {
-      if (!fullName.trim()) {
-        showMessage(
-          "Falta el nombre",
-          "Introduce tu nombre y apellidos antes de continuar.",
-        );
-        return false;
-      }
-
-      if (!phone.trim()) {
-        showMessage(
-          "Falta el teléfono",
-          "Introduce un teléfono de contacto antes de continuar.",
-        );
-        return false;
-      }
-
-      if (!isValidPhone(phone)) {
-        showMessage(
-          "Teléfono no válido",
-          "Introduce un teléfono válido, con al menos 9 dígitos.",
-        );
-        return false;
-      }
-    }
-
-    if (step === 4) {
-      if (!photoUri && !videoUri && !locationCaptured) {
-        showMessage(
-          "Información incompleta",
-          "Conviene añadir al menos una foto, un vídeo o capturar la ubicación antes de continuar.",
-        );
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-    const goNext = async () => {
-    if (!validateStep()) return;
-  
-    if (step < 5) {
+  const advanceToNextStep = async () => {
+    if (step < 4) {
       const nextStep = (step + 1) as Step;
-  
+
       await saveCurrentProgress(nextStep);
-  
+
       setStep(nextStep);
     }
   };
 
+  const goNext = async () => {
+    if (step === 3 && !photoUri && !videoUri && !coords) {
+      setShowEmptyStep3Confirmation(true);
+      return;
+    }
+
+    await advanceToNextStep();
+  };
+
   const goBack = useCallback(() => {
+    if (showEmptyStep3Confirmation) {
+      setShowEmptyStep3Confirmation(false);
+      return;
+    }
+
     if (showWhatsAppConfirmation) {
       setShowWhatsAppConfirmation(false);
       return;
@@ -1756,6 +1829,7 @@ const saveCurrentProgress = async (
   }, [
     selectedProvince,
     showContacts,
+    showEmptyStep3Confirmation,
     showProvinces,
     showWhatsAppConfirmation,
     showWhatsAppOptions,
@@ -2006,6 +2080,37 @@ const saveCurrentProgress = async (
     </SectionCard>
   );
 
+  const renderEmptyStep3Confirmation = () => (
+    <SectionCard title="Continuar sin información">
+      <View style={styles.sectionContent}>
+        <Text style={styles.sectionDescription}>
+          No has añadido ubicación, foto ni vídeo. Esta información puede ser
+          muy útil para valorar la situación y localizar al animal. ¿Quieres
+          continuar de todos modos?
+        </Text>
+
+        <Pressable
+          style={styles.secondaryButton}
+          onPress={() => setShowEmptyStep3Confirmation(false)}
+        >
+          <Text style={styles.secondaryButtonText}>
+            Volver y añadir información
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.primaryButton}
+          onPress={() => {
+            setShowEmptyStep3Confirmation(false);
+            void advanceToNextStep();
+          }}
+        >
+          <Text style={styles.primaryButtonText}>Continuar sin añadirla</Text>
+        </Pressable>
+      </View>
+    </SectionCard>
+  );
+
   const renderWhatsAppOptions = () => (
     <SectionCard title="Enviar el aviso">
       <View style={styles.sectionContent}>
@@ -2075,19 +2180,19 @@ const saveCurrentProgress = async (
     </SectionCard>
   );
 
-  const renderStep5ActionBar = () => {
+  const renderSummaryActionBar = () => {
     if (
       showWhatsAppOptions ||
       showContacts ||
       showProvinces ||
       selectedProvince ||
-      step !== 5
+      step !== 4
     ) {
       return null;
     }
 
     return (
-      <View style={styles.step5ActionBar}>
+      <View style={styles.summaryActionBar}>
         <Pressable
           style={[styles.menuActionButton, styles.menuActionButtonPrimary]}
           onPress={() => setShowWhatsAppOptions(true)}
@@ -2120,12 +2225,13 @@ const saveCurrentProgress = async (
   const renderNavigationArrows = () => {
     const isOverlayOpen =
       showContacts ||
+      showEmptyStep3Confirmation ||
       showWhatsAppConfirmation ||
       showWhatsAppOptions ||
       showProvinces ||
       !!selectedProvince;
     const canShowBackArrow = isOverlayOpen || step > 1;
-    const canShowForwardArrow = !isOverlayOpen && step < 5;
+    const canShowForwardArrow = !isOverlayOpen && step < 4;
 
     return (
       <>
@@ -2155,6 +2261,7 @@ const saveCurrentProgress = async (
   };
 
   const renderStep = () => {
+    if (showEmptyStep3Confirmation) return renderEmptyStep3Confirmation();
     if (showContacts) return renderContacts();
     if (showProvinces && !selectedProvince) return renderProvinceList();
     if (selectedProvince) return renderProvinceDetail();
@@ -2284,73 +2391,14 @@ const saveCurrentProgress = async (
 
     if (step === 3) {
       return (
-        <SectionCard title="Paso 3. Datos de contacto">
-          <View style={styles.sectionContent}>
-            <Text style={styles.sectionDescription}>
-              Facilita tu nombre para que los especialistas sepan a quién
-              dirigirse y un número de teléfono en caso de que necesiten ponerse
-              en contacto contigo.
-            </Text>
-
-            <TextInput
-              placeholder="Nombre y apellidos"
-              value={fullName}
-              onChangeText={setFullName}
-              style={styles.input}
-            />
-
-            <TextInput
-              placeholder="Teléfono de contacto"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              style={styles.input}
-            />
-
-            <Pressable
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: rememberContact }}
-              style={styles.rememberContactRow}
-              onPress={() => setRememberContact((current) => !current)}
-            >
-              <View
-                style={[
-                  styles.rememberContactBox,
-                  rememberContact && styles.rememberContactBoxChecked,
-                ]}
-              >
-                {rememberContact ? (
-                  <Text style={styles.rememberContactCheck}>✓</Text>
-                ) : null}
-              </View>
-
-              <Text style={styles.rememberContactText}>
-                Recordar mi nombre y teléfono en este dispositivo
-              </Text>
-            </Pressable>
-
-            <View style={styles.warningBox}>
-              <Text style={styles.warningText}>
-                Tus datos se guardan únicamente en este dispositivo para
-                permitir recuperar el aviso y consultar el historial. No se
-                envían ni se comparten automáticamente.
-              </Text>
-            </View>
-          </View>
-        </SectionCard>
-      );
-    }
-
-    if (step === 4) {
-      return (
-        <SectionCard title="Paso 4. Foto, vídeo y ubicación">
+        <SectionCard title="Paso 3. Foto, vídeo y ubicación">
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
               Facilita una foto, un vídeo o la ubicación del hallazgo. Esta información puede ayudar a valorar mejor la situación y localizar el lugar si fuera necesario.
             </Text>
 
             <Text style={styles.sectionDescription}>
-              La ubicación es la información más importante. La foto y el vídeo pueden ayudar, pero son opcionales.
+              La ubicación y las fotografías ayudan a valorar mejor la situación y a localizar al animal. Si puedes aportar ambas, facilitarás la atención del aviso.
             </Text>
 
             <Text style={styles.subheading}>¿Qué deseas aportar?</Text>
@@ -2406,9 +2454,25 @@ const saveCurrentProgress = async (
                     <Text style={styles.mapLocationTitle}>
                       📍 Ubicación capturada
                     </Text>
+
+                    {approximateLocation ? (
+                      <>
+                        <Text style={styles.mapLocationLabel}>
+                          Referencia del lugar
+                        </Text>
+                        <Text style={styles.mapLocationText}>
+                          {approximateLocation}
+                        </Text>
+                      </>
+                    ) : null}
+
+                    <Text style={styles.mapLocationLabel}>Coordenadas</Text>
                     <Text style={styles.mapCoords}>
-                      {coords.latitude.toFixed(5)},{" "}
-                      {coords.longitude.toFixed(5)}
+                      {formatCoordinates(coords)}
+                    </Text>
+                    <Text style={styles.mapEmptyText}>
+                      La referencia del lugar puede no ser exacta. Las
+                      coordenadas suelen ofrecer una localización más precisa.
                     </Text>
                     <Text style={styles.mapEmptyText}>
                       Puedes abrir la ubicación en Google Maps para ver calles,
@@ -2442,7 +2506,7 @@ const saveCurrentProgress = async (
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={90}
         >
-          <SectionCard title="Paso 5. Resumen">
+          <SectionCard title="Paso 4. Resumen">
             <View style={styles.sectionContent}>
               <Text style={styles.sectionDescription}>
                 Lee el resumen y pulsa en Teléfonos de ayuda para llamar a los
@@ -2471,15 +2535,20 @@ const saveCurrentProgress = async (
         style={styles.keyboardAvoid}
         keyboardVerticalOffset={90}
       >
-        <SectionCard title="Paso 5. Resumen">
+        <SectionCard title="Paso 4. Resumen">
           <View style={styles.sectionContent}>
-            <View style={styles.step5Instructions}>
+            <View style={styles.summaryInstructions}>
               <Text style={styles.bulletText}>
                 • Revisa si el resumen es correcto o retrocede para corregir.
               </Text>
               <Text style={styles.bulletText}>
                 • Usa <Text style={styles.bulletStrong}>WhatsApp</Text> para
                 enviarlo a GREFA Madrid o a otro contacto que elijas.
+              </Text>
+              <Text style={styles.bulletText}>
+                • Usa <Text style={styles.bulletStrong}>Copiar</Text> para
+                guardar el resumen en el portapapeles y compartirlo mediante
+                cualquier aplicación.
               </Text>
               <Text style={styles.bulletText}>
                 • Usa <Text style={styles.bulletStrong}>Ayuda</Text> para buscar
@@ -2509,7 +2578,7 @@ const saveCurrentProgress = async (
         }}
       />
 
-      {showStep5ActionBar ? renderStep5ActionBar() : null}
+      {showSummaryActionBar ? renderSummaryActionBar() : null}
 
       <ScrollView
         ref={scrollViewRef}
@@ -2517,7 +2586,7 @@ const saveCurrentProgress = async (
         contentContainerStyle={[
           styles.container,
           {
-            paddingTop: showStep5ActionBar ? 84 : 12,
+            paddingTop: showSummaryActionBar ? 84 : 12,
             paddingBottom: Math.max(220, insets.bottom + 180),
           },
         ]}
@@ -2689,38 +2758,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: "#ffffff",
   },
-  rememberContactRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingVertical: 4,
-  },
-  rememberContactBox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: "#14532d",
-    backgroundColor: "#ffffff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rememberContactBoxChecked: {
-    backgroundColor: "#14532d",
-  },
-  rememberContactCheck: {
-    color: "#ffffff",
-    fontSize: 15,
-    lineHeight: 18,
-    fontWeight: "900",
-  },
-  rememberContactText: {
-    flex: 1,
-    color: "#374151",
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "700",
-  },
   summaryEditor: {
     minHeight: 184,
     lineHeight: 21,
@@ -2846,7 +2883,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
   },
-  step5ActionBar: {
+  summaryActionBar: {
     position: "absolute",
     top: 0,
     left: 0,
@@ -2990,7 +3027,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  step5Instructions: {
+  summaryInstructions: {
     backgroundColor: "#eef8f0",
     borderWidth: 1,
     borderColor: "#b7dfc0",
@@ -3038,6 +3075,19 @@ const styles = StyleSheet.create({
     color: "#14532d",
     fontSize: 15,
     fontWeight: "900",
+    textAlign: "center",
+  },
+  mapLocationLabel: {
+    color: "#14532d",
+    fontSize: 13,
+    fontWeight: "900",
+    textAlign: "center",
+  },
+  mapLocationText: {
+    color: "#1f2937",
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "700",
     textAlign: "center",
   },
   mapCoords: {
