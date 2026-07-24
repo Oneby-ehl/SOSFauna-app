@@ -1,6 +1,8 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { ExternalLink } from "@/components/external-link";
+
 const institutionalSources = [
   {
     name: "Emergencias 112",
@@ -32,10 +34,36 @@ const institutionalSources = [
   },
 ];
 
+const legalSources = [
+  {
+    name: "Ley 42/2007, de 13 de diciembre, del Patrimonio Natural y de la Biodiversidad",
+    description:
+      "Es la norma básica estatal para la conservación del patrimonio natural y la biodiversidad. Entre otras cuestiones, establece medidas de protección para las especies silvestres.",
+    url: "https://www.boe.es/buscar/act.php?id=BOE-A-2007-21490",
+    displayUrl: "texto consolidado del BOE",
+  },
+  {
+    name: "Real Decreto 139/2011: especies en régimen de protección especial y especies amenazadas",
+    description:
+      "Desarrolla el Listado de Especies Silvestres en Régimen de Protección Especial y el Catálogo Español de Especies Amenazadas.",
+    url: "https://www.boe.es/buscar/act.php?id=BOE-A-2011-3582",
+    displayUrl: "texto consolidado del BOE",
+  },
+  {
+    name: "Normativa de las especies silvestres — MITECO",
+    description:
+      "Página oficial del Ministerio para la Transición Ecológica y el Reto Demográfico con el marco normativo estatal, europeo e internacional sobre conservación de especies silvestres.",
+    url: "https://www.miteco.gob.es/es/biodiversidad/temas/conservacion-de-especies/especies-silvestres/ce-silvestres-conservacion-normativa.html",
+    displayUrl: "MITECO",
+  },
+];
+
 export default function SourcesPage() {
   return (
     <>
-      <Stack.Screen options={{ title: "Recursos oficiales | SOS Fauna España" }} />
+      <Stack.Screen
+        options={{ title: "Recursos de información | SOS Fauna España" }}
+      />
 
       <ScrollView
         style={styles.screen}
@@ -43,7 +71,7 @@ export default function SourcesPage() {
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text style={styles.title}>Recursos oficiales</Text>
+          <Text style={styles.title}>Recursos de información</Text>
 
           <Text style={styles.intro}>
             La información y los teléfonos incluidos en SOS Fauna España se han
@@ -54,7 +82,7 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recursos oficiales</Text>
+          <Text style={styles.sectionTitle}>Recursos de información</Text>
 
           {institutionalSources.map((source) => (
             <View key={source.name} style={styles.card}>
@@ -62,13 +90,13 @@ export default function SourcesPage() {
 
               <Text style={styles.cardText}>{source.description}</Text>
 
-              <Link href={source.url as never} asChild>
+              <ExternalLink href={source.url} asChild>
                 <Pressable style={styles.linkButton}>
                   <Text style={styles.linkButtonText}>
                     Visitar {source.displayUrl}
                   </Text>
                 </Pressable>
-              </Link>
+              </ExternalLink>
             </View>
           ))}
         </View>
@@ -108,19 +136,42 @@ export default function SourcesPage() {
           </Text>
         </View>
 
-        <View style={styles.disclaimer}>
-          <Text style={styles.disclaimerTitle}>Proyecto independiente</Text>
+        <View style={styles.section}>
+          <View style={styles.sectionHeadingRow}>
+            <Text style={styles.sectionIcon}>⚖️</Text>
+            <Text style={styles.sectionTitle}>
+              Normativa básica sobre fauna silvestre
+            </Text>
+          </View>
 
-          <Text style={styles.disclaimerText}>
-            SOS Fauna España es un proyecto independiente. No es una aplicación
-            oficial de ninguna administración pública, servicio de
-            emergencias, cuerpo policial o entidad mencionada en esta página.
+          <Text style={styles.sectionIntro}>
+            La normativa española protege la fauna silvestre y regula
+            determinadas actuaciones sobre los animales y las especies
+            protegidas. En caso de duda, se recomienda contactar con los
+            servicios competentes antes de capturar, retener, trasladar o
+            manipular un animal silvestre.
           </Text>
 
-          <Text style={styles.disclaimerText}>
-            La información proporcionada es orientativa y no sustituye las
-            instrucciones de veterinarios, centros de recuperación, agentes
-            medioambientales o servicios de emergencia.
+          {legalSources.map((source) => (
+            <View key={source.name} style={styles.card}>
+              <Text style={styles.cardTitle}>{source.name}</Text>
+
+              <Text style={styles.cardText}>{source.description}</Text>
+
+              <ExternalLink href={source.url} asChild>
+                <Pressable style={styles.linkButton}>
+                  <Text style={styles.linkButtonText}>
+                    Visitar {source.displayUrl}
+                  </Text>
+                </Pressable>
+              </ExternalLink>
+            </View>
+          ))}
+
+          <Text style={styles.orientationNote}>
+            Esta información tiene carácter orientativo. La gestión de la fauna
+            silvestre corresponde en gran medida a las comunidades autónomas y
+            puede variar según el territorio y la especie.
           </Text>
         </View>
 
@@ -172,10 +223,24 @@ const styles = StyleSheet.create({
   section: {
     gap: 14,
   },
+  sectionHeadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  sectionIcon: {
+    fontSize: 22,
+  },
   sectionTitle: {
     color: "#111827",
     fontSize: 24,
     fontWeight: "900",
+  },
+  sectionIntro: {
+    color: "#4b5563",
+    fontSize: 16,
+    lineHeight: 25,
   },
   card: {
     backgroundColor: "#ffffff",
@@ -226,23 +291,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 23,
   },
-  disclaimer: {
-    backgroundColor: "#fef3c7",
-    borderWidth: 1,
-    borderColor: "#f59e0b",
-    borderRadius: 16,
-    padding: 20,
-    gap: 10,
-  },
-  disclaimerTitle: {
-    color: "#92400e",
-    fontSize: 18,
-    fontWeight: "800",
-  },
-  disclaimerText: {
-    color: "#92400e",
-    fontSize: 15,
-    lineHeight: 23,
+  orientationNote: {
+    color: "#4b5563",
+    fontSize: 14,
+    fontStyle: "italic",
+    lineHeight: 22,
   },
   backButton: {
     alignSelf: "flex-start",

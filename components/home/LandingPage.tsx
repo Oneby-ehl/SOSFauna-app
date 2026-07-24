@@ -5,6 +5,7 @@ import {
   discardCurrentCase,
   recoverCurrentCase,
 } from "@/services/rescueCaseService";
+import AppVersionFooter from "@/components/AppVersionFooter";
 import { getHistory } from "@/services/rescueStorage";
 import {
   Alert,
@@ -17,18 +18,16 @@ import {
   View,
 } from "react-native";
 
-type FeatureCardProps = {
+type AnimalScopeGroupProps = {
   icon: string;
-  title: string;
-  description: string;
+  label: string;
 };
 
-function FeatureCard({ icon, title, description }: FeatureCardProps) {
+function AnimalScopeGroup({ icon, label }: AnimalScopeGroupProps) {
   return (
-    <View style={styles.featureCard}>
-      <Text style={styles.featureIcon}>{icon}</Text>
-      <Text style={styles.featureTitle}>{title}</Text>
-      <Text style={styles.featureDescription}>{description}</Text>
+    <View style={styles.animalScopeGroup}>
+      <Text style={styles.animalScopeIcon}>{icon}</Text>
+      <Text style={styles.animalScopeLabel}>{label}</Text>
     </View>
   );
 }
@@ -318,37 +317,6 @@ export default function LandingPage() {
           ) : null}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            Todo lo necesario para actuar con rapidez
-          </Text>
-
-          <View
-            style={[
-              styles.featureGrid,
-              isCompact && styles.featureGridCompact,
-            ]}
-          >
-            <FeatureCard
-              icon="🧭"
-              title="Recomendaciones"
-              description="Recibe orientación adaptada al tipo de animal y a la situación antes de intervenir."
-            />
-
-            <FeatureCard
-              icon="📷"
-              title="Información útil"
-              description="Añade fotografías, vídeos y ubicación para facilitar la valoración del caso."
-            />
-
-            <FeatureCard
-             icon="☎️"
-             title="Recursos adecuados"
-             description="Prepara un resumen del aviso y localiza fácilmente los servicios a los que puedes dirigirte."
-            />
-          </View>
-        </View>
-
         <View style={[styles.section, styles.processSection]}>
           <View style={styles.processIntro}>
             <Text style={styles.sectionEyebrow}>Cómo funciona</Text>
@@ -416,6 +384,22 @@ export default function LandingPage() {
           </View>
         </View>
 
+        <View style={[styles.section, styles.animalScopeSection]}>
+          <Text style={[styles.sectionTitle, styles.animalScopeTitle]}>
+            ¿Qué animales incluye SOS Fauna España?
+          </Text>
+
+          <Text style={[styles.sectionDescription, styles.animalScopeText]}>
+            SOS Fauna España se centra en cubrir las incidencias más habituales de la fauna silvestre no marina.
+          </Text>
+
+          <View style={styles.animalScopeGrid}>
+            <AnimalScopeGroup icon="🦉" label="Aves" />
+            <AnimalScopeGroup icon="🦊" label="Mamíferos" />
+            <AnimalScopeGroup icon="🦎" label="Reptiles y anfibios" />
+          </View>
+        </View>
+
         {installPrompt ? (
           <View style={styles.installSection}>
             <Text style={styles.installTitle}>
@@ -442,7 +426,7 @@ export default function LandingPage() {
               Asistencia guiada ante incidencias con fauna silvestre.
             </Text>
             <Text style={styles.footerNote}>
-              📱 Aplicación Android próximamente
+              📱 Aplicación Android disponible próximamente en Google Play
             </Text>
           </View>
 
@@ -454,16 +438,24 @@ export default function LandingPage() {
              <Link href="/privacy">
                <Text style={styles.footerLink}>Política de privacidad</Text>
              </Link>
+
+             <Link href="/legal">
+               <Text style={styles.footerLink}>Aviso legal</Text>
+             </Link>
            
              <Link href="/sources">
-               <Text style={styles.footerLink}>Recursos oficiales</Text>
+               <Text style={styles.footerLink}>Recursos de información</Text>
              </Link>
 
              <Link href="/contact">
                <Text style={styles.footerLink}>Contacto</Text>
              </Link>
-           </View>
+          </View>
         </View>
+      </View>
+
+      <View style={styles.versionFooter}>
+        <AppVersionFooter />
       </View>
     </ScrollView>
   );
@@ -794,34 +786,54 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 27,
   },
-  featureGrid: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  featureGridCompact: {
-    flexDirection: "column",
-  },
-  featureCard: {
-    flex: 1,
+  animalScopeSection: {
     backgroundColor: "#ffffff",
-    borderRadius: 20,
+    borderRadius: 28,
     borderWidth: 1,
     borderColor: "#dfe7df",
-    padding: 26,
+    paddingHorizontal: 30,
+    paddingTop: 26,
+    paddingBottom: 22,
+    gap: 15,
+  },
+  animalScopeTitle: {
+    maxWidth: "100%",
+  },
+  animalScopeText: {
+    maxWidth: "100%",
+  },
+  animalScopeGrid: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     gap: 12,
   },
-  featureIcon: {
+  animalScopeGroup: {
+    flex: 1,
+    minWidth: 180,
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 4,
+  },
+  animalScopeIcon: {
     fontSize: 34,
+    lineHeight: 41,
   },
-  featureTitle: {
+  animalScopeLabel: {
     color: "#183d28",
-    fontSize: 20,
+    fontSize: 17,
+    lineHeight: 23,
     fontWeight: "900",
+    textAlign: "center",
   },
-  featureDescription: {
-    color: "#536158",
-    fontSize: 15,
-    lineHeight: 24,
+  versionFooter: {
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 18,
+    paddingBottom: 24,
   },
   processSection: {
     backgroundColor: "#ffffff",

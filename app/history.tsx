@@ -17,6 +17,7 @@ import {
   deleteHistoryItem,
   getHistory,
 } from "@/services/rescueStorage";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import type {
   RescueAnimalState,
   RescueAnimalType,
@@ -37,6 +38,11 @@ const ANIMAL_TYPE_LABELS: Record<RescueAnimalType, string> = {
 const ANIMAL_STATE_LABELS: Record<RescueAnimalState, string> = {
   alive: "Vivo",
   dead: "Muerto",
+};
+
+const ANIMAL_STATE_ICONS: Record<RescueAnimalState, string> = {
+  alive: "🟢",
+  dead: "⚫",
 };
 
 const FLAG_LABELS: Array<{
@@ -76,6 +82,12 @@ function getActiveFlagLabels(flags: RescueFlags): string[] {
   return FLAG_LABELS.filter(({ key }) => flags[key]).map(
     ({ label }) => label,
   );
+}
+
+function formatObservedSituation(flagLabels: string[]): string {
+  return flagLabels.length > 0
+    ? `${flagLabels.join(". ")}.`
+    : "Sin incidencias destacables.";
 }
 
 function buildCaseSummary(rescueCase: RescueCase): string {
@@ -118,6 +130,7 @@ function HistoryCard({
   onDelete: () => void;
 }) {
   const flagLabels = getActiveFlagLabels(rescueCase.flags);
+  const observedSituation = formatObservedSituation(flagLabels);
 
   return (
     <View style={styles.card}>
@@ -130,21 +143,24 @@ function HistoryCard({
           <Text style={styles.cardDate}>
             {formatDate(rescueCase.completedAt ?? rescueCase.updatedAt)}
           </Text>
+
+          <Text style={styles.cardState}>
+            {ANIMAL_STATE_ICONS[rescueCase.animalState]}{" "}
+            {ANIMAL_STATE_LABELS[rescueCase.animalState]}
+          </Text>
         </View>
 
         <Text style={styles.expandIcon}>{expanded ? "−" : "+"}</Text>
       </Pressable>
 
       <View style={styles.cardSummary}>
-        <Text style={styles.summaryLabel}>Estado</Text>
-        <Text style={styles.summaryValue}>
-          {ANIMAL_STATE_LABELS[rescueCase.animalState]}
-        </Text>
-
         <Text style={styles.summaryLabel}>Ubicación</Text>
         <Text style={styles.summaryValue}>
           {rescueCase.locationText.trim() || "No indicada"}
         </Text>
+
+        <Text style={styles.summaryLabel}>Situación</Text>
+        <Text style={styles.summaryValue}>{observedSituation}</Text>
       </View>
 
       {expanded ? (
@@ -165,11 +181,7 @@ function HistoryCard({
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Situación observada</Text>
-            <Text style={styles.detailValue}>
-              {flagLabels.length > 0
-                ? flagLabels.join(", ")
-                : "No se seleccionaron circunstancias adicionales"}
-            </Text>
+            <Text style={styles.detailValue}>{observedSituation}</Text>
           </View>
 
           {rescueCase.coords ? (
@@ -184,11 +196,17 @@ function HistoryCard({
 
           <View style={styles.detailActions}>
             <Pressable style={styles.copyButton} onPress={onCopy}>
-              <Text style={styles.copyButtonText}>📋 Copiar resumen</Text>
+              <View style={styles.buttonContent}>
+                <IconSymbol name="doc.on.doc" size={16} color="#ffffff" />
+                <Text style={styles.copyButtonText}>Copiar resumen</Text>
+              </View>
             </Pressable>
 
             <Pressable style={styles.deleteButton} onPress={onDelete}>
-              <Text style={styles.deleteButtonText}>Eliminar este aviso</Text>
+              <View style={styles.buttonContent}>
+                <IconSymbol name="trash" size={16} color="#9b1c1c" />
+                <Text style={styles.deleteButtonText}>Eliminar aviso</Text>
+              </View>
             </Pressable>
           </View>
         </View>
@@ -520,6 +538,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  cardState: {
+    color: "#34483a",
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "800",
+  },
   expandIcon: {
     width: 34,
     height: 34,
@@ -577,6 +601,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
     marginTop: 2,
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
   },
   copyButton: {
     minHeight: 44,
