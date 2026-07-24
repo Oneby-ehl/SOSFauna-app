@@ -1,11 +1,18 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { SeoHead } from "@/components/seo/SeoHead";
+
 const principles = ["Calma", "Claridad", "Prudencia", "Acción"];
 
 export default function AboutPage() {
   return (
     <>
+      <SeoHead
+        title="Sobre SOS Fauna España | Ayuda a la fauna silvestre"
+        description="Conoce el objetivo y el funcionamiento de SOS Fauna España, un proyecto independiente de orientación ante incidencias con fauna silvestre."
+        path="/about"
+      />
       <Stack.Screen options={{ title: "Sobre SOS Fauna España | SOS Fauna España" }} />
 
       <ScrollView

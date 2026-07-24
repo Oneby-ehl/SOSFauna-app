@@ -5,6 +5,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
+import { NoIndexHead } from "@/components/seo/SeoHead";
+
 export default function AvisoRoute() {
   const router = useRouter();
   const { mode } = useLocalSearchParams<{ mode?: string }>();
@@ -43,14 +45,22 @@ export default function AvisoRoute() {
 
   if (loading) {
     return (
-      <View style={styles.loadingScreen}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Recuperando aviso…</Text>
-      </View>
+      <>
+        <NoIndexHead path="/aviso" title="Aviso | SOS Fauna España" />
+        <View style={styles.loadingScreen}>
+          <ActivityIndicator size="large" />
+          <Text style={styles.loadingText}>Recuperando aviso…</Text>
+        </View>
+      </>
     );
   }
 
-  return <SosAssistant initialCase={initialCase} />;
+  return (
+    <>
+      <NoIndexHead path="/aviso" title="Aviso | SOS Fauna España" />
+      <SosAssistant initialCase={initialCase} />
+    </>
+  );
 }
 
 const styles = StyleSheet.create({

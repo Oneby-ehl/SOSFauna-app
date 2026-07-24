@@ -11,7 +11,6 @@ export default function Root({ children }: { children: ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <meta name="robots" content="noindex,nofollow" />
         <meta name="theme-color" content="#14532d" />
         <link rel="manifest" href="/manifest.json" />
         <link

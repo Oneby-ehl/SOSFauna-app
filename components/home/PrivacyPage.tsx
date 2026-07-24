@@ -1,6 +1,8 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { SeoHead } from "@/components/seo/SeoHead";
+
 const storageUses = [
   "recuperar un aviso no finalizado;",
   "mantener un historial reciente de avisos;",
@@ -11,6 +13,11 @@ const storageUses = [
 export default function PrivacyPage() {
   return (
     <>
+      <SeoHead
+        title="Política de privacidad | SOS Fauna España"
+        description="Consulta cómo SOS Fauna España gestiona los permisos, el almacenamiento local y la información utilizada en la aplicación web y Android."
+        path="/privacy"
+      />
       <Stack.Screen
         options={{ title: "Política de privacidad | SOS Fauna España" }}
       />

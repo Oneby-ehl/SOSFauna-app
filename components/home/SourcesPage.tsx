@@ -2,6 +2,7 @@ import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ExternalLink } from "@/components/external-link";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 const institutionalSources = [
   {
@@ -61,6 +62,11 @@ const legalSources = [
 export default function SourcesPage() {
   return (
     <>
+      <SeoHead
+        title="Recursos de información sobre fauna silvestre | SOS Fauna España"
+        description="Teléfonos, organismos públicos, normativa y recursos útiles para actuar ante incidencias con fauna silvestre en España."
+        path="/sources"
+      />
       <Stack.Screen
         options={{ title: "Recursos de información | SOS Fauna España" }}
       />

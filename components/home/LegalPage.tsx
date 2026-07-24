@@ -1,6 +1,8 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { SeoHead } from "@/components/seo/SeoHead";
+
 const sections = [
   {
     title: "1. Identificación y finalidad",
@@ -80,6 +82,11 @@ const sections = [
 export default function LegalPage() {
   return (
     <>
+      <SeoHead
+        title="Aviso legal | SOS Fauna España"
+        description="Información legal, condiciones de uso y límites de responsabilidad de SOS Fauna España."
+        path="/legal"
+      />
       <Stack.Screen options={{ title: "Aviso legal | SOS Fauna España" }} />
 
       <ScrollView

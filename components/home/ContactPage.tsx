@@ -1,9 +1,16 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { SeoHead } from "@/components/seo/SeoHead";
+
 export default function ContactPage() {
   return (
     <>
+      <SeoHead
+        title="Contacto | SOS Fauna España"
+        description="Contacta con SOS Fauna España para comunicar errores, sugerencias o consultas relacionadas con el funcionamiento del proyecto."
+        path="/contact"
+      />
       <Stack.Screen options={{ title: "Contacto | SOS Fauna España" }} />
 
       <ScrollView

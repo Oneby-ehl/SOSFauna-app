@@ -17,6 +17,7 @@ import {
   deleteHistoryItem,
   getHistory,
 } from "@/services/rescueStorage";
+import { NoIndexHead } from "@/components/seo/SeoHead";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type {
   RescueAnimalState,
@@ -307,6 +308,7 @@ export default function HistoryPage() {
       contentContainerStyle={styles.screenContent}
       showsVerticalScrollIndicator
     >
+      <NoIndexHead path="/history" title="Mis avisos | SOS Fauna España" />
       <Stack.Screen options={{ title: "Mis avisos" }} />
 
       <View style={styles.header}>

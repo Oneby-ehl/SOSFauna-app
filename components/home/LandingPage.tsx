@@ -6,6 +6,7 @@ import {
   recoverCurrentCase,
 } from "@/services/rescueCaseService";
 import AppVersionFooter from "@/components/AppVersionFooter";
+import { homeStructuredData, SeoHead } from "@/components/seo/SeoHead";
 import { getHistory } from "@/services/rescueStorage";
 import {
   Alert,
@@ -175,7 +176,15 @@ export default function LandingPage() {
       contentContainerStyle={styles.screenContent}
       showsVerticalScrollIndicator
     >
-      <Stack.Screen options={{ title: "SOS Fauna España" }} />
+      <SeoHead
+        title="SOS Fauna España | Ayuda ante animales silvestres"
+        description="SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda."
+        path="/"
+        structuredData={homeStructuredData}
+      />
+      <Stack.Screen
+        options={{ title: "SOS Fauna España | Ayuda ante animales silvestres" }}
+      />
 
       <View style={styles.header}>
         <View style={styles.headerInner}>
@@ -196,7 +205,11 @@ export default function LandingPage() {
           <View style={[styles.heroContent, isCompact && styles.heroContentCompact]}>
             <Text style={styles.badge}>Ayuda a la fauna silvestre</Text>
 
-            <Text style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}>
+            <Text
+              accessibilityRole="header"
+              aria-level={1}
+              style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}
+            >
               ¿Has encontrado un animal silvestre herido, atrapado o en peligro?
             </Text>
 
