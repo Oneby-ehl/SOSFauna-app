@@ -177,13 +177,13 @@ export default function LandingPage() {
       showsVerticalScrollIndicator
     >
       <SeoHead
-        title="SOS Fauna España | Ayuda ante animales silvestres"
+        title="SOS Fauna España | Ayuda a la fauna silvestre"
         description="SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda."
         path="/"
         structuredData={homeStructuredData}
       />
       <Stack.Screen
-        options={{ title: "SOS Fauna España | Ayuda ante animales silvestres" }}
+        options={{ title: "SOS Fauna España | Ayuda a la fauna silvestre" }}
       />
 
       <View style={styles.header}>
