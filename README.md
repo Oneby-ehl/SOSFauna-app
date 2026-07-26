@@ -9,7 +9,7 @@
 - Asistente paso a paso para registrar un aviso de fauna.
 - Selección del estado del animal: vivo o muerto.
 - Selección del tipo general de animal.
-- Registro de situaciones observadas como sangrado, cría, anilla/GPS, atrapamiento, debilidad, respiración agitada o dificultad para volar.
+- Registro de situaciones observadas como lesión aparente, cría, anilla/GPS, atrapamiento, debilidad, respiración agitada o dificultad para volar.
 - Consejos básicos de actuación según el caso.
 - Captura de foto, vídeo y ubicación GPS.
 - Visualización del punto de localización en mapa.

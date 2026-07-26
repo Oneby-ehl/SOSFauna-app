@@ -11,6 +11,8 @@ import * as MediaLibrary from "expo-media-library";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
+  Animated,
+  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -29,6 +31,8 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { SectionCard } from "@/components/SectionCard";
 import { provinceContacts } from "@/lib/provinceContacts";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type FlagsState = {
   bleeding: boolean;
@@ -79,7 +83,7 @@ const ANIMAL_STATE_OPTIONS: Array<{ key: AnimalState; label: string }> = [
 ];
 
 const FLAG_LABELS: Array<{ key: keyof FlagsState; label: string }> = [
-  { key: "bleeding", label: "Sangra" },
+  { key: "bleeding", label: "Herido" },
   { key: "baby", label: "Es cría" },
   { key: "catDog", label: "Ataque de gato/perro" },
   { key: "canNotMove", label: "No se mueve bien" },
@@ -541,7 +545,7 @@ function hasAnyConcern(flags: FlagsState) {
 function getObservedSigns(flags: FlagsState, includeCannotFly = false) {
   const signs: string[] = [];
 
-  if (flags.bleeding) signs.push("• Presenta sangrado.");
+  if (flags.bleeding) signs.push("• Presenta signos de lesión.");
   if (flags.catDog) signs.push("• Ha sufrido un ataque de gato o perro.");
   if (flags.canNotMove) signs.push("• No se mueve con normalidad.");
   if (includeCannotFly && flags.cannotFly) signs.push("• No puede volar.");
@@ -727,7 +731,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
   (additionalRisk
     ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags, true) + "\n\n"
     : "🚨 PUEDE NECESITAR AYUDA SI\n" +
-      "• Presenta heridas, sangrado, está muy débil o respira con dificultad.\n" +
+      "• Presenta heridas o signos de lesión, está muy débil o respira con dificultad.\n" +
       "• No puede mantenerse erguida o desplazarse con normalidad.\n" +
       "• Tiene un ala caída o en una posición anómala.\n" +
       "• Ha sido atacada por un gato o un perro.\n" +
@@ -1209,6 +1213,12 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const flowCompletedRef = useRef(false);
   const reverseGeocodeCacheRef = useRef<Record<string, string | null>>({});
   const pendingReverseGeocodeRef = useRef<Set<string>>(new Set());
+  const forwardArrowHintX = useRef(new Animated.Value(0)).current;
+  const forwardArrowHintScale = useRef(new Animated.Value(1)).current;
+  const forwardArrowReadinessRef = useRef<{
+    ready: boolean;
+    step: Step | null;
+  }>({ ready: false, step: null });
   const [scrollY, setScrollY] = useState(0);
   const [scrollContentHeight, setScrollContentHeight] = useState(0);
   const [scrollLayoutHeight, setScrollLayoutHeight] = useState(0);
@@ -1243,6 +1253,25 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     [animalState],
   );
 
+  const isCurrentStepReadyToContinue = useMemo(
+    () => {
+      if (step === 1) {
+        return (
+          Boolean(animalState) &&
+          Boolean(animalType) &&
+          Object.values(flags).some(Boolean)
+        );
+      }
+
+      if (step === 3) {
+        return Boolean(photoUri || videoUri || coords);
+      }
+
+      return false;
+    },
+    [animalState, animalType, coords, flags, photoUri, step, videoUri],
+  );
+
   const hasMeaningfulProgress = useMemo(() => {
     if (initialCase || currentCase) return true;
 
@@ -1272,6 +1301,71 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   useEffect(() => {
     shouldConfirmExitRef.current = hasMeaningfulProgress;
   }, [hasMeaningfulProgress]);
+
+  useEffect(() => {
+    if (forwardArrowReadinessRef.current.step !== step) {
+      forwardArrowReadinessRef.current = {
+        ready: isCurrentStepReadyToContinue,
+        step,
+      };
+      forwardArrowHintX.stopAnimation();
+      forwardArrowHintScale.stopAnimation();
+      forwardArrowHintX.setValue(0);
+      forwardArrowHintScale.setValue(1);
+      return;
+    }
+
+    if (!isCurrentStepReadyToContinue) {
+      forwardArrowReadinessRef.current.ready = false;
+      forwardArrowHintX.stopAnimation();
+      forwardArrowHintScale.stopAnimation();
+      forwardArrowHintX.setValue(0);
+      forwardArrowHintScale.setValue(1);
+      return;
+    }
+
+    if (forwardArrowReadinessRef.current.ready) return;
+
+    forwardArrowReadinessRef.current.ready = true;
+    forwardArrowHintX.setValue(0);
+    forwardArrowHintScale.setValue(1);
+
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(forwardArrowHintX, {
+          toValue: 7,
+          duration: 320,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+        Animated.timing(forwardArrowHintScale, {
+          toValue: 1.12,
+          duration: 320,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(forwardArrowHintX, {
+          toValue: 0,
+          duration: 360,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+        Animated.timing(forwardArrowHintScale, {
+          toValue: 1,
+          duration: 360,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ]),
+    ]).start();
+  }, [
+    forwardArrowHintScale,
+    forwardArrowHintX,
+    isCurrentStepReadyToContinue,
+    step,
+  ]);
 
   const mergedProvinceContacts = useMemo(() => {
     const madridEntry = {
@@ -2247,14 +2341,22 @@ const saveCurrentProgress = async (
         ) : null}
 
         {canShowForwardArrow ? (
-          <Pressable
+          <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel="Continuar"
-            style={styles.sideArrowRight}
+            style={[
+              styles.sideArrowRight,
+              {
+                transform: [
+                  { translateX: forwardArrowHintX },
+                  { scale: forwardArrowHintScale },
+                ],
+              },
+            ]}
             onPress={goNext}
           >
             <Text style={styles.sideArrowText}>›</Text>
-          </Pressable>
+          </AnimatedPressable>
         ) : null}
       </>
     );
