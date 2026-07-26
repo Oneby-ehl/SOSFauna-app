@@ -1,5 +1,5 @@
-import SosAssistant from "@/components/sos/SosAssistant";
+import LandingPage from "./LandingPage";
 
 export default function HomeNative() {
-  return <SosAssistant />;
+  return <LandingPage />;
 }

@@ -33,31 +33,10 @@ function AnimalScopeGroup({ icon, label }: AnimalScopeGroupProps) {
   );
 }
 
-type StepProps = {
-  number: string;
-  title: string;
-  description: string;
-};
-
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
-
-function Step({ number, title, description }: StepProps) {
-  return (
-    <View style={styles.step}>
-      <View style={styles.stepNumber}>
-        <Text style={styles.stepNumberText}>{number}</Text>
-      </View>
-
-      <View style={styles.stepContent}>
-        <Text style={styles.stepTitle}>{title}</Text>
-        <Text style={styles.stepDescription}>{description}</Text>
-      </View>
-    </View>
-  );
-}
 
 export default function LandingPage() {
   const router = useRouter();
@@ -330,43 +309,6 @@ export default function LandingPage() {
           ) : null}
         </View>
 
-        <View style={[styles.section, styles.processSection]}>
-          <View style={styles.processIntro}>
-            <Text style={styles.sectionEyebrow}>Cómo funciona</Text>
-            <Text style={[styles.sectionTitle, styles.processTitle]}>
-              Cuatro pasos para actuar correctamente
-            </Text>
-            <Text style={[styles.sectionDescription, styles.processDescription]}>
-              Describe lo que ocurre, consulta las recomendaciones y prepara toda la información necesaria antes de contactar con el recurso más adecuado.
-            </Text>
-          </View>
-
-          <View style={styles.steps}>
-            <Step
-              number="1"
-              title="Describe la situación"
-              description="Indica qué animal has encontrado y qué está ocurriendo."
-            />
-
-            <Step
-              number="2"
-              title="Consulta las recomendaciones"
-              description="Recibe indicaciones adaptadas al caso antes de intervenir."
-            />
-
-            <Step
-              number="3"
-              title="Facilita la información necesaria"
-              description="Añade ubicación, fotografías y datos de contacto cuando sea posible."
-            />
-
-            <Step
-              number="4"
-              title="Contacta con el recurso adecuado"
-              description="Obtén un resumen del aviso y los recursos recomendados para actuar."
-            />
-          </View>
-        </View>
         <View style={[styles.section, styles.processSection]}>
           <View style={styles.processIntro}>
             <Text style={[styles.sectionTitle, styles.processTitle]}>
