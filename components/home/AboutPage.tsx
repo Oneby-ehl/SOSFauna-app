@@ -5,6 +5,16 @@ import { SeoHead } from "@/components/seo/SeoHead";
 
 const principles = ["Calma", "Claridad", "Prudencia", "Acción"];
 
+const aboutPageStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  name: "Sobre SOS Fauna España",
+  url: "https://sosfauna.es/about",
+  inLanguage: "es",
+  description:
+    "SOS Fauna España es un proyecto independiente de orientación para incidencias con fauna silvestre.",
+};
+
 export default function AboutPage() {
   return (
     <>
@@ -12,6 +22,7 @@ export default function AboutPage() {
         title="Sobre SOS Fauna España | Ayuda a la fauna silvestre"
         description="Conoce el objetivo y el funcionamiento de SOS Fauna España, un proyecto independiente de orientación ante incidencias con fauna silvestre."
         path="/about"
+        structuredData={aboutPageStructuredData}
       />
       <Stack.Screen options={{ title: "Sobre SOS Fauna España | SOS Fauna España" }} />
 

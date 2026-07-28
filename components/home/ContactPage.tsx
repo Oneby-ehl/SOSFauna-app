@@ -3,6 +3,20 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { SeoHead } from "@/components/seo/SeoHead";
 
+const contactPageStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  name: "Contacto - SOS Fauna España",
+  url: "https://sosfauna.es/contact",
+  inLanguage: "es",
+  description:
+    "Página de contacto de SOS Fauna España para comunicar errores, sugerencias o consultas relacionadas con el funcionamiento del proyecto.",
+  significantLink: [
+    "mailto:contacto@sosfauna.es",
+    "mailto:privacidad@sosfauna.es",
+  ],
+};
+
 export default function ContactPage() {
   return (
     <>
@@ -10,6 +24,7 @@ export default function ContactPage() {
         title="Contacto | SOS Fauna España"
         description="Contacta con SOS Fauna España para comunicar errores, sugerencias o consultas relacionadas con el funcionamiento del proyecto."
         path="/contact"
+        structuredData={contactPageStructuredData}
       />
       <Stack.Screen options={{ title: "Contacto | SOS Fauna España" }} />
 

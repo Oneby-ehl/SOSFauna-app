@@ -6,7 +6,7 @@ import {
   recoverCurrentCase,
 } from "@/services/rescueCaseService";
 import AppVersionFooter from "@/components/AppVersionFooter";
-import { homeStructuredData, SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead } from "@/components/seo/SeoHead";
 import { getHistory } from "@/services/rescueStorage";
 import {
   Alert,
@@ -18,6 +18,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type AnimalScopeGroupProps = {
   icon: string;
@@ -150,20 +151,20 @@ export default function LandingPage() {
   };
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.screenContent}
-      showsVerticalScrollIndicator
-    >
-      <SeoHead
-        title="SOS Fauna España | Ayuda a la fauna silvestre"
-        description="SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda."
-        path="/"
-        structuredData={homeStructuredData}
-      />
-      <Stack.Screen
-        options={{ title: "SOS Fauna España | Ayuda a la fauna silvestre" }}
-      />
+    <SafeAreaView style={styles.screen} edges={["top"]}>
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={styles.screenContent}
+        showsVerticalScrollIndicator
+      >
+        <SeoHead
+          title="SOS Fauna España | Ayuda a la fauna silvestre"
+          description="SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda."
+          path="/"
+        />
+        <Stack.Screen
+          options={{ title: "SOS Fauna España | Ayuda a la fauna silvestre" }}
+        />
 
       <View style={styles.header}>
         <View style={styles.headerInner}>
@@ -409,10 +410,11 @@ export default function LandingPage() {
         </View>
       </View>
 
-      <View style={styles.versionFooter}>
-        <AppVersionFooter />
-      </View>
-    </ScrollView>
+        <View style={styles.versionFooter}>
+          <AppVersionFooter />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
