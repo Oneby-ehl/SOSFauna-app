@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 const SITE_NAME = "SOS Fauna España";
 const SITE_URL = "https://sosfauna.es";
 const THEME_COLOR = "#14532d";
-const SOCIAL_IMAGE_URL = `${SITE_URL}/og-image.png`;
+const SOCIAL_IMAGE_URL = `${SITE_URL}/og-image.jpg`;
 const SOCIAL_IMAGE_ALT =
   "SOS Fauna España - Ayuda a la fauna silvestre";
 const SOCIAL_IMAGE_WIDTH = "1200";

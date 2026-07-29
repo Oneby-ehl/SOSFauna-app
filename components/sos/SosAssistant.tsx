@@ -1225,18 +1225,24 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const [flags, setFlags] = useState<FlagsState>(
     initialCase?.flags ?? createInitialFlags(),
   );
+  const step2ScrollProgress =
+    scrollContentHeight <= scrollLayoutHeight
+      ? 0
+      : (scrollY + scrollLayoutHeight) / scrollContentHeight;
 
   const advice = useMemo(
     () => getAdvice(animalState, animalType, flags),
     [animalState, animalType, flags],
   );
 
-  const selectedFlags = useMemo(
-    () =>
-      FLAG_LABELS.filter(({ key }) => flags[key])
-        .map(({ label }) => label)
-        .join(", ") || "Sin marcas",
+  const selectedFlagLabels = useMemo(
+    () => FLAG_LABELS.filter(({ key }) => flags[key]).map(({ label }) => label),
     [flags],
+  );
+
+  const selectedFlags = useMemo(
+    () => selectedFlagLabels.join(", ") || "Sin marcas",
+    [selectedFlagLabels],
   );
 
   const selectedAnimalLabel = useMemo(
@@ -1272,6 +1278,30 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     [animalState, animalType, coords, flags, photoUri, step, videoUri],
   );
 
+  const shouldShowForwardArrowHint = useMemo(() => {
+    if (step === 1) {
+      return isCurrentStepReadyToContinue;
+    }
+
+    if (step === 2) {
+      return scrollY > 0 && step2ScrollProgress >= 0.9;
+    }
+
+    if (step === 3) {
+      return Boolean(photoUri || videoUri || coords);
+    }
+
+    return false;
+  }, [
+    coords,
+    isCurrentStepReadyToContinue,
+    photoUri,
+    scrollY,
+    step,
+    step2ScrollProgress,
+    videoUri,
+  ]);
+
   const hasMeaningfulProgress = useMemo(() => {
     if (initialCase || currentCase) return true;
 
@@ -1302,45 +1332,28 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     shouldConfirmExitRef.current = hasMeaningfulProgress;
   }, [hasMeaningfulProgress]);
 
-  useEffect(() => {
-    if (forwardArrowReadinessRef.current.step !== step) {
-      forwardArrowReadinessRef.current = {
-        ready: isCurrentStepReadyToContinue,
-        step,
-      };
-      forwardArrowHintX.stopAnimation();
-      forwardArrowHintScale.stopAnimation();
-      forwardArrowHintX.setValue(0);
-      forwardArrowHintScale.setValue(1);
-      return;
-    }
+  const resetForwardArrowHint = useCallback(() => {
+    forwardArrowHintX.stopAnimation();
+    forwardArrowHintScale.stopAnimation();
+    forwardArrowHintX.setValue(0);
+    forwardArrowHintScale.setValue(1);
+  }, [forwardArrowHintScale, forwardArrowHintX]);
 
-    if (!isCurrentStepReadyToContinue) {
-      forwardArrowReadinessRef.current.ready = false;
-      forwardArrowHintX.stopAnimation();
-      forwardArrowHintScale.stopAnimation();
-      forwardArrowHintX.setValue(0);
-      forwardArrowHintScale.setValue(1);
-      return;
-    }
-
-    if (forwardArrowReadinessRef.current.ready) return;
-
-    forwardArrowReadinessRef.current.ready = true;
+  const playForwardArrowHint = useCallback(() => {
     forwardArrowHintX.setValue(0);
     forwardArrowHintScale.setValue(1);
 
     Animated.sequence([
       Animated.parallel([
         Animated.timing(forwardArrowHintX, {
-          toValue: 7,
-          duration: 320,
+          toValue: 11,
+          duration: 300,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: Platform.OS !== "web",
         }),
         Animated.timing(forwardArrowHintScale, {
-          toValue: 1.12,
-          duration: 320,
+          toValue: 1.18,
+          duration: 300,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: Platform.OS !== "web",
         }),
@@ -1348,22 +1361,44 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       Animated.parallel([
         Animated.timing(forwardArrowHintX, {
           toValue: 0,
-          duration: 360,
+          duration: 380,
           easing: Easing.inOut(Easing.cubic),
           useNativeDriver: Platform.OS !== "web",
         }),
         Animated.timing(forwardArrowHintScale, {
           toValue: 1,
-          duration: 360,
+          duration: 380,
           easing: Easing.inOut(Easing.cubic),
           useNativeDriver: Platform.OS !== "web",
         }),
       ]),
     ]).start();
+  }, [forwardArrowHintScale, forwardArrowHintX]);
+
+  useEffect(() => {
+    if (forwardArrowReadinessRef.current.step !== step) {
+      forwardArrowReadinessRef.current = {
+        ready: shouldShowForwardArrowHint,
+        step,
+      };
+      resetForwardArrowHint();
+      return;
+    }
+
+    if (!shouldShowForwardArrowHint) {
+      forwardArrowReadinessRef.current.ready = false;
+      resetForwardArrowHint();
+      return;
+    }
+
+    if (forwardArrowReadinessRef.current.ready) return;
+
+    forwardArrowReadinessRef.current.ready = true;
+    playForwardArrowHint();
   }, [
-    forwardArrowHintScale,
-    forwardArrowHintX,
-    isCurrentStepReadyToContinue,
+    playForwardArrowHint,
+    resetForwardArrowHint,
+    shouldShowForwardArrowHint,
     step,
   ]);
 
@@ -1428,12 +1463,17 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     selectedProvince,
   ]);
 
+  const locationSummaryLines = useMemo(
+    () => buildLocationSummaryLines(approximateLocation, coords),
+    [approximateLocation, coords],
+  );
+
   const generatedSummary = useMemo(() => {
     return [
       "AVISO DE RESCATE DE FAUNA",
       `Estado del animal: ${selectedAnimalStateLabel}`,
       `Tipo de animal: ${selectedAnimalLabel}`,
-      ...buildLocationSummaryLines(approximateLocation, coords),
+      ...locationSummaryLines,
       `Señales observadas: ${selectedFlags}`,
       `Foto capturada: ${photoUri ? "sí" : "no"}`,
       `Vídeo capturado: ${videoUri ? "sí" : "no"}`,
@@ -1441,8 +1481,7 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       .filter(Boolean)
       .join("\n");
   }, [
-    approximateLocation,
-    coords,
+    locationSummaryLines,
     photoUri,
     selectedAnimalLabel,
     selectedAnimalStateLabel,
@@ -2274,6 +2313,76 @@ const saveCurrentProgress = async (
     </SectionCard>
   );
 
+  const renderSummaryPreview = () => (
+    <View style={[styles.summaryBox, styles.summaryPreview]}>
+      <Text style={styles.summaryPreviewTitle}>📋 RESUMEN DEL AVISO</Text>
+
+      <View style={styles.summaryPreviewSection}>
+        <Text style={styles.summaryPreviewLabel}>🐾 Animal</Text>
+        <Text style={styles.summaryPreviewValue}>{selectedAnimalLabel}</Text>
+      </View>
+
+      <View style={styles.summaryPreviewSection}>
+        <Text style={styles.summaryPreviewLabel}>❤️ Estado</Text>
+        <Text style={styles.summaryPreviewValue}>
+          {selectedAnimalStateLabel}
+        </Text>
+      </View>
+
+      <View style={styles.summaryPreviewSection}>
+        <Text style={styles.summaryPreviewLabel}>⚠️ Situación observada</Text>
+        {selectedFlagLabels.length > 0 ? (
+          <View style={styles.summaryPreviewList}>
+            {selectedFlagLabels.map((label) => (
+              <Text key={label} style={styles.summaryPreviewListItem}>
+                • {label}
+              </Text>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.summaryPreviewValue}>Sin marcas</Text>
+        )}
+      </View>
+
+      <View style={styles.summaryPreviewSection}>
+        <Text style={styles.summaryPreviewLabel}>📍 Ubicación</Text>
+        {locationSummaryLines.length > 0 ? (
+          <View style={styles.summaryPreviewList}>
+            {locationSummaryLines.map((line) => {
+              const displayLine = line.startsWith("Mapa:")
+                ? "Mapa incluido en el aviso"
+                : line;
+
+              return (
+                <Text key={line} style={styles.summaryPreviewValue}>
+                  {displayLine}
+                </Text>
+              );
+            })}
+          </View>
+        ) : (
+          <Text style={styles.summaryPreviewValue}>❌ No</Text>
+        )}
+      </View>
+
+      <View style={styles.summaryPreviewMetaRow}>
+        <View style={styles.summaryPreviewMetaItem}>
+          <Text style={styles.summaryPreviewLabel}>📷 Fotografía</Text>
+          <Text style={styles.summaryPreviewValue}>
+            {photoUri ? "✅ Sí" : "❌ No"}
+          </Text>
+        </View>
+
+        <View style={styles.summaryPreviewMetaItem}>
+          <Text style={styles.summaryPreviewLabel}>🎥 Vídeo</Text>
+          <Text style={styles.summaryPreviewValue}>
+            {videoUri ? "✅ Sí" : "❌ No"}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+
   const renderSummaryActionBar = () => {
     if (
       showWhatsAppOptions ||
@@ -2615,9 +2724,7 @@ const saveCurrentProgress = async (
                 servicios de ayuda o emergencias más cercanos.
               </Text>
 
-              <Text style={[styles.summaryBox, styles.summaryEditor]}>
-                {generatedSummary}
-              </Text>
+              {renderSummaryPreview()}
 
               <View style={styles.warningBox}>
                 <Text style={styles.warningText}>
@@ -2662,9 +2769,7 @@ const saveCurrentProgress = async (
               </Text>
             </View>
 
-            <Text style={[styles.summaryBox, styles.summaryEditor]}>
-              {generatedSummary}
-            </Text>
+            {renderSummaryPreview()}
           </View>
         </SectionCard>
       </KeyboardAvoidingView>
@@ -2979,6 +3084,63 @@ const styles = StyleSheet.create({
     padding: 12,
     lineHeight: 22,
     color: "#111827",
+  },
+  summaryPreview: {
+    gap: 14,
+    borderColor: "#b7dfc0",
+    backgroundColor: "#fbfdfb",
+  },
+  summaryPreviewTitle: {
+    color: "#14532d",
+    fontSize: 15,
+    fontWeight: "900",
+    lineHeight: 21,
+  },
+  summaryPreviewSection: {
+    gap: 4,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    paddingTop: 12,
+  },
+  summaryPreviewLabel: {
+    color: "#6b7280",
+    fontSize: 13,
+    fontWeight: "800",
+    lineHeight: 18,
+  },
+  summaryPreviewValue: {
+    color: "#111827",
+    fontSize: 16,
+    fontWeight: "800",
+    lineHeight: 23,
+  },
+  summaryPreviewList: {
+    gap: 4,
+  },
+  summaryPreviewListItem: {
+    color: "#111827",
+    fontSize: 16,
+    fontWeight: "800",
+    lineHeight: 24,
+  },
+  summaryPreviewMetaRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    paddingTop: 12,
+  },
+  summaryPreviewMetaItem: {
+    flexGrow: 1,
+    flexBasis: 140,
+    gap: 4,
+    backgroundColor: "#eef8f0",
+    borderWidth: 1,
+    borderColor: "#dbe7dd",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   inlineActionRow: {
     marginTop: 8,
