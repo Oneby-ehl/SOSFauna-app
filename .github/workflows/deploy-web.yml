@@ -36,6 +36,10 @@ jobs:
       - name: Export Expo web PWA
         run: npm run build:web:pwa
 
+      - name: Prepare GitHub Pages 404 page
+        run: |
+          node -e "const fs = require('fs'); const source = 'dist/+not-found.html'; const target = 'dist/404.html'; if (!fs.existsSync(source)) { throw new Error('No se ha encontrado dist/+not-found.html.'); } fs.copyFileSync(source, target); console.log('dist/404.html generado desde dist/+not-found.html');"
+
       - name: Disable Jekyll
         run: touch dist/.nojekyll
 

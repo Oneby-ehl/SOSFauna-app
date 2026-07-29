@@ -142,6 +142,14 @@ export default function LandingPage() {
     router.push("/history");
   };
 
+  const handleOpenFaq = () => {
+    router.push("/faq");
+  };
+
+  const handleOpenRecoveryCenters = () => {
+    router.push("/centros");
+  };
+
   const handleInstallApp = async () => {
     if (!installPrompt) return;
 
@@ -212,7 +220,12 @@ export default function LandingPage() {
           </View>
 
           <View style={[styles.heroPanel, isCompact && styles.heroPanelCompact]}>
-            <View style={styles.heroOwlGroup}>
+            <View
+              style={[
+                styles.heroOwlGroup,
+                isCompact && styles.heroOwlGroupCompact,
+              ]}
+            >
               <Text style={[styles.heroPanelIcon, isCompact && styles.heroPanelIconCompact]}>🦉</Text>
               <View style={styles.owlBase}>
                 <Text style={styles.owlBaseText}>🌿</Text>
@@ -292,10 +305,60 @@ export default function LandingPage() {
                 </View>
               ) : null}
 
+            </View>
+
+            <View
+              style={[
+                styles.heroPanelBottom,
+                isCompact && styles.heroPanelBottomCompact,
+              ]}
+            >
               <Text style={styles.heroNote}>
                 Gratuito · Sin registro{"\n"}
                 Diseñado para incidencias en España
               </Text>
+
+              <View style={styles.quickAccessBlock}>
+                <Pressable
+                  accessibilityRole="button"
+                  style={[
+                    styles.caseButton,
+                    isCompact && styles.caseButtonCompact,
+                    styles.quickAccessButton,
+                    isCompact && styles.quickAccessButtonCompact,
+                  ]}
+                  onPress={handleOpenFaq}
+                >
+                  <Text
+                    style={[
+                      styles.quickAccessButtonText,
+                      isCompact && styles.caseButtonTextCompact,
+                    ]}
+                  >
+                    ❓ Preguntas frecuentes
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  style={[
+                    styles.caseButton,
+                    isCompact && styles.caseButtonCompact,
+                    styles.quickAccessButton,
+                    isCompact && styles.quickAccessButtonCompact,
+                  ]}
+                  onPress={handleOpenRecoveryCenters}
+                >
+                  <Text
+                    style={[
+                      styles.quickAccessButtonText,
+                      isCompact && styles.caseButtonTextCompact,
+                    ]}
+                  >
+                    📞 Centros de Recuperación y teléfonos de ayuda
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           </View>
 
@@ -570,7 +633,7 @@ const styles = StyleSheet.create({
   heroActions: {
     width: "100%",
     alignItems: "stretch",
-    gap: 14,
+    gap: 12,
   },
   heroActionsCompact: {
     gap: 10,
@@ -621,6 +684,26 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "900",
   },
+  quickAccessBlock: {
+    gap: 10,
+  },
+  quickAccessButton: {
+    minHeight: 50,
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#9ab7a0",
+    paddingVertical: 12,
+  },
+  quickAccessButtonCompact: {
+    minHeight: 44,
+    paddingVertical: 9,
+  },
+  quickAccessButtonText: {
+    color: "#14532d",
+    fontSize: 16,
+    fontWeight: "900",
+    textAlign: "center",
+  },
   pendingBlock: {
     gap: 10,
   },
@@ -644,16 +727,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     textAlign: "center",
-    marginTop: 6,
+  },
+  heroPanelBottom: {
+    width: "100%",
+    marginTop: "auto",
+    gap: 10,
+  },
+  heroPanelBottomCompact: {
+    gap: 10,
   },
   heroPanel: {
     flex: 0.75,
     minWidth: 280,
     backgroundColor: "#dfeee2",
     borderRadius: 28,
-    padding: 32,
-    justifyContent: "center",
-    gap: 22,
+    padding: 28,
+    justifyContent: "flex-start",
+    gap: 16,
   },
   heroPanelCompact: {
     flexGrow: 0,
@@ -664,7 +754,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     padding: 18,
     borderRadius: 18,
-    gap: 12,
+    gap: 10,
   },
   heroPanelIcon: {
     fontSize: 48,
@@ -675,6 +765,12 @@ const styles = StyleSheet.create({
   heroOwlGroup: {
     alignSelf: "flex-start",
     alignItems: "center",
+    marginTop: -24,
+    marginBottom: 4,
+  },
+  heroOwlGroupCompact: {
+    marginTop: -10,
+    marginBottom: 0,
   },
   owlBase: {
     marginTop: -4,

@@ -154,26 +154,6 @@ export default function FaqPage() {
             habituales sobre la ayuda responsable a la fauna silvestre y el
             funcionamiento de SOS Fauna España.
           </Text>
-          <View style={styles.headerContactBox}>
-            <Text style={styles.headerContactTitle}>
-              ¿Necesitas contactar directamente?
-            </Text>
-            <Text style={styles.headerContactText}>
-              Consulta los centros de recuperación y teléfonos de ayuda
-              disponibles en tu provincia.
-            </Text>
-            <Link href="/centros" asChild>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Centros de Recuperación y teléfonos de ayuda"
-                style={styles.headerContactButton}
-              >
-                <Text style={styles.headerContactButtonText}>
-                  Centros de Recuperación y teléfonos de ayuda
-                </Text>
-              </Pressable>
-            </Link>
-          </View>
         </View>
 
         <View
@@ -341,41 +321,6 @@ const styles = StyleSheet.create({
     color: "#4b5563",
     fontSize: 17,
     lineHeight: 27,
-  },
-  headerContactBox: {
-    maxWidth: 760,
-    backgroundColor: "#eef8f0",
-    borderWidth: 1,
-    borderColor: "#b7dfc0",
-    borderRadius: 14,
-    padding: 14,
-    gap: 8,
-  },
-  headerContactTitle: {
-    color: "#14532d",
-    fontSize: 16,
-    fontWeight: "900",
-    lineHeight: 22,
-  },
-  headerContactText: {
-    color: "#374151",
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  headerContactButton: {
-    alignSelf: "flex-start",
-    minHeight: 42,
-    marginTop: 2,
-    backgroundColor: "#14532d",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerContactButtonText: {
-    color: "#ffffff",
-    fontSize: 14,
-    fontWeight: "900",
   },
   searchSection: {
     gap: 14,
