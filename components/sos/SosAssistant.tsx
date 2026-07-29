@@ -8,6 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
+import * as Speech from "expo-speech";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -1159,6 +1160,19 @@ function buildLocationSummaryLines(
   return lines;
 }
 
+function cleanTextForSpeech(text: string) {
+  return text
+    .replace(
+      /[\u{1F1E6}-\u{1F1FF}\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,
+      " ",
+    )
+    .replace(/[•·▪◦●○■□◆◇★☆▶▷►]/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\s*\n\s*/g, "\n")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+}
+
 export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -1179,6 +1193,7 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] =
     useState(false);
   const [lastWhatsAppNumber, setLastWhatsAppNumber] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [showEmptyStep3Confirmation, setShowEmptyStep3Confirmation] =
     useState(false);
 
@@ -1211,6 +1226,7 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const shouldConfirmExitRef = useRef(initialCase !== null);
   const saveCurrentProgressRef = useRef<() => Promise<void>>(async () => {});
   const flowCompletedRef = useRef(false);
+  const isMountedRef = useRef(true);
   const reverseGeocodeCacheRef = useRef<Record<string, string | null>>({});
   const pendingReverseGeocodeRef = useRef<Set<string>>(new Set());
   const forwardArrowHintX = useRef(new Animated.Value(0)).current;
@@ -1234,6 +1250,57 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     () => getAdvice(animalState, animalType, flags),
     [animalState, animalType, flags],
   );
+
+  const finishSpeaking = useCallback(() => {
+    if (isMountedRef.current) {
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  const toggleAdviceSpeech = useCallback(async () => {
+    if (isSpeaking) {
+      await Speech.stop();
+      finishSpeaking();
+      return;
+    }
+
+    await Speech.stop();
+
+    const speechText = cleanTextForSpeech(advice);
+    if (!speechText) return;
+
+    setIsSpeaking(true);
+
+    try {
+      Speech.speak(speechText, {
+        language: "es-ES",
+        rate: 0.9,
+        onDone: finishSpeaking,
+        onStopped: finishSpeaking,
+        onError: finishSpeaking,
+      });
+    } catch {
+      finishSpeaking();
+    }
+  }, [advice, finishSpeaking, isSpeaking]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      void Speech.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (step !== 2) {
+      void Speech.stop();
+      setIsSpeaking(false);
+    }
+
+    return () => {
+      void Speech.stop();
+    };
+  }, [advice, step]);
 
   const selectedFlagLabels = useMemo(
     () => FLAG_LABELS.filter(({ key }) => flags[key]).map(({ label }) => label),
@@ -2594,6 +2661,31 @@ const saveCurrentProgress = async (
               Antes de intervenir, lee estas recomendaciones.
             </Text>
 
+            <View style={styles.speechControlRow}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isSpeaking
+                    ? "Detener lectura de las recomendaciones"
+                    : "Escuchar las recomendaciones"
+                }
+                style={styles.speechButton}
+                onPress={toggleAdviceSpeech}
+              >
+                <Text style={styles.speechButtonText}>
+                  {isSpeaking
+                    ? "⏹ Detener lectura"
+                    : "🔊 Escuchar recomendaciones"}
+                </Text>
+              </Pressable>
+
+              {isSpeaking ? (
+                <Text style={styles.speechStatusText}>
+                  Leyendo recomendaciones...
+                </Text>
+              ) : null}
+            </View>
+
             <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
           </View>
         </SectionCard>
@@ -3018,6 +3110,35 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
     textAlign: "center",
+  },
+  speechControlRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 10,
+  },
+  speechButton: {
+    minHeight: 46,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: "#e5e7eb",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  speechButtonText: {
+    color: "#111827",
+    fontWeight: "800",
+    fontSize: 15,
+    textAlign: "center",
+  },
+  speechStatusText: {
+    color: "#4b5563",
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
   },
   disabledButton: {
     opacity: 0.6,
