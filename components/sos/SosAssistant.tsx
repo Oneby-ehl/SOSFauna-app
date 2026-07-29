@@ -30,8 +30,8 @@ import {
 } from "react-native-safe-area-context";
 
 import { Stack, useRouter } from "expo-router";
+import { RecoveryCentersContent } from "@/components/contacts/RecoveryCentersPage";
 import { SectionCard } from "@/components/SectionCard";
-import { provinceContacts } from "@/lib/provinceContacts";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -68,7 +68,7 @@ const GREFA_WHATSAPP = "34648539901";
 const COMMON_END =
   "En el siguiente paso podrás facilitar una foto y la ubicación del hallazgo. Contacta con un centro especializado, con los Agentes Forestales o con Emergencias y facilita la información recopilada por el medio que prefieras.";
 
-const ANIMAL_OPTIONS: Array<{ key: AnimalType; label: string }> = [
+const ANIMAL_OPTIONS: { key: AnimalType; label: string }[] = [
   { key: "smallBird", label: "Ave pequeña" },
   { key: "largeBird", label: "Ave rapaz / ave grande" },
   { key: "bat", label: "Murciélago" },
@@ -78,12 +78,12 @@ const ANIMAL_OPTIONS: Array<{ key: AnimalType; label: string }> = [
   { key: "unknown", label: "No estoy seguro" },
 ];
 
-const ANIMAL_STATE_OPTIONS: Array<{ key: AnimalState; label: string }> = [
+const ANIMAL_STATE_OPTIONS: { key: AnimalState; label: string }[] = [
   { key: "alive", label: "Vivo" },
   { key: "dead", label: "Muerto" },
 ];
 
-const FLAG_LABELS: Array<{ key: keyof FlagsState; label: string }> = [
+const FLAG_LABELS: { key: keyof FlagsState; label: string }[] = [
   { key: "bleeding", label: "Herido" },
   { key: "baby", label: "Es cría" },
   { key: "catDog", label: "Ataque de gato/perro" },
@@ -114,44 +114,6 @@ function createInitialFlags(): FlagsState {
     other: false,
   };
 }
-
-const NATIONAL_HELP_CONTACTS = [
-  { name: "Emergencias", phone: "112", note: "Emergencias generales" },
-  {
-    name: "SEPRONA",
-    phone: "062",
-    note: "Guardia Civil · Protección de la naturaleza",
-  },
-  {
-    name: "Policía Municipal / Local",
-    phone: "092",
-    note: "Policía local del municipio",
-  },
-  { name: "Policía Nacional", phone: "091", note: "Atención policial" },
-];
-
-const MADRID_PROVINCE_CONTACTS = [
-  {
-    name: "GREFA guardia",
-    phone: "627 461 457",
-    note: "Guardia para avisos de fauna salvaje herida",
-  },
-  {
-    name: "GREFA central",
-    phone: "91 638 75 50",
-    note: "Teléfono general del centro",
-  },
-  {
-    name: "CRAS Madrid",
-    phone: "91 276 06 26",
-    note: "Centro de Recuperación de Animales Silvestres de la Comunidad de Madrid",
-  },
-  {
-    name: "Agentes Forestales de Madrid",
-    phone: "900 181 628",
-    note: "Avisos e incidencias sobre fauna y medio natural",
-  },
-];
 
 function canUseCannotFly(animalType: AnimalType) {
   return (
@@ -1469,35 +1431,6 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     step,
   ]);
 
-  const mergedProvinceContacts = useMemo(() => {
-    const madridEntry = {
-      province: "Madrid",
-      contacts: MADRID_PROVINCE_CONTACTS,
-    };
-    const base = Array.isArray(provinceContacts) ? provinceContacts : [];
-    const withoutMadrid = base.filter((item) => item.province !== "Madrid");
-
-    return [madridEntry, ...withoutMadrid].sort((a, b) =>
-      a.province.localeCompare(b.province, "es"),
-    );
-  }, []);
-
-  const filteredProvinceContacts = useMemo(() => {
-    const normalizedSearch = provinceSearch.trim().toLowerCase();
-
-    if (!normalizedSearch) return mergedProvinceContacts;
-
-    return mergedProvinceContacts.filter((item) =>
-      item.province
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .includes(
-          normalizedSearch.normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
-        ),
-    );
-  }, [provinceSearch, mergedProvinceContacts]);
-
   const showSummaryActionBar =
     step === 4 &&
     !showContacts &&
@@ -1679,7 +1612,7 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     }
   };
 
-  const incompatibleWithNormalAppearance: Array<keyof FlagsState> = [
+  const incompatibleWithNormalAppearance: (keyof FlagsState)[] = [
     "bleeding",
     "catDog",
     "canNotMove",
@@ -1811,11 +1744,6 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
   const copySummary = async () => {
     await Clipboard.setStringAsync(generatedSummary);
     showMessage("Resumen copiado", "El resumen se ha copiado al portapapeles.");
-  };
-
-  const callNumber = async (phoneNumber: string) => {
-    const url = `tel:${phoneNumber}`;
-    await Linking.openURL(url);
   };
 
 const saveCurrentProgress = async (
@@ -2089,165 +2017,24 @@ const saveCurrentProgress = async (
     setSelectedProvince(null);
   };
 
-  const handleOpenProvincePhones = () => {
-    setShowContacts(false);
-    setShowProvinces(true);
-    setSelectedProvince(null);
-    setProvinceSearch("");
-  };
-
-  const renderContacts = () => (
-    <SectionCard title="Teléfonos de ayuda">
-      <View style={styles.sectionContent}>
-        <Text style={styles.sectionDescription}>
-          Elige el servicio adecuado según la urgencia y la ubicación del animal.
-        </Text>
-
-        <Text style={styles.sectionDescription}>
-          Llama al 112 si existe peligro inmediato para personas, tráfico o seguridad. Para otros casos, contacta con el servicio más adecuado.
-        </Text>
-
-        <Text style={styles.subheading}>Ayuda inmediata</Text>
-
-        {NATIONAL_HELP_CONTACTS.map((contact) => (
-          <Pressable
-            key={contact.name}
-            style={[
-              styles.contactRow,
-              contact.phone === "112" && styles.contactRowEmergency,
-            ]}
-            onPress={() => callNumber(contact.phone)}
-          >
-            <View style={styles.contactTextBlock}>
-              <Text style={styles.contactName}>
-                {contact.phone === "112"
-                  ? "🚨 Emergencias"
-                  : contact.phone === "062"
-                    ? "🌿 SEPRONA"
-                    : contact.phone === "092"
-                      ? "🚓 Policía Municipal / Local"
-                      : "👮 Policía Nacional"}
-              </Text>
-              <Text style={styles.contactNote}>{contact.note}</Text>
-            </View>
-            <View style={styles.contactPhonePill}>
-              <Text style={styles.contactPhonePillText}>{contact.phone}</Text>
-            </View>
-          </Pressable>
-        ))}
-
-        <Text style={styles.subheading}>Ayuda por provincias</Text>
-
-        <Pressable
-          style={styles.primaryButton}
-          onPress={handleOpenProvincePhones}
-        >
-          <Text style={styles.primaryButtonText}>
-            📍 Buscar ayuda en mi provincia
-          </Text>
-        </Pressable>
-
-        <Pressable
-          style={styles.secondaryButton}
-          onPress={() => setShowHelpSources((current) => !current)}
-        >
-          <Text style={styles.secondaryButtonText}>Fuentes y aviso legal</Text>
-        </Pressable>
-
-        {showHelpSources ? (
-          <View style={styles.infoBox}>
-            <Text style={styles.infoText}>
-              Fuentes de información:
-              {"\n\n"}• Emergencias 112: www.proteccioncivil.es/catalogo/info112/
-              {"\n"}• Guardia Civil (SEPRONA): www.guardiacivil.es
-              {"\n"}• Policía Nacional: www.policia.es
-              {"\n"}• Agentes Forestales de la Comunidad de Madrid:
-              {"\n"}{" "}
-              www.comunidad.madrid/centros/emisora-cuerpo-agentes-forestales
-              {"\n\n"}SOS Fauna España es una aplicación independiente y no está
-              afiliada ni representa a ninguna administración pública, servicio de
-              emergencias o cuerpo policial.
-            </Text>
-          </View>
-        ) : null}
-      </View>
-    </SectionCard>
+  const renderRecoveryCenters = () => (
+    <RecoveryCentersContent
+      provinceSearch={provinceSearch}
+      selectedProvince={selectedProvince}
+      showHelpSources={showHelpSources}
+      showProvinceList={showProvinces}
+      onProvinceSearchChange={setProvinceSearch}
+      onSelectedProvinceChange={setSelectedProvince}
+      onShowHelpSourcesChange={setShowHelpSources}
+      onShowProvinceListChange={(value) => {
+        setShowProvinces(value);
+        setShowContacts(!value);
+        if (!value) {
+          setSelectedProvince(null);
+        }
+      }}
+    />
   );
-
-  const renderProvinceList = () => (
-    <SectionCard title="Teléfonos por provincias">
-      <View style={styles.sectionContent}>
-        <Text style={styles.sectionDescription}>
-          Selecciona una provincia para ver los centros disponibles.
-        </Text>
-
-        <TextInput
-          placeholder="Buscar provincia"
-          value={provinceSearch}
-          onChangeText={setProvinceSearch}
-          style={styles.input}
-          autoCapitalize="words"
-        />
-
-        {filteredProvinceContacts.length ? (
-          filteredProvinceContacts.map((item) => (
-            <Pressable
-              key={item.province}
-              style={styles.contactRow}
-              onPress={() => setSelectedProvince(item.province)}
-            >
-              <View style={styles.contactTextBlock}>
-                <Text style={styles.contactName}>{item.province}</Text>
-                <Text style={styles.contactNote}>
-                  {item.contacts.length} contacto
-                  {item.contacts.length === 1 ? "" : "s"}
-                </Text>
-              </View>
-              <Text style={styles.contactPhone}>Ver</Text>
-            </Pressable>
-          ))
-        ) : (
-          <View style={styles.warningBox}>
-            <Text style={styles.warningText}>
-              No se han encontrado provincias con ese nombre.
-            </Text>
-          </View>
-        )}
-      </View>
-    </SectionCard>
-  );
-
-  const renderProvinceDetail = () => {
-    const province = mergedProvinceContacts.find(
-      (p) => p.province === selectedProvince,
-    );
-
-    if (!province) return null;
-
-    return (
-      <SectionCard title={province.province}>
-        <View style={styles.sectionContent}>
-          <Text style={styles.sectionDescription}>
-            Estos son los contactos disponibles para esta provincia.
-          </Text>
-
-          {province.contacts.map((contact) => (
-            <Pressable
-              key={`${province.province}-${contact.name}-${contact.phone}`}
-              style={styles.contactRow}
-              onPress={() => callNumber(contact.phone)}
-            >
-              <View style={styles.contactTextBlock}>
-                <Text style={styles.contactName}>{contact.name}</Text>
-                <Text style={styles.contactNote}>{contact.note}</Text>
-              </View>
-              <Text style={styles.contactPhone}>{contact.phone}</Text>
-            </Pressable>
-          ))}
-        </View>
-      </SectionCard>
-    );
-  };
 
   const renderWhatsAppConfirmation = () => (
     <SectionCard title="Confirmar envío">
@@ -2540,9 +2327,9 @@ const saveCurrentProgress = async (
 
   const renderStep = () => {
     if (showEmptyStep3Confirmation) return renderEmptyStep3Confirmation();
-    if (showContacts) return renderContacts();
-    if (showProvinces && !selectedProvince) return renderProvinceList();
-    if (selectedProvince) return renderProvinceDetail();
+    if (showContacts || showProvinces || selectedProvince) {
+      return renderRecoveryCenters();
+    }
     if (showWhatsAppConfirmation) return renderWhatsAppConfirmation();
     if (showWhatsAppOptions) return renderWhatsAppOptions();
 

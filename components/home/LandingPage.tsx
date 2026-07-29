@@ -379,7 +379,8 @@ export default function LandingPage() {
           <View>
             <Text style={styles.footerBrand}>SOS Fauna España</Text>
             <Text style={styles.footerText}>
-              Asistencia guiada ante incidencias con fauna silvestre.
+              Asistencia guiada para ayudar a la fauna silvestre de forma
+              segura y responsable.
             </Text>
             <Text style={styles.footerNote}>
               📱 Aplicación Android disponible próximamente en Google Play
@@ -391,14 +392,16 @@ export default function LandingPage() {
                <Text style={styles.footerLink}>Sobre SOS Fauna España</Text>
              </Link>
 
-             <Link href="/privacy">
-               <Text style={styles.footerLink}>Política de privacidad</Text>
+             <Link href="/faq">
+               <Text style={styles.footerLink}>Preguntas frecuentes</Text>
              </Link>
 
-             <Link href="/legal">
-               <Text style={styles.footerLink}>Aviso legal</Text>
+             <Link href="/centros">
+               <Text style={styles.footerLink}>
+                 Centros de Recuperación y teléfonos de ayuda
+               </Text>
              </Link>
-           
+
              <Link href="/sources">
                <Text style={styles.footerLink}>Recursos de información</Text>
              </Link>
@@ -406,7 +409,17 @@ export default function LandingPage() {
              <Link href="/contact">
                <Text style={styles.footerLink}>Contacto</Text>
              </Link>
-          </View>
+
+             <View style={styles.footerLegalLinks}>
+               <Link href="/privacy">
+                 <Text style={styles.footerLink}>Política de privacidad</Text>
+               </Link>
+
+               <Link href="/legal">
+                 <Text style={styles.footerLink}>Aviso legal</Text>
+               </Link>
+             </View>
+           </View>
         </View>
       </View>
 
@@ -881,6 +894,12 @@ const styles = StyleSheet.create({
   },
   footerLinks: {
     gap: 10,
+  },
+  footerLegalLinks: {
+    borderTopWidth: 1,
+    borderTopColor: "rgba(226, 238, 228, 0.22)",
+    gap: 10,
+    paddingTop: 12,
   },
   footerLink: {
     color: "#e2eee4",
