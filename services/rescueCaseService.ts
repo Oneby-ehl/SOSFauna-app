@@ -1,5 +1,8 @@
 import type {
   RescueAnimalState,
+  RescueAnimalEnvironment,
+  RescueAnimalPlace,
+  RescueAnimalPosition,
   RescueAnimalType,
   RescueCase,
   RescueCoordinates,
@@ -18,6 +21,9 @@ type RescueCaseData = {
   step: RescueStep;
   animalState: RescueAnimalState;
   animalType: RescueAnimalType;
+  animalPlace?: RescueAnimalPlace | null;
+  animalPosition?: RescueAnimalPosition | null;
+  animalEnvironment?: RescueAnimalEnvironment | null;
   flags: RescueFlags;
   locationText: string;
   approximateLocation?: string;

@@ -1,4 +1,15 @@
+import {
+  type AnimalSearchItem,
+  findAnimalCatalogTextMatch,
+  searchAnimalCatalog,
+} from "@/data/animalSearchCatalog";
 import { faqCategories, faqItems } from "@/data/faq";
+import {
+  type AnimalType,
+  COMMON_END,
+  createInitialFlags,
+  getAdvice,
+} from "@/components/sos/SosAssistant";
 import { Link, Stack, useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -13,9 +24,21 @@ import {
 import { SeoHead } from "@/components/seo/SeoHead";
 import { searchFaqItems } from "@/utils/faqSearch";
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function removeAssistantNextStepParagraph(advice: string) {
+  return advice
+    .replace(new RegExp(`\\n*${escapeRegExp(COMMON_END)}$`), "")
+    .trim();
+}
+
 export default function FaqPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedAnimal, setSelectedAnimal] =
+    useState<AnimalSearchItem | null>(null);
   const [openItemId, setOpenItemId] = useState<string | null>(null);
   const [focusedCategory, setFocusedCategory] = useState<string | null>(null);
   const [stickyHeaderHeight, setStickyHeaderHeight] = useState(0);
@@ -25,9 +48,40 @@ export default function FaqPage() {
   const scrollViewRef = useRef<ScrollView>(null);
   const searchInputRef = useRef<TextInput>(null);
 
+  const selectedAnimalAdvice = useMemo(() => {
+    if (!selectedAnimal?.category) return null;
+
+    return removeAssistantNextStepParagraph(
+      getAdvice(
+        "alive",
+        selectedAnimal.category as AnimalType,
+        createInitialFlags(),
+      ),
+    );
+  }, [selectedAnimal]);
+
+  const displayedFaqItems = useMemo(() => {
+    if (!selectedAnimal || !selectedAnimalAdvice) return faqItems;
+
+    return faqItems.map((item) => {
+      if (item.id !== "que-hacer-si-encuentro-animal") return item;
+
+      return {
+        ...item,
+        question: `¿Qué debo hacer si encuentro ${selectedAnimal.displayNameWithArticle}?`,
+        answer: selectedAnimalAdvice,
+      };
+    });
+  }, [selectedAnimal, selectedAnimalAdvice]);
+
+  const animalSearchResults = useMemo(
+    () => searchAnimalCatalog(searchQuery),
+    [searchQuery],
+  );
+
   const groupedItems = useMemo(
     () => {
-      const searchResults = searchFaqItems(faqItems, searchQuery);
+      const searchResults = searchFaqItems(displayedFaqItems, searchQuery);
 
       return faqCategories
         .map((category) => ({
@@ -36,7 +90,7 @@ export default function FaqPage() {
         }))
         .filter((group) => group.items.length > 0);
     },
-    [searchQuery],
+    [displayedFaqItems, searchQuery],
   );
 
   const hasResults = groupedItems.length > 0;
@@ -61,6 +115,7 @@ export default function FaqPage() {
 
   const handleCategoryPress = (category: string) => {
     setSearchQuery("");
+    setSelectedAnimal(null);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => scrollToCategory(category));
     });
@@ -68,12 +123,33 @@ export default function FaqPage() {
 
   const clearSearch = () => {
     setSearchQuery("");
+    setSelectedAnimal(null);
     setOpenItemId(null);
     requestAnimationFrame(() => searchInputRef.current?.focus());
   };
 
   const startNotice = () => {
-    router.push({ pathname: "/aviso", params: { mode: "new" } });
+    router.push({
+      pathname: "/aviso",
+      params: {
+        mode: "new",
+        animalType: selectedAnimal?.category,
+      },
+    });
+  };
+
+  const selectAnimalSearchResult = (animal: AnimalSearchItem) => {
+    setSelectedAnimal(animal);
+    setSearchQuery(animal.name);
+    setOpenItemId("que-hacer-si-encuentro-animal");
+  };
+
+  const handleSearchQueryChange = (value: string) => {
+    const animalMatch = findAnimalCatalogTextMatch(value);
+
+    setSearchQuery(value);
+    setSelectedAnimal(animalMatch);
+    setOpenItemId(animalMatch ? "que-hacer-si-encuentro-animal" : null);
   };
 
   const renderCreateNoticePrompt = () => (
@@ -168,10 +244,7 @@ export default function FaqPage() {
             accessibilityLabel="Buscar una pregunta frecuente"
             placeholder="Buscar una pregunta…"
             value={searchQuery}
-            onChangeText={(value) => {
-              setSearchQuery(value);
-              setOpenItemId(null);
-            }}
+            onChangeText={handleSearchQueryChange}
             style={[
               styles.searchInput,
               searchQuery.length > 0 && styles.searchInputWithClear,
@@ -190,6 +263,25 @@ export default function FaqPage() {
               </Pressable>
             ) : null}
           </View>
+
+          {animalSearchResults.length > 0 ? (
+            <View style={styles.categoryList}>
+              {animalSearchResults.map((animal) => (
+                <Pressable
+                  key={animal.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Seleccionar ${animal.name}`}
+                  onPress={() => selectAnimalSearchResult(animal)}
+                  style={({ pressed }) => [
+                    styles.categoryPill,
+                    pressed && styles.categoryPillPressed,
+                  ]}
+                >
+                  <Text style={styles.categoryPillText}>{animal.name}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
 
           <View style={styles.categoryList}>
             {faqCategories.map((category) => (

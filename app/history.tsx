@@ -21,6 +21,9 @@ import { NoIndexHead } from "@/components/seo/SeoHead";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import type {
   RescueAnimalState,
+  RescueAnimalEnvironment,
+  RescueAnimalPlace,
+  RescueAnimalPosition,
   RescueAnimalType,
   RescueCase,
   RescueFlags,
@@ -28,7 +31,7 @@ import type {
 
 const ANIMAL_TYPE_LABELS: Record<RescueAnimalType, string> = {
   smallBird: "Ave pequeña",
-  largeBird: "Ave grande",
+  largeBird: "Ave mediana / grande",
   bat: "Murciélago",
   smallMammal: "Mamífero pequeño",
   largeMammal: "Mamífero grande",
@@ -39,6 +42,34 @@ const ANIMAL_TYPE_LABELS: Record<RescueAnimalType, string> = {
 const ANIMAL_STATE_LABELS: Record<RescueAnimalState, string> = {
   alive: "Vivo",
   dead: "Muerto",
+};
+
+const ANIMAL_PLACE_LABELS: Record<RescueAnimalPlace, string> = {
+  ground: "En el suelo",
+  treeOrBush: "En un árbol o arbusto",
+  buildingOrRoof: "En un edificio o tejado",
+  roadOrStreet: "En una carretera o calle",
+  parkOrGarden: "En un parque o jardín",
+  fieldOrNatural: "En el campo o entorno natural",
+  industrialArea: "En una zona industrial",
+  water: "En el agua",
+  otherPlace: "Otro lugar",
+};
+
+const ANIMAL_POSITION_LABELS: Record<RescueAnimalPosition, string> = {
+  ground: "En el suelo",
+  treeOrBush: "En un árbol o arbusto",
+  buildingOrRoof: "En un edificio o tejado",
+  water: "En el agua",
+  otherPlace: "Otro lugar",
+};
+
+const ANIMAL_ENVIRONMENT_LABELS: Record<RescueAnimalEnvironment, string> = {
+  roadOrStreet: "En una carretera o calle",
+  parkOrGarden: "En un parque o jardín",
+  fieldOrNatural: "En el campo o entorno natural",
+  industrialArea: "En una zona industrial",
+  otherEnvironment: "Otro entorno",
 };
 
 const ANIMAL_STATE_ICONS: Record<RescueAnimalState, string> = {
@@ -98,6 +129,24 @@ function normalizeUsefulText(value: string | null | undefined): string | undefin
 
 function formatCoordinates(coords: NonNullable<RescueCase["coords"]>): string {
   return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+}
+
+function getAnimalPlaceLabel(rescueCase: RescueCase): string | null {
+  return rescueCase.animalPlace
+    ? ANIMAL_PLACE_LABELS[rescueCase.animalPlace]
+    : null;
+}
+
+function getAnimalPositionLabel(rescueCase: RescueCase): string | null {
+  return rescueCase.animalPosition
+    ? ANIMAL_POSITION_LABELS[rescueCase.animalPosition]
+    : null;
+}
+
+function getAnimalEnvironmentLabel(rescueCase: RescueCase): string | null {
+  return rescueCase.animalEnvironment
+    ? ANIMAL_ENVIRONMENT_LABELS[rescueCase.animalEnvironment]
+    : null;
 }
 
 function getStoredLocationFallback(rescueCase: RescueCase) {
@@ -160,6 +209,9 @@ function getHistoryLocationFields(rescueCase: RescueCase) {
 
 function buildCaseSummary(rescueCase: RescueCase): string {
   const flagLabels = getActiveFlagLabels(rescueCase.flags);
+  const animalPositionLabel = getAnimalPositionLabel(rescueCase);
+  const animalEnvironmentLabel = getAnimalEnvironmentLabel(rescueCase);
+  const animalPlaceLabel = getAnimalPlaceLabel(rescueCase);
 
   return [
     "SOS Fauna España",
@@ -169,13 +221,18 @@ function buildCaseSummary(rescueCase: RescueCase): string {
     )}`,
     `Animal: ${ANIMAL_TYPE_LABELS[rescueCase.animalType]}`,
     `Estado: ${ANIMAL_STATE_LABELS[rescueCase.animalState]}`,
+    animalPositionLabel ? `Dónde está: ${animalPositionLabel}` : null,
+    animalEnvironmentLabel ? `Entorno: ${animalEnvironmentLabel}` : null,
+    !animalPositionLabel && !animalEnvironmentLabel && animalPlaceLabel
+      ? `Dónde está el animal: ${animalPlaceLabel}`
+      : null,
     `Situación observada: ${
       flagLabels.length > 0
         ? flagLabels.join(", ")
         : "Sin circunstancias adicionales seleccionadas"
     }`,
     ...buildLocationSummaryLines(rescueCase),
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 function HistoryCard({
@@ -194,6 +251,9 @@ function HistoryCard({
   const flagLabels = getActiveFlagLabels(rescueCase.flags);
   const observedSituation = formatObservedSituation(flagLabels);
   const locationFields = getHistoryLocationFields(rescueCase);
+  const animalPositionLabel = getAnimalPositionLabel(rescueCase);
+  const animalEnvironmentLabel = getAnimalEnvironmentLabel(rescueCase);
+  const animalPlaceLabel = getAnimalPlaceLabel(rescueCase);
 
   return (
     <View style={styles.card}>
@@ -222,6 +282,27 @@ function HistoryCard({
             {field}
           </Text>
         ))}
+
+        {animalPositionLabel ? (
+          <>
+            <Text style={styles.summaryLabel}>Dónde está</Text>
+            <Text style={styles.summaryValue}>{animalPositionLabel}</Text>
+          </>
+        ) : null}
+
+        {animalEnvironmentLabel ? (
+          <>
+            <Text style={styles.summaryLabel}>Entorno</Text>
+            <Text style={styles.summaryValue}>{animalEnvironmentLabel}</Text>
+          </>
+        ) : null}
+
+        {!animalPositionLabel && !animalEnvironmentLabel && animalPlaceLabel ? (
+          <>
+            <Text style={styles.summaryLabel}>Dónde está el animal</Text>
+            <Text style={styles.summaryValue}>{animalPlaceLabel}</Text>
+          </>
+        ) : null}
 
         <Text style={styles.summaryLabel}>Situación</Text>
         <Text style={styles.summaryValue}>{observedSituation}</Text>

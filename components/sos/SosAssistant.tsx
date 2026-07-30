@@ -35,7 +35,7 @@ import { SectionCard } from "@/components/SectionCard";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-type FlagsState = {
+export type FlagsState = {
   bleeding: boolean;
   baby: boolean;
   catDog: boolean;
@@ -50,7 +50,7 @@ type FlagsState = {
   other: boolean;
 };
 
-type AnimalType =
+export type AnimalType =
   | "smallBird"
   | "largeBird"
   | "bat"
@@ -59,18 +59,22 @@ type AnimalType =
   | "reptileAmphibian"
   | "unknown";
 
-type AnimalState = "alive" | "dead";
+export type AnimalState = "alive" | "dead";
+
+type AnimalPlace = NonNullable<RescueCase["animalPlace"]>;
+type AnimalPosition = NonNullable<RescueCase["animalPosition"]>;
+type AnimalEnvironment = NonNullable<RescueCase["animalEnvironment"]>;
 
 type Step = 1 | 2 | 3 | 4;
 
 const GREFA_WHATSAPP = "34648539901";
 
-const COMMON_END =
+export const COMMON_END =
   "En el siguiente paso podrás facilitar una foto y la ubicación del hallazgo. Contacta con un centro especializado, con los Agentes Forestales o con Emergencias y facilita la información recopilada por el medio que prefieras.";
 
 const ANIMAL_OPTIONS: { key: AnimalType; label: string }[] = [
   { key: "smallBird", label: "Ave pequeña" },
-  { key: "largeBird", label: "Ave rapaz / ave grande" },
+  { key: "largeBird", label: "Ave mediana / grande" },
   { key: "bat", label: "Murciélago" },
   { key: "smallMammal", label: "Pequeño mamífero" },
   { key: "largeMammal", label: "Mamífero grande" },
@@ -81,6 +85,37 @@ const ANIMAL_OPTIONS: { key: AnimalType; label: string }[] = [
 const ANIMAL_STATE_OPTIONS: { key: AnimalState; label: string }[] = [
   { key: "alive", label: "Vivo" },
   { key: "dead", label: "Muerto" },
+];
+
+const ANIMAL_PLACE_OPTIONS: { key: AnimalPlace; label: string }[] = [
+  { key: "ground", label: "En el suelo" },
+  { key: "treeOrBush", label: "En un árbol o arbusto" },
+  { key: "buildingOrRoof", label: "En un edificio o tejado" },
+  { key: "roadOrStreet", label: "En una carretera o calle" },
+  { key: "parkOrGarden", label: "En un parque o jardín" },
+  { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+  { key: "industrialArea", label: "En una zona industrial" },
+  { key: "water", label: "En el agua" },
+  { key: "otherPlace", label: "Otro lugar" },
+];
+
+const ANIMAL_POSITION_OPTIONS: { key: AnimalPosition; label: string }[] = [
+  { key: "ground", label: "En el suelo" },
+  { key: "treeOrBush", label: "En un árbol o arbusto" },
+  { key: "buildingOrRoof", label: "En un edificio o tejado" },
+  { key: "water", label: "En el agua" },
+  { key: "otherPlace", label: "Otro lugar" },
+];
+
+const ANIMAL_ENVIRONMENT_OPTIONS: {
+  key: AnimalEnvironment;
+  label: string;
+}[] = [
+  { key: "roadOrStreet", label: "En una carretera o calle" },
+  { key: "parkOrGarden", label: "En un parque o jardín" },
+  { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+  { key: "industrialArea", label: "En una zona industrial" },
+  { key: "otherEnvironment", label: "Otro entorno" },
 ];
 
 const FLAG_LABELS: { key: keyof FlagsState; label: string }[] = [
@@ -98,7 +133,7 @@ const FLAG_LABELS: { key: keyof FlagsState; label: string }[] = [
   { key: "other", label: "Otro" },
 ];
 
-function createInitialFlags(): FlagsState {
+export function createInitialFlags(): FlagsState {
   return {
     bleeding: false,
     baby: false,
@@ -315,7 +350,7 @@ return (
 
   if (animalType === "largeBird") {
     return (
-  "🦉 CRÍA DE RAPAZ O AVE GRANDE\n\n" +
+  "🦉 CRÍA DE AVE MEDIANA / GRANDE\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• No toda cría de rapaz o ave grande encontrada fuera del nido necesita ser recogida.\n" +
   "• Puede encontrarse en una fase de aprendizaje.\n" +
@@ -656,7 +691,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
     COMMON_END;
 
     return (
-  "🦅 RAPAZ O AVE GRANDE QUE PUEDE NECESITAR AYUDA\n\n" +
+  "🦅 AVE MEDIANA / GRANDE QUE PUEDE NECESITAR AYUDA\n\n" +
   "🚨 SEÑALES OBSERVADAS\n" +
   getObservedSigns(flags, true) +
   "\n\n⚠️ PRECAUCIÓN\n" +
@@ -685,7 +720,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
     COMMON_END;
 
     return (
-  "🦅 RAPAZ O AVE GRANDE QUE NO VUELA\n\n" +
+  "🦅 AVE MEDIANA / GRANDE QUE NO VUELA\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• Una rapaz o ave grande que no vuela no siempre necesita ser rescatada de inmediato.\n" +
   "• Puede tratarse de un ejemplar joven en fase de aprendizaje o emancipación.\n" +
@@ -724,7 +759,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
     COMMON_END;
 
     return (
-  "🦅 RAPAZ O AVE GRANDE EN SITUACIÓN DE RIESGO\n\n" +
+  "🦅 AVE MEDIANA / GRANDE EN SITUACIÓN DE RIESGO\n\n" +
   "🚨 SEÑALES OBSERVADAS\n" +
   getObservedSigns(flags) +
   "\n\n⚠️ PRECAUCIÓN\n" +
@@ -747,7 +782,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
     COMMON_END;
 
   return (
-  "🦅 RAPAZ O AVE GRANDE\n\n" +
+  "🦅 AVE MEDIANA / GRANDE\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• Mantén una distancia prudente y observa la situación antes de intervenir.\n" +
   "• Una rapaz o ave grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
@@ -922,7 +957,7 @@ const commonEnd =
   );
 }
 
-function getAdvice(
+export function getAdvice(
   animalState: AnimalState,
   animalType: AnimalType,
   flags: FlagsState,
@@ -1015,6 +1050,7 @@ function showMessage(title: string, message: string) {
 
 type SosAssistantProps = {
   initialCase?: RescueCase | null;
+  initialAnimalType?: AnimalType | null;
 };
 
 type RescueCoordinates = NonNullable<RescueCase["coords"]>;
@@ -1135,7 +1171,10 @@ function cleanTextForSpeech(text: string) {
     .trim();
 }
 
-export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
+export default function HomeScreen({
+  initialCase = null,
+  initialAnimalType = null,
+}: SosAssistantProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [currentCase, setCurrentCase] = useState<RescueCase | null>(initialCase);
@@ -1163,8 +1202,18 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     (initialCase?.animalState as AnimalState) ?? "alive",
   );
   const [animalType, setAnimalType] = useState<AnimalType>(
-    (initialCase?.animalType as AnimalType) ?? "unknown",
+    (initialCase?.animalType as AnimalType) ?? initialAnimalType ?? "unknown",
   );
+  const [animalPlace] = useState<AnimalPlace | null>(
+    initialCase?.animalPlace ?? null,
+  );
+  const [animalPosition, setAnimalPosition] = useState<AnimalPosition | null>(
+    initialCase?.animalPosition ?? null,
+  );
+  const [animalEnvironment, setAnimalEnvironment] =
+    useState<AnimalEnvironment | null>(
+      initialCase?.animalEnvironment ?? null,
+    );
 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [videoUri, setVideoUri] = useState<string | null>(null);
@@ -1288,6 +1337,28 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     [animalState],
   );
 
+  const selectedAnimalPlaceLabel = useMemo(
+    () =>
+      ANIMAL_PLACE_OPTIONS.find((option) => option.key === animalPlace)
+        ?.label || "No indicado",
+    [animalPlace],
+  );
+
+  const selectedAnimalPositionLabel = useMemo(
+    () =>
+      ANIMAL_POSITION_OPTIONS.find((option) => option.key === animalPosition)
+        ?.label || "No indicado",
+    [animalPosition],
+  );
+
+  const selectedAnimalEnvironmentLabel = useMemo(
+    () =>
+      ANIMAL_ENVIRONMENT_OPTIONS.find(
+        (option) => option.key === animalEnvironment,
+      )?.label || "No indicado",
+    [animalEnvironment],
+  );
+
   const isCurrentStepReadyToContinue = useMemo(
     () => {
       if (step === 1) {
@@ -1338,6 +1409,9 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       step !== 1 ||
       animalState !== "alive" ||
       animalType !== "unknown" ||
+      animalPlace !== null ||
+      animalPosition !== null ||
+      animalEnvironment !== null ||
       Object.values(flags).some(Boolean) ||
       photoUri !== null ||
       videoUri !== null ||
@@ -1346,6 +1420,9 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
     );
   }, [
     animalState,
+    animalEnvironment,
+    animalPlace,
+    animalPosition,
     animalType,
     coords,
     currentCase,
@@ -1473,6 +1550,15 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       "AVISO DE RESCATE DE FAUNA",
       `Estado del animal: ${selectedAnimalStateLabel}`,
       `Tipo de animal: ${selectedAnimalLabel}`,
+      animalPosition
+        ? `Dónde está: ${selectedAnimalPositionLabel}`
+        : null,
+      animalEnvironment
+        ? `Entorno: ${selectedAnimalEnvironmentLabel}`
+        : null,
+      !animalPosition && !animalEnvironment && animalPlace
+        ? `Dónde está el animal: ${selectedAnimalPlaceLabel}`
+        : null,
       ...locationSummaryLines,
       `Señales observadas: ${selectedFlags}`,
       `Foto capturada: ${photoUri ? "sí" : "no"}`,
@@ -1482,8 +1568,14 @@ export default function HomeScreen({ initialCase = null }: SosAssistantProps) {
       .join("\n");
   }, [
     locationSummaryLines,
+    animalEnvironment,
+    animalPlace,
+    animalPosition,
     photoUri,
+    selectedAnimalEnvironmentLabel,
     selectedAnimalLabel,
+    selectedAnimalPlaceLabel,
+    selectedAnimalPositionLabel,
     selectedAnimalStateLabel,
     selectedFlags,
     videoUri,
@@ -1753,6 +1845,9 @@ const saveCurrentProgress = async (
       RescueCase,
       | "animalState"
       | "animalType"
+      | "animalPlace"
+      | "animalPosition"
+      | "animalEnvironment"
       | "flags"
       | "locationText"
       | "approximateLocation"
@@ -1766,6 +1861,9 @@ const saveCurrentProgress = async (
       step: nextStep,
       animalState,
       animalType,
+      animalPlace,
+      animalPosition,
+      animalEnvironment,
       flags,
       locationText,
       approximateLocation,
@@ -1852,6 +1950,9 @@ const saveCurrentProgress = async (
         step,
         animalState,
         animalType,
+        animalPlace,
+        animalPosition,
+        animalEnvironment,
         flags,
         locationText,
         approximateLocation,
@@ -2183,6 +2284,33 @@ const saveCurrentProgress = async (
         </Text>
       </View>
 
+      {animalPosition ? (
+        <View style={styles.summaryPreviewSection}>
+          <Text style={styles.summaryPreviewLabel}>📍 Dónde está</Text>
+          <Text style={styles.summaryPreviewValue}>
+            {selectedAnimalPositionLabel}
+          </Text>
+        </View>
+      ) : null}
+
+      {animalEnvironment ? (
+        <View style={styles.summaryPreviewSection}>
+          <Text style={styles.summaryPreviewLabel}>🌍 Entorno</Text>
+          <Text style={styles.summaryPreviewValue}>
+            {selectedAnimalEnvironmentLabel}
+          </Text>
+        </View>
+      ) : null}
+
+      {!animalPosition && !animalEnvironment && animalPlace ? (
+        <View style={styles.summaryPreviewSection}>
+          <Text style={styles.summaryPreviewLabel}>📍 Dónde está el animal</Text>
+          <Text style={styles.summaryPreviewValue}>
+            {selectedAnimalPlaceLabel}
+          </Text>
+        </View>
+      ) : null}
+
       <View style={styles.summaryPreviewSection}>
         <Text style={styles.summaryPreviewLabel}>⚠️ Situación observada</Text>
         {selectedFlagLabels.length > 0 ? (
@@ -2347,7 +2475,7 @@ const saveCurrentProgress = async (
               </Text>
 
               <View style={styles.sectionGroup}>
-                <Text style={styles.subheading}>¿El animal está vivo o muerto?</Text>
+                <Text style={styles.subheading}>❤️ ¿El animal está vivo o muerto?</Text>
                 <View style={styles.flagGrid}>
                   {ANIMAL_STATE_OPTIONS.map((option) => {
                     const active = animalState === option.key;
@@ -2381,7 +2509,7 @@ const saveCurrentProgress = async (
 
               <>
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>¿Qué animal has encontrado?</Text>
+                    <Text style={styles.subheading}>🐾 ¿Qué animal has encontrado?</Text>
                     <View style={styles.flagGrid}>
                       {ANIMAL_OPTIONS.map((option) => {
                         const active = animalType === option.key;
@@ -2408,7 +2536,7 @@ const saveCurrentProgress = async (
 
                   {animalState !== "dead" ? (
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>¿Qué observas?</Text>
+                    <Text style={styles.subheading}>👀 ¿Qué observas?</Text>
                     <View style={styles.flagGrid}>
                       {FLAG_LABELS.map(({ key, label }) => {
                         const active = flags[key];
@@ -2433,6 +2561,58 @@ const saveCurrentProgress = async (
                     </View>
                   </View>
                   ) : null}
+
+                  <View style={styles.sectionGroup}>
+                    <Text style={styles.subheading}>📍 ¿Dónde está exactamente?</Text>
+                    <View style={styles.flagGrid}>
+                      {ANIMAL_POSITION_OPTIONS.map((option) => {
+                        const active = animalPosition === option.key;
+
+                        return (
+                          <Pressable
+                            key={option.key}
+                            style={[styles.flag, active && styles.flagActive]}
+                            onPress={() => setAnimalPosition(option.key)}
+                          >
+                            <Text
+                              style={[
+                                styles.flagText,
+                                active && styles.flagTextActive,
+                              ]}
+                            >
+                              {option.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <View style={styles.sectionGroup}>
+                    <Text style={styles.subheading}>🌍 ¿En qué entorno se encuentra?</Text>
+                    <View style={styles.flagGrid}>
+                      {ANIMAL_ENVIRONMENT_OPTIONS.map((option) => {
+                        const active = animalEnvironment === option.key;
+
+                        return (
+                          <Pressable
+                            key={option.key}
+                            style={[styles.flag, active && styles.flagActive]}
+                            onPress={() => setAnimalEnvironment(option.key)}
+                          >
+                            <Text
+                              style={[
+                                styles.flagText,
+                                active && styles.flagTextActive,
+                              ]}
+                            >
+                              {option.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
                 </>
             </View>
           </SectionCard>

@@ -1,4 +1,4 @@
-import type { RescueCase } from "@/types/rescueCase";
+import type { RescueAnimalType, RescueCase } from "@/types/rescueCase";
 import { recoverCurrentCase } from "@/services/rescueCaseService";
 import SosAssistant from "@/components/sos/SosAssistant";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -9,7 +9,10 @@ import { NoIndexHead } from "@/components/seo/SeoHead";
 
 export default function AvisoRoute() {
   const router = useRouter();
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const { animalType, mode } = useLocalSearchParams<{
+    animalType?: string;
+    mode?: string;
+  }>();
   const [initialCase, setInitialCase] = useState<RescueCase | null>(null);
   const [loading, setLoading] = useState(mode === "continue");
 
@@ -58,9 +61,31 @@ export default function AvisoRoute() {
   return (
     <>
       <NoIndexHead path="/aviso" title="Aviso | SOS Fauna España" />
-      <SosAssistant initialCase={initialCase} />
+      <SosAssistant
+        initialCase={initialCase}
+        initialAnimalType={normalizeAnimalTypeParam(animalType)}
+      />
     </>
   );
+}
+
+function normalizeAnimalTypeParam(
+  value: string | string[] | undefined,
+): RescueAnimalType | null {
+  const normalizedValue = Array.isArray(value) ? value[0] : value;
+  const validAnimalTypes: RescueAnimalType[] = [
+    "smallBird",
+    "largeBird",
+    "bat",
+    "smallMammal",
+    "largeMammal",
+    "reptileAmphibian",
+    "unknown",
+  ];
+
+  return validAnimalTypes.includes(normalizedValue as RescueAnimalType)
+    ? (normalizedValue as RescueAnimalType)
+    : null;
 }
 
 const styles = StyleSheet.create({
