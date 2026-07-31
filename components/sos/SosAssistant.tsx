@@ -314,6 +314,7 @@ return (
   "🐣 POLLO O VOLANTÓN\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• Antes de actuar, intenta distinguir si se trata de un pollo o de un volantón. No todas las aves jóvenes encontradas en el suelo necesitan ayuda.\n\n" +
+  "• Si crees que es un vencejo, no lo dejes en el suelo esperando a sus padres. Recógelo, mantenlo en una caja ventilada y contacta con un centro especializado.\n\n" +
 
   "🐥 POLLO\n" +
   "• Tiene poco plumaje, plumón visible o zonas sin plumas.\n" +
@@ -623,6 +624,7 @@ function getSmallBirdAdvice(flags: FlagsState) {
   "⚠️ ANTES DE INTERVENIR\n" +
   "• Un ave que no vuela no siempre necesita ser rescatada de inmediato.\n" +
   "• Puede tratarse de un volantón que está aprendiendo a volar o de un ave que realmente necesite ayuda.\n" +
+  "• En vencejos, estar en el suelo o no mantener el vuelo requiere recogida y valoración especializada.\n" +
   "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
   "• Si tienes dudas sobre si se trata de una cría, un pollo o un volantón, vuelve al paso anterior y selecciona la opción «Es cría».\n\n" +
   "❌ QUÉ NO HACER\n" +
@@ -671,6 +673,7 @@ function getSmallBirdAdvice(flags: FlagsState) {
   "🐦 AVE PEQUEÑA\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• No todas las aves pequeñas encontradas en el suelo necesitan ayuda.\n" +
+  "• Si parece un vencejo, estar en el suelo no es normal: protégelo en una caja ventilada y consulta cuanto antes.\n" +
   "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
   "• Si no existe un peligro inmediato, evita recogerla.\n\n" +
   "❌ QUÉ NO HACER\n" +

@@ -82,6 +82,37 @@ export const faqCategories: FaqCategory[] = [
 
 export const faqItems: FaqItem[] = [
   {
+    id: "vencejo-en-suelo",
+    category: "Antes de actuar",
+    question: "¿Qué hago si encuentro un vencejo en el suelo?",
+    answer:
+      "Recógelo con cuidado, mételo en una caja de cartón ventilada con papel de cocina en el fondo y déjalo en un lugar tranquilo, protegido del calor y de animales domésticos. Contacta cuanto antes con un centro especializado, Agentes Forestales o Medioambientales.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.contact, situations.transport, [
+      "vencejo",
+      "vencejos",
+      "suelo",
+      "caja",
+      "papel de cocina",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "cuando-ayudar-vencejo",
+    category: "Antes de actuar",
+    question: "¿Cuándo necesita ayuda un vencejo?",
+    answer:
+      "Necesita ayuda si está en el suelo, ha caído de un nido, tiene sangre o heridas, un ala caída, está muy débil, respira con dificultad, ha chocado contra un cristal, ha estado en contacto con un gato o no consigue mantener el vuelo.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.baby, [
+      "vencejo",
+      "vencejos",
+      "cristal",
+      "ventana",
+      "gato",
+      "no vuela",
+    ]),
+    showCreateNotice: true,
+  },
+  {
     id: "que-hacer-si-encuentro-animal",
     category: "Antes de actuar",
     question: "¿Qué debo hacer si encuentro un animal silvestre?",
@@ -129,11 +160,27 @@ export const faqItems: FaqItem[] = [
     showCreateNotice: true,
   },
   {
+    id: "vencejo-padres-suelo",
+    category: "Crías y animales jóvenes",
+    question: "¿Debo dejar un vencejo en el suelo para que sus padres lo atiendan?",
+    answer:
+      "No. Los padres no bajarán al suelo para alimentar a un pollo de vencejo caído del nido. Un vencejo joven encontrado en el suelo debe recogerse y recibir valoración.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.contact, [
+      "vencejo",
+      "vencejos",
+      "padres",
+      "suelo",
+      "caído del nido",
+      "caido del nido",
+    ]),
+    showCreateNotice: true,
+  },
+  {
     id: "que-hacer-si-encuentro-cria",
     category: "Crías y animales jóvenes",
     question: "¿Qué debo hacer si encuentro una cría?",
     answer:
-      "No la recojas automáticamente. Observa si está herida, en peligro o expuesta. Muchas crías están atendidas por sus padres aunque parezcan solas. Si hay riesgo real o dudas, contacta con un centro de recuperación o con el servicio competente.",
+      "No la recojas automáticamente. Observa si está herida, en peligro o expuesta. Muchas crías están atendidas por sus padres aunque parezcan solas. En vencejos caídos del nido, los padres no bajan al suelo a alimentarlos. Si hay riesgo real o dudas, contacta con un centro de recuperación o con el servicio competente.",
     keywords: mergeFaqSearchKeywords(
       animals.birds,
       animals.mammals,
@@ -150,7 +197,7 @@ export const faqItems: FaqItem[] = [
     category: "Crías y animales jóvenes",
     question: "¿Cómo distingo un pollo de un volantón?",
     answer:
-      "Un pollo suele tener poco plumaje o plumón visible y normalmente debería estar en el nido. Un volantón está más emplumado, puede saltar o moverse por el suelo y sus padres suelen seguir alimentándolo mientras aprende.",
+      "Un pollo suele tener poco plumaje o plumón visible y normalmente debería estar en el nido. Un volantón está más emplumado, puede saltar o moverse por el suelo y sus padres suelen seguir alimentándolo mientras aprende. Esta pauta no se aplica a vencejos: un vencejo en el suelo debe recogerse y valorarse.",
     keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, [
       "plumaje",
       "plumón",
@@ -164,7 +211,7 @@ export const faqItems: FaqItem[] = [
     category: "Crías y animales jóvenes",
     question: "¿Debo alejar una cría de sus padres?",
     answer:
-      "Solo si existe un peligro inmediato, como tráfico, depredadores domésticos o una zona insegura. Siempre que sea posible, mantenla cerca del lugar donde fue encontrada para no romper el vínculo con los adultos.",
+      "Solo si existe un peligro inmediato, como tráfico, depredadores domésticos o una zona insegura. Siempre que sea posible, mantenla cerca del lugar donde fue encontrada para no romper el vínculo con los adultos. En vencejos encontrados en el suelo, protégelos en una caja ventilada y consulta cuanto antes.",
     keywords: mergeFaqSearchKeywords(
       animals.birds,
       animals.mammals,
@@ -216,6 +263,38 @@ export const faqItems: FaqItem[] = [
     ]),
   },
   {
+    id: "vencejo-gato",
+    category: "Animales heridos o atrapados",
+    question: "¿Qué hago si un gato ha tocado un vencejo?",
+    answer:
+      "Recógelo, mantenlo en una caja y no lo liberes directamente. Aunque no veas heridas, necesita valoración cuanto antes por un centro especializado.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.contact, [
+      "vencejo",
+      "vencejos",
+      "gato",
+      "boca",
+      "patas",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-cristal",
+    category: "Animales heridos o atrapados",
+    question: "¿Qué hago si un vencejo ha chocado contra un cristal?",
+    answer:
+      "No lo lances al aire para comprobar si vuela. Protégelo en una caja tranquila y consulta con un centro especializado, porque puede tener lesiones aunque parezca recuperarse.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.contact, [
+      "vencejo",
+      "vencejos",
+      "cristal",
+      "ventana",
+      "colisión",
+      "colision",
+      "aturdido",
+    ]),
+    showCreateNotice: true,
+  },
+  {
     id: "animal-herido",
     category: "Animales heridos o atrapados",
     question: "¿Qué hago si el animal está herido?",
@@ -252,7 +331,7 @@ export const faqItems: FaqItem[] = [
     category: "Animales heridos o atrapados",
     question: "¿Qué hago si no puede volar?",
     answer:
-      "Puede tratarse de un volantón, un animal debilitado o un ejemplar lesionado. Observa si hay heridas, peligro o comportamiento anómalo. Si no es una cría en fase normal de aprendizaje, solicita orientación especializada.",
+      "Puede tratarse de un volantón, un animal debilitado o un ejemplar lesionado. Observa si hay heridas, peligro o comportamiento anómalo. En vencejos, estar en el suelo o no mantener el vuelo requiere recogida y valoración. No lances al animal al aire para comprobar si vuela.",
     keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.baby, [
       "ala",
       "vuelo",
@@ -298,13 +377,82 @@ export const faqItems: FaqItem[] = [
     category: "Animales heridos o atrapados",
     question: "¿Qué hago si encuentro un ave que no puede volar?",
     answer:
-      "No siempre significa que esté herida: puede tratarse de un volantón. Observa el plumaje, la postura, la presencia de los padres y posibles signos visibles de lesión antes de intervenir.",
+      "No siempre significa que esté herida: puede tratarse de un volantón. Observa el plumaje, la postura, la presencia de los padres y posibles signos visibles de lesión antes de intervenir. En vencejos, no lo dejes en el suelo ni lo lances al aire: protégelo y consulta con un centro especializado.",
     keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.injured, [
       "ala",
       "no vuela",
       "vuelo",
       "plumaje",
       "postura",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "lanzar-vencejo",
+    category: "Manipulación y cuidados",
+    question: "¿Puedo lanzar un vencejo al aire para ver si vuela?",
+    answer:
+      "No. Si está débil, lesionado o todavía no está preparado, puede caer y sufrir más daños. Una prueba de vuelo no consiste en lanzar al animal.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, [
+      "vencejo",
+      "vencejos",
+      "lanzar",
+      "lanzarlo",
+      "tirar",
+      "vuelo",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "prueba-vuelo-vencejo",
+    category: "Manipulación y cuidados",
+    question: "¿Cómo se hace una prueba de vuelo con un vencejo?",
+    answer:
+      "Solo debe plantearse si no hay lesiones, muestra buen estado general y el plumaje está completamente desarrollado. Se coloca sobre la palma abierta y debe despegar por sí mismo. Si se aferra, cae o no mantiene el vuelo, recógelo y solicita ayuda especializada.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, [
+      "vencejo",
+      "vencejos",
+      "prueba de vuelo",
+      "palma",
+      "plumaje",
+      "cañones",
+      "canones",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "agua-comida-vencejo",
+    category: "Manipulación y cuidados",
+    question: "¿Puedo darle agua o comida a un vencejo?",
+    answer:
+      "No introduzcas agua directamente en el pico y no le des pan, leche, carne ni pienso. Para una atención inicial breve, es más seguro mantenerlo tranquilo y pedir ayuda que improvisar comida o hidratación.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.feeding, situations.hydration, [
+      "vencejo",
+      "vencejos",
+      "agua",
+      "pan",
+      "leche",
+      "carne",
+      "pienso",
+      "hidratar",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "caja-vencejo",
+    category: "Manipulación y cuidados",
+    question: "¿Por qué es importante meter al vencejo en una caja?",
+    answer:
+      "La caja reduce el estrés, evita que se golpee intentando escapar y permite mantenerlo protegido hasta recibir indicaciones. Debe ser de cartón, estar ventilada y no dejar espacio para intentar volar dentro.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.transport, situations.stress, [
+      "vencejo",
+      "vencejos",
+      "caja",
+      "cartón",
+      "carton",
+      "jaula",
+      "estrés",
+      "estres",
     ]),
     showCreateNotice: true,
   },
@@ -447,6 +595,45 @@ export const faqItems: FaqItem[] = [
       ["tráfico", "trafico", "carretera", "persona", "riesgo", "animal grande"],
     ),
     showCreateNotice: true,
+    showRecoveryCenters: true,
+  },
+  {
+    id: "nidos-vencejo-edificios",
+    category: "Contacto y emergencias",
+    question: "¿Los vencejos hacen nidos en edificios?",
+    answer:
+      "Sí. En España suelen criar en huecos de edificios y muchas parejas regresan cada año al mismo nido. Si hay actividad de vencejos en un hueco, conviene no bloquearlo y consultar con la autoridad ambiental competente.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.contact, [
+      "vencejo",
+      "vencejos",
+      "nido",
+      "nidos",
+      "edificio",
+      "fachada",
+      "tejado",
+      "hueco",
+      "alero",
+    ]),
+    showRecoveryCenters: true,
+  },
+  {
+    id: "nidos-vencejo-obras",
+    category: "Contacto y emergencias",
+    question: "¿Qué hago si una obra afecta a un nido de vencejo?",
+    answer:
+      "No retires el nido ni bloquees la entrada al hueco. Si puedes hacerlo con seguridad, documenta la situación, la ubicación y si hay adultos entrando, huevos o pollos. Contacta con Agentes Forestales, Medioambientales o la autoridad ambiental competente.",
+    keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.contact, [
+      "vencejo",
+      "vencejos",
+      "obra",
+      "obras",
+      "fachada",
+      "tejado",
+      "hueco",
+      "colonia",
+      "nido activo",
+      "bloquear",
+    ]),
     showRecoveryCenters: true,
   },
   {

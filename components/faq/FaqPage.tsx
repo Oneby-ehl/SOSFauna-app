@@ -34,6 +34,9 @@ function removeAssistantNextStepParagraph(advice: string) {
     .trim();
 }
 
+const swiftAdvice =
+  "El vencejo pasa casi toda su vida volando. Sus patas están adaptadas para aferrarse a superficies, no para caminar. Si encuentras uno en el suelo, la situación es anómala y necesita ayuda o al menos una valoración antes de volver a liberarlo.";
+
 export default function FaqPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,6 +53,8 @@ export default function FaqPage() {
 
   const selectedAnimalAdvice = useMemo(() => {
     if (!selectedAnimal?.category) return null;
+
+    if (selectedAnimal.id === "vencejo") return swiftAdvice;
 
     return removeAssistantNextStepParagraph(
       getAdvice(
