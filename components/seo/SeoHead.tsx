@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 const SITE_NAME = "SOS Fauna España";
 const SITE_URL = "https://sosfauna.es";
 const THEME_COLOR = "#14532d";
+const ORGANIZATION_LOGO_URL = `${SITE_URL}/google-logo.png`;
 const SOCIAL_IMAGE_URL = `${SITE_URL}/og-image.jpg`;
 const SOCIAL_IMAGE_ALT =
   "SOS Fauna España - Ayuda a la fauna silvestre";
@@ -38,6 +39,14 @@ const globalStructuredData = [
   },
 ];
 
+const organizationStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE_NAME,
+  url: `${SITE_URL}/`,
+  logo: ORGANIZATION_LOGO_URL,
+};
+
 type SeoHeadProps = {
   title: string;
   description: string;
@@ -63,8 +72,11 @@ export function SeoHead({
   if (Platform.OS !== "web") return null;
 
   const url = absoluteUrl(path);
+  const includeOrganizationStructuredData =
+    includeGlobalStructuredData && url === `${SITE_URL}/`;
   const structuredDataItems = [
     ...(includeGlobalStructuredData ? globalStructuredData : []),
+    ...(includeOrganizationStructuredData ? [organizationStructuredData] : []),
     ...(structuredData ? [structuredData] : []),
   ];
 
