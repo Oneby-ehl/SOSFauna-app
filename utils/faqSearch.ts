@@ -19,6 +19,27 @@ type ScoredFaqItem = {
 const MIN_SINGLE_TERM_SCORE = 10;
 const MIN_MULTI_TERM_SCORE = 18;
 const GENERIC_RANKING_TERMS = new Set(["animal", "animales", "fauna"]);
+const SEARCH_STOP_WORDS = new Set([
+  "a",
+  "al",
+  "de",
+  "del",
+  "el",
+  "en",
+  "esta",
+  "está",
+  "he",
+  "la",
+  "lo",
+  "que",
+  "qué",
+  "un",
+  "una",
+]);
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 export const normalizeSearchText = (value: string) =>
   value
@@ -28,10 +49,19 @@ export const normalizeSearchText = (value: string) =>
     .trim()
     .replace(/\s+/g, " ");
 
+const containsSearchPhrase = (text: string, phrase: string) =>
+  new RegExp(
+    `(^|[^\\p{L}\\p{N}])${escapeRegExp(phrase)}($|[^\\p{L}\\p{N}])`,
+    "u",
+  ).test(text);
+
 export const tokenizeFaqSearchQuery = (query: string): string[] => {
   const tokens = normalizeSearchText(query).split(" ").filter(Boolean);
 
-  return tokens.filter((token, index) => tokens.indexOf(token) === index);
+  return tokens.filter(
+    (token, index) =>
+      !SEARCH_STOP_WORDS.has(token) && tokens.indexOf(token) === index,
+  );
 };
 
 const normalizeFaqItem = (
@@ -47,7 +77,9 @@ const normalizeFaqItem = (
 });
 
 const hasKeywordPhraseMatch = (keywords: string[], phrase: string) =>
-  keywords.some((keyword) => keyword === phrase || keyword.includes(phrase));
+  keywords.some(
+    (keyword) => keyword === phrase || containsSearchPhrase(keyword, phrase),
+  );
 
 const scoreFaqItem = (
   normalizedItem: NormalizedFaqItem,
@@ -62,11 +94,11 @@ const scoreFaqItem = (
       (keyword) => keyword === term,
     );
     const keywordPartialMatch = normalizedItem.keywords.some((keyword) =>
-      keyword.includes(term),
+      containsSearchPhrase(keyword, term),
     );
-    const questionMatch = normalizedItem.question.includes(term);
-    const categoryMatch = normalizedItem.category.includes(term);
-    const answerMatch = normalizedItem.answer.includes(term);
+    const questionMatch = containsSearchPhrase(normalizedItem.question, term);
+    const categoryMatch = containsSearchPhrase(normalizedItem.category, term);
+    const answerMatch = containsSearchPhrase(normalizedItem.answer, term);
     const termMatched =
       keywordPartialMatch || questionMatch || categoryMatch || answerMatch;
 
@@ -96,10 +128,12 @@ const scoreFaqItem = (
     meaningfulRankingTerms.length > 0 ? meaningfulRankingTerms : terms;
   const allTermsInQuestionOrKeywords = termsForQuestionKeywordBonus.every(
     (term) =>
-      normalizedItem.question.includes(term) ||
-      normalizedItem.keywords.some((keyword) => keyword.includes(term)),
+      containsSearchPhrase(normalizedItem.question, term) ||
+      normalizedItem.keywords.some((keyword) =>
+        containsSearchPhrase(keyword, term),
+      ),
   );
-  const phraseInQuestion = normalizedItem.question.includes(phrase);
+  const phraseInQuestion = containsSearchPhrase(normalizedItem.question, phrase);
   const phraseInKeyword = hasKeywordPhraseMatch(normalizedItem.keywords, phrase);
 
   if (allTermsMatch) score += 20;

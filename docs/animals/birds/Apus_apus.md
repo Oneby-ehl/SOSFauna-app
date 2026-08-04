@@ -56,6 +56,22 @@ Investigaciones realizadas mediante dispositivos de seguimiento han mostrado que
 
 Otros ejemplares pueden posarse ocasionalmente durante periodos cortos, aunque siguen pasando más del 99 % de ese tiempo en el aire.
 
+Durante esta fase aérea prolongada se ha observado también actividad nocturna y ascensos alrededor del anochecer y el amanecer.
+
+Estos ascensos crepusculares pueden alcanzar altitudes de hasta aproximadamente 2,5 kilómetros.
+
+Su función exacta no está demostrada. Se ha propuesto que podrían estar relacionados con la obtención de información atmosférica, meteorológica u orientativa, pero no deben explicarse como un comportamiento cerrado o exclusivamente asociado al sueño.
+
+La permanencia aérea prolongada implica que el vencejo debe descansar o dormir durante el vuelo, pero el mecanismo exacto no se ha demostrado directamente mediante registros electroencefalográficos en *Apus apus*.
+
+Por tanto, no debe afirmarse que el vencejo común duerma mediante un mecanismo concreto, como el sueño unihemisférico, aunque este fenómeno sea conocido en otras aves.
+
+Durante la fase aérea no reproductora, algunos individuos estudiados renovaron progresivamente plumas de vuelo de alas y cola sin que se detectaran aterrizajes.
+
+La bebida en vuelo implica una maniobra precisa sobre masas de agua. En estudios biomecánicos se han reconstruido maniobras de bebida en las que el vencejo desciende, reduce su velocidad antes del contacto y toca la superficie con el pico durante una pasada rasante.
+
+En una muestra de 163 maniobras, la velocidad media en el momento de tocar el agua fue de aproximadamente 11,7 m/s, unos 42 km/h.
+
 Durante la temporada de reproducción utiliza el nido para:
 
 - aparearse en algunos casos;
@@ -63,6 +79,10 @@ Durante la temporada de reproducción utiliza el nido para:
 - incubar;
 - criar a los pollos;
 - descansar.
+
+La cópula puede producirse tanto en vuelo como en el nido.
+
+Aunque la cópula aérea está descrita para la especie, no debe presentarse como la única forma de apareamiento ni describirse con detalle biomecánico si no existe una fuente específica que lo respalde.
 
 ---
 
@@ -111,7 +131,25 @@ La mayor parte de los ejemplares abandona las colonias entre finales de julio y 
 
 Inverna principalmente en África al sur del ecuador.
 
-Puede realizar desplazamientos muy extensos y se estima que, en determinadas circunstancias, puede recorrer hasta unos 1.000 kilómetros en un día.
+Los estudios con geolocalizadores muestran rutas complejas entre Europa y África, con diferencias entre la migración otoñal y la primaveral.
+
+No existe una única ruta migratoria simple para todos los vencejos europeos.
+
+Las poblaciones reproductoras de distintas regiones pueden utilizar diferentes áreas africanas durante el periodo no reproductor.
+
+El vencejo puede modificar su dirección durante diferentes etapas del viaje y ajustar sus desplazamientos a las condiciones de viento.
+
+Se ha demostrado que puede compensar la deriva producida por el viento durante la migración.
+
+Como otras aves migratorias, probablemente combina distintas fuentes de información para orientarse, pero no se conoce con precisión qué señales sensoriales utiliza *Apus apus* ni cómo las integra.
+
+Durante la migración primaveral puede realizar desplazamientos muy rápidos.
+
+En vencejos del norte de Europa se han estimado velocidades migratorias medias primaverales de aproximadamente 570 km/día, con un máximo de 832 km/día mantenido durante nueve días.
+
+Durante fases concretas de viaje se han estimado etapas superiores a 1.000 km/día.
+
+Estas cifras proceden de geolocalizadores y deben interpretarse como estimaciones de desplazamiento, no como recorridos continuos medidos por GPS.
 
 ---
 
@@ -173,6 +211,12 @@ La especie presenta una elevada fidelidad:
 
 Muchas parejas regresan cada año al mismo lugar.
 
+Estudios de seguimiento a largo plazo han cuantificado esta fidelidad: alrededor del 94 % de los adultos observados reproduciéndose en años sucesivos reutilizó un lugar de nidificación ocupado previamente.
+
+Esta fidelidad demuestra una memoria duradera del lugar de cría.
+
+Sin embargo, no se conoce con precisión qué señales utiliza el vencejo para identificar la entrada concreta del hueco.
+
 ---
 
 ## 8. Reproducción
@@ -200,6 +244,14 @@ Al salir del nido deben ser capaces de volar y alimentarse de forma autónoma.
 
 A diferencia de otras aves, el vencejo no pasa normalmente por una fase de volantón atendido por sus padres en el suelo o sobre ramas.
 
+La salida del nido depende de una preparación física y aerodinámica compleja, no solo de la edad o del aspecto externo.
+
+Los pollos pueden acumular reservas durante el crecimiento y alcanzar una masa superior a la que tendrán al abandonar el nido.
+
+Durante la última fase antes de la emancipación, pueden perder peso mientras las alas continúan desarrollándose.
+
+Los estudios experimentales sugieren que ajustan su masa corporal en relación con la superficie alar para alcanzar una carga alar adecuada antes del primer vuelo.
+
 ---
 
 ## 9. Torpor de los pollos
@@ -215,9 +267,19 @@ Los pollos poseen la capacidad de entrar en un estado de torpor:
 - conservan energía;
 - pueden permanecer varios días sin recibir alimento.
 
+El torpor es un estado fisiológico reversible de ahorro energético, no simplemente inmovilidad por debilidad.
+
+Durante el torpor disminuye primero el metabolismo y posteriormente puede descender la temperatura corporal o del nido como consecuencia de una menor producción de calor.
+
+En vencejos silvestres se ha medido una reducción metabólica media de aproximadamente el 56 % durante episodios de torpor.
+
 Esta adaptación les permite sobrevivir a periodos temporales de escasez.
 
 La ausencia momentánea de los adultos en el nido no significa necesariamente que los pollos hayan sido abandonados.
+
+Esta capacidad no debe transformarse en una recomendación para mantener sin atención a un pollo encontrado.
+
+La duración e intensidad del torpor dependen de la edad, el estado corporal, las reservas disponibles y las condiciones ambientales.
 
 ---
 
@@ -248,6 +310,14 @@ Presenta un aspecto muy parecido al de un adulto, pero todavía puede conservar:
 - desarrollo muscular incompleto.
 
 Aunque parezca completamente emplumado, todavía no debe liberarse si el plumaje no ha alcanzado su máximo desarrollo o quedan restos de cañones.
+
+Tener todas las plumas visibles no garantiza por sí solo que el joven esté preparado para volar.
+
+También importa la relación entre masa corporal, longitud y superficie de las alas, musculatura y capacidad de mantener un vuelo sostenido.
+
+Dentro del nido, los pollos pueden batir las alas y realizar ejercicios apoyándose sobre las alas extendidas.
+
+Estos movimientos podrían ayudar a preparar el vuelo y, según estudios experimentales, proporcionar información mecánica sobre la relación entre masa corporal y superficie alar.
 
 ---
 
@@ -483,6 +553,8 @@ Si fracasa tras dos intentos realizados en condiciones seguras, debe interrumpir
 El vencejo común es un insectívoro aéreo especializado.
 
 Se alimenta de pequeños organismos voladores que forman el denominado aeroplancton.
+
+Para esta especie no importa solo la abundancia total de insectos, sino que las presas estén activas, volando y accesibles en el momento y lugar adecuados.
 
 Entre sus presas se encuentran:
 
@@ -744,6 +816,14 @@ Pueden reflejar situaciones adversas durante su formación, como:
 - estado nutricional deficiente;
 - estrés físico.
 
+Estas marcas se corresponden con zonas de crecimiento anómalo de la pluma.
+
+Pueden afectar a barbas, bárbulas y, en casos graves, al raquis, creando puntos mecánicamente más débiles y con mayor riesgo de rotura.
+
+No permiten identificar por sí solas una causa concreta.
+
+Además de problemas nutricionales o falta de alimento, pueden relacionarse con estrés agudo, enfermedad u otras alteraciones fisiológicas durante el crecimiento.
+
 La calidad del plumaje es esencial para:
 
 - mantener el vuelo;
@@ -813,6 +893,10 @@ Pueden provocar:
 
 La elevada fidelidad del vencejo al nido hace que la pérdida del hueco tenga consecuencias especialmente graves.
 
+Una cavidad aparentemente pequeña puede ser un lugar de reproducción reutilizado durante años.
+
+Cerrar o destruir un hueco activo no equivale simplemente a obligar al ave a buscar otro lugar, especialmente en una especie con fidelidad tan alta al sitio de cría.
+
 ### Criterio SOS Fauna
 
 Cuando el aviso esté relacionado con obras:
@@ -845,6 +929,16 @@ Entre sus principales amenazas se encuentran:
 - aumento de temperaturas;
 - reducción de humedad del suelo;
 - disminución de recursos alimenticios.
+
+La relación entre clima, insectos y reproducción no debe presentarse de forma simple.
+
+La temperatura, la lluvia y el viento influyen en cuándo y dónde están disponibles los insectos voladores.
+
+Primaveras moderadamente cálidas pueden adelantar la reproducción y, en algunas poblaciones estudiadas, asociarse a un mayor éxito reproductor.
+
+En cambio, episodios extremos, periodos fríos o lluviosos, sequías o cambios en la disponibilidad temporal de insectos pueden afectar negativamente a la alimentación y a la cría.
+
+Por tanto, no debe afirmarse una cadena simplificada del tipo "más temperatura equivale siempre a menor éxito reproductor".
 
 Las medidas de conservación incluyen:
 
@@ -997,16 +1091,28 @@ No debe bloquearse ni destruirse un nido activo. Debe consultarse con la autorid
 
 ## 29. Nivel de evidencia
 
-### Confirmado por varias fuentes
+### Confirmado o demostrado por estudios específicos
 
 - El vencejo común pasa la mayor parte de su vida en el aire.
-- Puede dormir en vuelo.
+- Algunos ejemplares permanecen aproximadamente diez meses en una fase de vida aérea.
+- Durante el periodo no reproductor puede pasar más del 99 % del tiempo en vuelo.
+- Algunos individuos estudiados no registraron aterrizajes durante esa fase.
+- Puede alimentarse y beber durante el vuelo.
+- La bebida en vuelo implica una maniobra de descenso, frenado y contacto breve con el agua.
+- Puede realizar actividad nocturna y ascensos crepusculares al anochecer y al amanecer.
+- Puede renovar progresivamente plumas de vuelo durante la fase aérea.
 - Puede aparearse en vuelo.
-- Se alimenta y bebe durante el vuelo.
-- Algunos ejemplares permanecen aproximadamente diez meses sin posarse.
+- También puede aparearse en el nido.
+- Realiza migraciones de larga distancia entre Europa y África.
+- Puede ajustar sus desplazamientos migratorios a las condiciones de viento.
+- Puede compensar la deriva producida por el viento durante la migración.
+- En fases rápidas de la migración primaveral se han estimado desplazamientos diarios superiores a 1.000 km.
 - Los pollos pueden entrar en torpor durante periodos adversos.
+- El torpor implica una reducción regulada del metabolismo.
+- En vencejos silvestres se ha medido una reducción metabólica media de aproximadamente el 56 % durante episodios de torpor.
 - En España nidifica principalmente en edificios.
 - Presenta una elevada fidelidad al lugar de cría.
+- Estudios de seguimiento han cuantificado fidelidades al lugar de nidificación próximas al 94 % en adultos reproductores.
 - Un vencejo encontrado en el suelo necesita recogida o valoración.
 - Los padres no bajan al suelo para alimentar a un pollo caído.
 - Un adulto sano puede despegar desde una superficie adecuada.
@@ -1017,6 +1123,26 @@ No debe bloquearse ni destruirse un nido activo. Debe consultarse con la autorid
 - La deshidratación es frecuente en animales recogidos.
 - El contacto con gatos requiere valoración.
 - La destrucción de huecos de edificios es una amenaza importante.
+- Las marcas de crecimiento anómalo en plumas pueden debilitarlas y no permiten diagnosticar por sí solas una causa concreta.
+- La meteorología puede afectar a la disponibilidad de insectos voladores, al éxito reproductor y a la supervivencia.
+
+### Respaldado con matices
+
+- La permanencia aérea prolongada implica que debe existir alguna forma de descanso o sueño durante el vuelo, pero el mecanismo exacto no está demostrado directamente mediante EEG en *Apus apus*.
+- Los ascensos crepusculares podrían estar relacionados con la obtención de información atmosférica, meteorológica u orientativa, pero su función exacta no está establecida.
+- El vencejo probablemente combina distintos sistemas de orientación durante la migración, pero no se conoce con precisión qué señales utiliza ni cómo las integra.
+- La memoria espacial y las referencias visuales probablemente intervienen en la localización del hueco de nidificación, pero no se conoce el mecanismo sensorial exacto.
+- La temperatura y otras variables climáticas pueden tener efectos positivos o negativos según momento, intensidad y población estudiada.
+- Las barras o marcas de estrés pueden aportar información sobre alteraciones durante el crecimiento de la pluma, pero no permiten identificar una causa concreta sin valoración especializada.
+
+### Hipótesis o no demostrado específicamente
+
+- Sueño unihemisférico como mecanismo concreto del vencejo común.
+- Relación directa y exclusiva entre ascensos nocturnos y sueño.
+- Secuencia biomecánica detallada de la cópula aérea en *Apus apus*.
+- Uso demostrado de una combinación concreta de Sol, estrellas, campo magnético, paisaje u otras señales para navegar.
+- Identificación exacta de las señales utilizadas para reconocer una rendija concreta de nidificación.
+- Cadena simple "cambio climático → menos insectos → declive del vencejo".
 
 ### Conocimiento técnico no destinado al ciudadano
 
@@ -1033,16 +1159,20 @@ No debe bloquearse ni destruirse un nido activo. Debe consultarse con la autorid
 - Pronóstico clínico.
 - Criterios de eutanasia.
 
-### Pendiente de ampliar
+### Preguntas pendientes de investigación divulgativa
 
 - Identificación visual mediante fotografías de las distintas etapas de desarrollo.
-- Medidas orientativas de alas y cola durante el crecimiento.
+- Medidas orientativas de alas y cola durante el crecimiento con fuentes veterinarias o de rehabilitación contrastadas.
 - Tabla de pesos con fuentes veterinarias contrastadas.
 - Lesiones y enfermedades más frecuentes.
 - Protocolo profesional completo de rehabilitación.
 - Diferenciación práctica entre vencejo común y vencejo pálido.
 - Actuación detallada ante contaminación por aceite, hollín o adhesivos.
 - Modelos de cajas nido y medidas de conservación en edificios.
+- Mecanismo exacto del sueño durante el vuelo en *Apus apus*.
+- Función precisa de los ascensos crepusculares.
+- Señales sensoriales concretas utilizadas para localizar el hueco de nidificación.
+- Sistemas específicos de navegación utilizados por el vencejo común.
 
 ### Recomendaciones descartadas
 
@@ -1081,11 +1211,63 @@ No debe bloquearse ni destruirse un nido activo. Debe consultarse con la autorid
 
 ### Investigación y divulgación científica
 
-- Universidad de Lund, Suecia.
-  - Seguimiento mediante registradores de microdatos.
-  - Vuelo prácticamente continuo durante el periodo no reproductor.
+- Hedenström, A., Norevik, G., Warfvinge, K., Andersson, A., Bäckman, J., & Åkesson, S. (2016). *Annual 10-Month Aerial Life Phase in the Common Swift Apus apus*. Current Biology, 26(22), 3066-3070. https://doi.org/10.1016/j.cub.2016.09.014
+  - Vida aérea durante aproximadamente diez meses.
+  - Más del 99 % del periodo no reproductor en vuelo.
+  - Actividad nocturna, ascensos crepusculares y muda durante la fase aérea.
+- Rattenborg, N. C. (2006). *Do birds sleep in flight?* Naturwissenschaften, 93(9), 413-425. https://doi.org/10.1007/s00114-006-0120-3
+  - Revisión científica sobre sueño en vuelo.
+  - Límite de evidencia sobre ausencia de EEG directo en vencejo común.
+- Dokter, A. M., Åkesson, S., Beekhuis, H., Bouten, W., Buurma, L., van Gasteren, H., & Holleman, I. (2013). *Twilight ascents by common swifts, Apus apus, at dawn and dusk: acquisition of orientation cues?* Animal Behaviour, 85(3), 545-552. https://doi.org/10.1016/j.anbehav.2012.12.006
+  - Ascensos crepusculares al amanecer y anochecer.
+  - Altitudes de hasta aproximadamente 2,5 km.
+  - Hipótesis de adquisición de información orientativa o atmosférica.
+- Nilsson, C., Bäckman, J., & Alerstam, T. (2019). *Flocking behaviour in the twilight ascents of Common Swifts Apus apus*. Ibis. https://doi.org/10.1111/ibi.12704
+  - Componente social de algunas fases de los ascensos crepusculares.
+  - Función exacta todavía no resuelta.
+- Ruaux, G., Monmasson, K., Hedrick, T. L., Lumineau, S., & de Margerie, E. (2023). *Drink safely: common swifts (Apus apus) dissipate mechanical energy to decrease flight speed before touch-and-go drinking*. Journal of Experimental Biology, 226(6). https://doi.org/10.1242/jeb.244961
+  - Bebida en vuelo mediante maniobra touch-and-go.
+  - Reconstrucción tridimensional de 163 maniobras.
+  - Frenado deliberado y velocidad media de contacto de aproximadamente 11,7 m/s.
+- Åkesson, S., Klaassen, R., Holmgren, J., Fox, J. W., & Hedenström, A. (2012). *Migration routes and strategies in a highly aerial migrant, the common swift Apus apus, revealed by light-level geolocators*. PLoS ONE, 7(7), e41195. https://doi.org/10.1371/journal.pone.0041195
+  - Rutas completas entre Europa y África.
+  - Diferencias entre otoño y primavera.
+  - Alimentación durante el desplazamiento.
+- Åkesson, S., & Bianco, G. (2021). *Wind-assisted sprint migration in northern swifts*. iScience, 24(6), 102474. https://doi.org/10.1016/j.isci.2021.102474
+  - Migración primaveral rápida.
+  - Velocidades medias y máximas de desplazamiento.
+  - Aprovechamiento de vientos favorables.
+- Åkesson, S., Bianco, G., & Hedenström, A. (2016). *Negotiating an ecological barrier: crossing the Sahara in relation to winds by common swifts*. Philosophical Transactions of the Royal Society B, 371, 20150393. https://doi.org/10.1098/rstb.2015.0393
+  - Cruce del Sáhara y relación con condiciones de viento.
+- Åkesson, S., Atkinson, P. W., Bermejo, A., de la Puente, J., Ferri, M., Hewson, C. M., Holmgren, J., Kaiser, E., Kearsley, L., Klaassen, R. H. G., Kolunen, H., Matsson, G., Minelli, F., Norevik, G., Pietiäinen, H., Singh, N. J., Spina, F., Viktora, L., & Hedenström, A. (2020). *Evolution of chain migration in an aerial insectivorous bird, the common swift Apus apus*. Evolution, 74(10), 2377-2391. https://doi.org/10.1111/evo.14093
+  - Migración en cadena.
+  - Conectividad entre poblaciones europeas y áreas africanas.
+- Wellbrock, A. H. J., Eckhardt, L. R. H., Kelsey, N. A., Heldmaier, G., Rozman, J., & Witte, K. (2022). *Cool birds: first evidence of energy-saving nocturnal torpor in free-living common swifts Apus apus resting in their nests*. Biology Letters, 18(4), 20210675. https://doi.org/10.1098/rsbl.2021.0675
+  - Torpor en vencejos en libertad.
+  - Reducción metabólica media aproximada del 56 %.
+- Jovani, R., & Rohwer, S. (2017). *Fault bars in bird feathers: mechanisms, and ecological and evolutionary causes and consequences*. Biological Reviews, 92, 1113-1127. https://doi.org/10.1111/brv.12273
+  - Formación, causas y consecuencias de las barras de estrés en plumas.
+- Legler, M., & Heenemann, K. (2025). *Feather Defects in a Juvenile Common Swift (Apus apus) Associated with a Circovirus Infection*. Veterinary Sciences, 12(12), 1117. https://doi.org/10.3390/vetsci12121117
+  - Caso clínico de alteraciones graves del plumaje en *Apus apus* asociadas a enfermedad.
+- Thomson, D. L., Douglas-Home, H., Furness, R. W., & Monaghan, P. (1996). *Breeding success and survival in the common swift Apus apus: a long-term study on the effects of weather*. Journal of Zoology, 239(1), 29-38. https://doi.org/10.1111/j.1469-7998.1996.tb05434.x
+  - Efectos de la meteorología sobre éxito reproductor y supervivencia.
+- [Autores a completar antes de publicación] (2025). *The impact of climatic conditions in wintering and breeding quarters on long-term breeding success in the Common Swift*. Avian Research, 16(2), 100242. https://doi.org/10.1016/j.avrs.2025.100242
+  - Seguimiento de 38 años y 5.486 intentos reproductores.
+  - Relación entre condiciones primaverales, fecha de puesta y éxito reproductor.
 - National Geographic.
   - Divulgación de la investigación sobre el seguimiento prolongado del vencejo común.
+
+### Referencias científicas pendientes de completar
+
+- Seguimiento de 15 años sobre fidelidad al lugar de nidificación del vencejo común, publicado en 2026.
+  - Pendiente de identificar autores, revista y DOI.
+  - Sustenta cualitativamente la fidelidad al lugar de nidificación próxima al 94 % en adultos reproductores.
+- Martins, T. L. F. (1997). Estudio experimental sobre crecimiento, masa corporal y emancipación del vencejo común publicado en *Animal Behaviour*.
+  - Pendiente de verificar metadatos bibliográficos y DOI.
+  - Sustenta cualitativamente la acumulación de reservas, pérdida de masa previa a la emancipación y plasticidad del desarrollo.
+- Wright, J., Markman, S., & Denney, S. M. (2006). *How do young common swifts Apus apus know when they are ready to fly?* Proceedings of the Royal Society B.
+  - Pendiente de verificar metadatos bibliográficos y DOI.
+  - Sustenta cualitativamente ejercicios de alas, carga alar y ajuste de masa antes del primer vuelo.
 
 ### Fuente de hábitat, reproducción y conservación
 
@@ -1158,3 +1340,36 @@ Aspectos incorporados
 - Prueba de vuelo.
 - Conservación.
 - Criterios editoriales para SOS Fauna.
+
+### 2026-08-03
+
+Fuentes revisadas
+
+- Hedenström et al. (2016), Current Biology.
+- Rattenborg (2006), Naturwissenschaften.
+- Dokter et al. (2013), Animal Behaviour.
+- Nilsson et al. (2019), Ibis.
+- Ruaux et al. (2023), Journal of Experimental Biology.
+- Åkesson et al. (2012), PLoS ONE.
+- Åkesson & Bianco (2021), iScience.
+- Åkesson, Bianco & Hedenström (2016), Philosophical Transactions of the Royal Society B.
+- Åkesson et al. (2020), Evolution.
+- Wellbrock et al. (2022), Biology Letters.
+- Jovani & Rohwer (2017), Biological Reviews.
+- Legler & Heenemann (2025), Veterinary Sciences.
+- Thomson et al. (1996), Journal of Zoology.
+- Avian Research (2025), autores pendientes de completar.
+- Martins (1997), metadatos pendientes de completar.
+- Wright, Markman & Denney (2006), metadatos pendientes de completar.
+
+Aspectos incorporados
+
+- Matices sobre sueño en vuelo y ausencia de EEG directo en *Apus apus*.
+- Ascensos crepusculares y límites sobre su función.
+- Biomecánica básica de la bebida en vuelo.
+- Migración, viento, rutas africanas y límites de la navegación conocida.
+- Torpor como ahorro energético regulado.
+- Desarrollo previo al primer vuelo, masa corporal y carga alar.
+- Barras de estrés en plumas y límites diagnósticos.
+- Relación entre meteorología, insectos y reproducción.
+- Actualización del nivel de evidencia y referencias científicas.

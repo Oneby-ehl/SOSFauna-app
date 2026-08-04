@@ -188,7 +188,7 @@ function getTrappedAdvice(animalType: AnimalType) {
     return (
   "🪤 RAPAZ ATRAPADA\n\n" +
   "🚨 ACTÚA CON CALMA\n" +
-  "• Una rapaz puede sentirse amenazada y usar sus garras y el pico, aunque parezca inmóvil o debilitada.\n" +
+  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras, aunque parezca inmóvil o debilitada.\n" +
   "• Antes de intervenir, observa cómo está atrapada y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
   "❌ QUÉ NO HACER\n" +
   "• No tires del animal para liberarlo.\n" +
@@ -314,7 +314,7 @@ return (
   "🐣 POLLO O VOLANTÓN\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• Antes de actuar, intenta distinguir si se trata de un pollo o de un volantón. No todas las aves jóvenes encontradas en el suelo necesitan ayuda.\n\n" +
-  "• Si crees que es un vencejo, no lo dejes en el suelo esperando a sus padres. Recógelo, mantenlo en una caja ventilada y contacta con un centro especializado.\n\n" +
+  "• Si crees que es un vencejo, no lo dejes en el suelo esperando a sus padres. Recógelo, mantenlo en una caja de cartón ventilada y contacta con un centro especializado.\n\n" +
 
   "🐥 POLLO\n" +
   "• Tiene poco plumaje, plumón visible o zonas sin plumas.\n" +
@@ -353,7 +353,7 @@ return (
     return (
   "🦉 CRÍA DE AVE MEDIANA / GRANDE\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
-  "• No toda cría de rapaz o ave grande encontrada fuera del nido necesita ser recogida.\n" +
+  "• No toda cría de ave mediana o grande encontrada fuera del nido necesita ser recogida.\n" +
   "• Puede encontrarse en una fase de aprendizaje.\n" +
   "• Los adultos pueden continuar alimentándola y vigilándola desde las proximidades.\n" +
   "• Algunas especies permanecen varios días en el suelo o en ramas bajas mientras aprenden a volar.\n\n" +
@@ -623,8 +623,8 @@ function getSmallBirdAdvice(flags: FlagsState) {
   "🐦 AVE QUE NO VUELA\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• Un ave que no vuela no siempre necesita ser rescatada de inmediato.\n" +
-  "• Puede tratarse de un volantón que está aprendiendo a volar o de un ave que realmente necesite ayuda.\n" +
-  "• En vencejos, estar en el suelo o no mantener el vuelo requiere recogida y valoración especializada.\n" +
+  "• Algunas aves encontradas en el suelo pueden ser volantones atendidos por sus padres, pero otras necesitan ayuda.\n" +
+  "• En especies como los vencejos, encontrarlas en el suelo o comprobar que no mantienen el vuelo requiere recogerlas y solicitar valoración.\n" +
   "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
   "• Si tienes dudas sobre si se trata de una cría, un pollo o un volantón, vuelve al paso anterior y selecciona la opción «Es cría».\n\n" +
   "❌ QUÉ NO HACER\n" +
@@ -673,7 +673,7 @@ function getSmallBirdAdvice(flags: FlagsState) {
   "🐦 AVE PEQUEÑA\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• No todas las aves pequeñas encontradas en el suelo necesitan ayuda.\n" +
-  "• Si parece un vencejo, estar en el suelo no es normal: protégelo en una caja ventilada y consulta cuanto antes.\n" +
+  "• Si parece un vencejo, estar en el suelo no es normal: protégelo en una caja de cartón ventilada y consulta cuanto antes.\n" +
   "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
   "• Si no existe un peligro inmediato, evita recogerla.\n\n" +
   "❌ QUÉ NO HACER\n" +
@@ -698,7 +698,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
   "🚨 SEÑALES OBSERVADAS\n" +
   getObservedSigns(flags, true) +
   "\n\n⚠️ PRECAUCIÓN\n" +
-  "• Una rapaz o ave grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
+  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
   "• Mantén una distancia prudente y evita acercar la cara o las manos.\n\n" +
   "❌ QUÉ NO HACER\n" +
   "• No intentes sujetarla por las alas, las patas, el cuello o las plumas.\n" +
@@ -725,7 +725,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
     return (
   "🦅 AVE MEDIANA / GRANDE QUE NO VUELA\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
-  "• Una rapaz o ave grande que no vuela no siempre necesita ser rescatada de inmediato.\n" +
+  "• Un ave mediana o grande que no vuela no siempre necesita ser rescatada de inmediato.\n" +
   "• Puede tratarse de un ejemplar joven en fase de aprendizaje o emancipación.\n" +
   "• Los adultos pueden continuar alimentándolo y vigilándolo desde las proximidades.\n" +
   "• Observa la situación desde una distancia prudente antes de intervenir, siempre que no exista un peligro inmediato.\n\n" +
@@ -766,7 +766,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
   "🚨 SEÑALES OBSERVADAS\n" +
   getObservedSigns(flags) +
   "\n\n⚠️ PRECAUCIÓN\n" +
-  "• Una rapaz o ave grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
+  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
   "• Mantén una distancia prudente y evita acorralarla.\n\n" +
   "❌ QUÉ NO HACER\n" +
   "• No pongas en riesgo tu propia seguridad ni intentes detener el tráfico por tu cuenta.\n" +
@@ -788,7 +788,7 @@ function getLargeBirdAdvice(flags: FlagsState) {
   "🦅 AVE MEDIANA / GRANDE\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
   "• Mantén una distancia prudente y observa la situación antes de intervenir.\n" +
-  "• Una rapaz o ave grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
+  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
   "• Su presencia en el suelo o en una rama baja no significa necesariamente que necesite ayuda.\n\n" +
   "❌ QUÉ NO HACER\n" +
   "• No la manipules para comprobar si está sana.\n" +

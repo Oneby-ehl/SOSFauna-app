@@ -3,7 +3,7 @@ import {
   findAnimalCatalogTextMatch,
   searchAnimalCatalog,
 } from "@/data/animalSearchCatalog";
-import { faqCategories, faqItems } from "@/data/faq";
+import { faqCategories, faqItems, swiftFaqPriorityIds } from "@/data/faq";
 import {
   type AnimalType,
   COMMON_END,
@@ -22,7 +22,7 @@ import {
 } from "react-native";
 
 import { SeoHead } from "@/components/seo/SeoHead";
-import { searchFaqItems } from "@/utils/faqSearch";
+import { normalizeSearchText, searchFaqItems } from "@/utils/faqSearch";
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -34,8 +34,160 @@ function removeAssistantNextStepParagraph(advice: string) {
     .trim();
 }
 
-const swiftAdvice =
-  "El vencejo pasa casi toda su vida volando. Sus patas están adaptadas para aferrarse a superficies, no para caminar. Si encuentras uno en el suelo, la situación es anómala y necesita ayuda o al menos una valoración antes de volver a liberarlo.";
+const swiftFaqPriority = new Map<string, number>(
+  swiftFaqPriorityIds.map((itemId, index) => [itemId, index]),
+);
+
+const speciesOverviewCategoryOrder = [
+  "Antes de actuar",
+  "Animales heridos o atrapados",
+  "Crías y animales jóvenes",
+  "Manipulación y cuidados",
+  "Contacto y emergencias",
+  "Conocer al vencejo",
+  "La aplicación",
+] as const;
+
+function getSpeciesOverviewCategoryIndex(category: string) {
+  const normalizedCategory = normalizeSearchText(category);
+  const categoryIndex = speciesOverviewCategoryOrder.findIndex(
+    (orderedCategory) => normalizeSearchText(orderedCategory) === normalizedCategory,
+  );
+
+  return categoryIndex === -1
+    ? speciesOverviewCategoryOrder.length
+    : categoryIndex;
+}
+
+function prioritizeSwiftFaqItems(items: typeof faqItems) {
+  return [...items].sort((firstItem, secondItem) => {
+    const firstPriority = swiftFaqPriority.get(firstItem.id);
+    const secondPriority = swiftFaqPriority.get(secondItem.id);
+
+    if (firstPriority !== undefined && secondPriority !== undefined) {
+      return firstPriority - secondPriority;
+    }
+
+    if (firstPriority !== undefined) return -1;
+    if (secondPriority !== undefined) return 1;
+
+    return 0;
+  });
+}
+
+function prioritizeSelectedAnimalIntroItem(items: typeof faqItems) {
+  return [...items].sort((firstItem, secondItem) => {
+    if (firstItem.id === "que-hacer-si-encuentro-animal") return -1;
+    if (secondItem.id === "que-hacer-si-encuentro-animal") return 1;
+
+    return 0;
+  });
+}
+
+const GENERAL_SWIFT_QUERIES = new Set(["vencejo", "vencejos", "apus apus"]);
+
+function isGeneralSwiftQuery(query: string) {
+  return GENERAL_SWIFT_QUERIES.has(normalizeSearchText(query));
+}
+
+function getAnimalSearchTerms(animal: AnimalSearchItem) {
+  return [animal.name, animal.id, ...(animal.aliases ?? [])].map(
+    normalizeSearchText,
+  );
+}
+
+function isSelectedAnimalIntroQuery(
+  query: string,
+  selectedAnimal: AnimalSearchItem | null,
+) {
+  if (!selectedAnimal) return false;
+
+  const normalizedQuery = normalizeSearchText(query);
+
+  return (
+    getAnimalSearchTerms(selectedAnimal).some(
+      (term) => normalizedQuery === term,
+    ) ||
+    normalizedQuery.includes("encontr") ||
+    normalizedQuery.includes("que hago") ||
+    normalizedQuery.includes("qué hago")
+  );
+}
+
+function isSelectedAnimalNameOnlyQuery(
+  query: string,
+  selectedAnimal: AnimalSearchItem | null,
+) {
+  if (!selectedAnimal) return false;
+
+  const normalizedQuery = normalizeSearchText(query);
+
+  return getAnimalSearchTerms(selectedAnimal).some(
+    (term) => normalizedQuery === term,
+  );
+}
+
+const swiftRedundantGeneralFaqIds = new Set([
+  "que-hacer-si-encuentro-cria",
+  "pollo-o-volanton",
+  "alejar-cria-padres",
+  "hidratar-cria",
+  "saber-si-necesita-ayuda",
+  "animal-herido",
+  "animal-atrapado",
+  "no-puede-volar",
+  "ave-no-puede-volar",
+]);
+
+const extraSwiftFaqIds = new Set([
+  "lanzar-vencejo",
+  "prueba-vuelo-vencejo",
+  "agua-comida-vencejo",
+  "caja-vencejo",
+  "nidos-vencejo-obras",
+]);
+
+function isSwiftFaqItem(itemId: string) {
+  return itemId.includes("vencejo") || extraSwiftFaqIds.has(itemId);
+}
+
+function getFaqSpeciesId(itemId: string) {
+  if (isSwiftFaqItem(itemId)) return "vencejo";
+  if (itemId === "murcielago") return "murcielago";
+
+  return null;
+}
+
+function filterFaqItemsBySelectedAnimal(
+  items: typeof faqItems,
+  selectedAnimal: AnimalSearchItem | null,
+) {
+  const selectedAnimalId = selectedAnimal?.id ?? null;
+
+  return items.filter((item) => {
+    const itemSpeciesId = getFaqSpeciesId(item.id);
+
+    if (itemSpeciesId !== null && itemSpeciesId !== selectedAnimalId) {
+      return false;
+    }
+
+    if (
+      selectedAnimalId === "vencejo" &&
+      swiftRedundantGeneralFaqIds.has(item.id)
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+function getVisibleFaqCategories(selectedAnimal: AnimalSearchItem | null) {
+  return faqCategories.filter(
+    (category) =>
+      category !== "Conocer al vencejo" || selectedAnimal?.id === "vencejo",
+  );
+}
 
 export default function FaqPage() {
   const router = useRouter();
@@ -54,8 +206,6 @@ export default function FaqPage() {
   const selectedAnimalAdvice = useMemo(() => {
     if (!selectedAnimal?.category) return null;
 
-    if (selectedAnimal.id === "vencejo") return swiftAdvice;
-
     return removeAssistantNextStepParagraph(
       getAdvice(
         "alive",
@@ -66,9 +216,11 @@ export default function FaqPage() {
   }, [selectedAnimal]);
 
   const displayedFaqItems = useMemo(() => {
-    if (!selectedAnimal || !selectedAnimalAdvice) return faqItems;
+    if (!selectedAnimal || !selectedAnimalAdvice) {
+      return filterFaqItemsBySelectedAnimal(faqItems, selectedAnimal);
+    }
 
-    return faqItems.map((item) => {
+    const animalSpecificItems = faqItems.map((item) => {
       if (item.id !== "que-hacer-si-encuentro-animal") return item;
 
       return {
@@ -77,7 +229,14 @@ export default function FaqPage() {
         answer: selectedAnimalAdvice,
       };
     });
+
+    return filterFaqItemsBySelectedAnimal(animalSpecificItems, selectedAnimal);
   }, [selectedAnimal, selectedAnimalAdvice]);
+
+  const visibleFaqCategories = useMemo(
+    () => getVisibleFaqCategories(selectedAnimal),
+    [selectedAnimal],
+  );
 
   const animalSearchResults = useMemo(
     () => searchAnimalCatalog(searchQuery),
@@ -87,15 +246,48 @@ export default function FaqPage() {
   const groupedItems = useMemo(
     () => {
       const searchResults = searchFaqItems(displayedFaqItems, searchQuery);
+      const rankedResults = isSelectedAnimalIntroQuery(
+        searchQuery,
+        selectedAnimal,
+      )
+        ? prioritizeSelectedAnimalIntroItem(searchResults)
+        : selectedAnimal?.id === "vencejo" && isGeneralSwiftQuery(searchQuery)
+          ? prioritizeSwiftFaqItems(searchResults)
+          : searchResults;
+      const isSearching = searchQuery.trim().length > 0;
+      const shouldUseEditorialCategoryOrder = isSelectedAnimalNameOnlyQuery(
+        searchQuery,
+        selectedAnimal,
+      );
 
-      return faqCategories
+      return visibleFaqCategories
         .map((category) => ({
           category,
-          items: searchResults.filter((item) => item.category === category),
+          items: rankedResults.filter((item) => item.category === category),
+          firstRank: rankedResults.findIndex(
+            (item) => item.category === category,
+          ),
         }))
-        .filter((group) => group.items.length > 0);
+        .filter((group) => group.items.length > 0)
+        .sort((firstGroup, secondGroup) => {
+          if (shouldUseEditorialCategoryOrder) {
+            return (
+              getSpeciesOverviewCategoryIndex(firstGroup.category) -
+              getSpeciesOverviewCategoryIndex(secondGroup.category)
+            );
+          }
+
+          if (!isSearching) {
+            return (
+              visibleFaqCategories.indexOf(firstGroup.category) -
+              visibleFaqCategories.indexOf(secondGroup.category)
+            );
+          }
+
+          return firstGroup.firstRank - secondGroup.firstRank;
+        });
     },
-    [displayedFaqItems, searchQuery],
+    [displayedFaqItems, searchQuery, selectedAnimal, visibleFaqCategories],
   );
 
   const hasResults = groupedItems.length > 0;
@@ -289,7 +481,7 @@ export default function FaqPage() {
           ) : null}
 
           <View style={styles.categoryList}>
-            {faqCategories.map((category) => (
+            {visibleFaqCategories.map((category) => (
               <Pressable
                 key={category}
                 accessibilityRole="button"

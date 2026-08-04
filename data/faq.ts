@@ -25,6 +25,7 @@ export type FaqCategory =
   | "Animales heridos o atrapados"
   | "Manipulación y cuidados"
   | "Contacto y emergencias"
+  | "Conocer al vencejo"
   | "La aplicación";
 
 export type FaqItem = {
@@ -39,6 +40,7 @@ export type FaqItem = {
 
 const animals = FAQ_SEARCH_GROUPS.animals;
 const situations = FAQ_SEARCH_GROUPS.situations;
+const swift = FAQ_SEARCH_GROUPS.swift;
 
 const allWildlifeSearchGroups = [
   animals.birds,
@@ -77,40 +79,792 @@ export const faqCategories: FaqCategory[] = [
   "Animales heridos o atrapados",
   "Manipulación y cuidados",
   "Contacto y emergencias",
+  "Conocer al vencejo",
   "La aplicación",
 ];
 
+export const swiftFaqPriorityIds = [
+  "que-hacer-si-encuentro-animal",
+  "vencejo-no-vuela-parece-sano",
+  "vencejo-senales-urgentes",
+  "vencejo-pollo-caido",
+  "vencejo-padres-suelo",
+  "vencejo-gato",
+  "vencejo-cristal",
+  "vencejo-atrapado",
+  "vencejo-chimenea-extractor",
+  "vencejo-mojado-contaminado",
+  "vencejo-donde-dejarlo",
+  "vencejo-caja-carton-jaula",
+  "vencejo-fondo-caja",
+  "vencejo-manipulacion-minima",
+  "vencejo-volar-dentro-casa",
+  "vencejo-observar-sin-explorar",
+  "vencejo-fotos-utiles",
+  "vencejo-informacion-crfs",
+  "vencejo-transporte",
+  "vencejo-horas-sin-contacto",
+  "vencejo-varios-dias",
+  "vencejo-aturdido-descansar",
+  "vencejo-parece-mejor",
+  "lanzar-vencejo",
+  "vencejo-cuando-no-prueba-vuelo",
+  "prueba-vuelo-vencejo",
+  "vencejo-no-sale-volando",
+  "vencejo-deshidratado",
+  "agua-comida-vencejo",
+  "vencejo-hidratar-indicacion-crfs",
+  "vencejo-dieta-incorrecta-plumaje",
+  "caja-vencejo",
+  "nidos-vencejo-obras",
+  "vencejo-cerrar-hueco-nido",
+] as const;
+
+const swiftRescueKeywords = mergeFaqSearchKeywords(
+  swift.animal,
+  swift.urgent,
+  swift.incidents,
+  swift.nest,
+  situations.contact,
+);
+
+const swiftCareKeywords = mergeFaqSearchKeywords(
+  swift.animal,
+  swift.care,
+  swift.urgent,
+  situations.transport,
+  situations.stress,
+  situations.contact,
+);
+
+const swiftFoodWaterKeywords = mergeFaqSearchKeywords(
+  swift.animal,
+  swift.foodWater,
+  situations.feeding,
+  situations.hydration,
+);
+
+const swiftFlightKeywords = mergeFaqSearchKeywords(
+  swift.animal,
+  swift.flight,
+  swift.urgent,
+  situations.injured,
+);
+
+const swiftKnowledgeKeywords = mergeFaqSearchKeywords(
+  swift.animal,
+  swift.knowledge,
+);
+
 export const faqItems: FaqItem[] = [
   {
-    id: "vencejo-en-suelo",
+    id: "vencejo-no-vuela-parece-sano",
     category: "Antes de actuar",
-    question: "¿Qué hago si encuentro un vencejo en el suelo?",
+    question: "El vencejo parece sano pero no vuela, ¿qué hago?",
     answer:
-      "Recógelo con cuidado, mételo en una caja de cartón ventilada con papel de cocina en el fondo y déjalo en un lugar tranquilo, protegido del calor y de animales domésticos. Contacta cuanto antes con un centro especializado, Agentes Forestales o Medioambientales.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.contact, situations.transport, [
-      "vencejo",
-      "vencejos",
-      "suelo",
-      "caja",
-      "papel de cocina",
+      "No lo lances ni lo obligues a volar. Un adulto sano puede despegar desde una superficie adecuada o desde la palma de una mano, pero si un vencejo está en el suelo o no inicia o mantiene el vuelo puede haber debilidad, deshidratación, traumatismo, lesión, enfermedad, agotamiento o aturdimiento tras una colisión. Protégelo en una caja de cartón ventilada y pide valoración especializada.",
+    keywords: mergeFaqSearchKeywords(swiftRescueKeywords, swiftFlightKeywords, [
+      "parece sano",
+      "sano",
+      "vencejo volar",
+      "vencejo no vuela",
+      "no despega",
     ]),
     showCreateNotice: true,
   },
   {
-    id: "cuando-ayudar-vencejo",
+    id: "vencejo-senales-urgentes",
     category: "Antes de actuar",
-    question: "¿Cuándo necesita ayuda un vencejo?",
+    question: "¿Qué señales indican que un vencejo necesita atención urgente?",
     answer:
-      "Necesita ayuda si está en el suelo, ha caído de un nido, tiene sangre o heridas, un ala caída, está muy débil, respira con dificultad, ha chocado contra un cristal, ha estado en contacto con un gato o no consigue mantener el vuelo.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.baby, [
-      "vencejo",
-      "vencejos",
-      "cristal",
-      "ventana",
-      "gato",
-      "no vuela",
+      "Necesita ayuda si está en el suelo, ha caído de un nido, permanece inmóvil, se deja recoger sin intentar escapar, tiene un ala caída o las alas asimétricas, presenta sangre o heridas, respira con dificultad, mantiene los ojos cerrados o semicerrados, parece muy débil, no mantiene una postura normal, muestra temblores o falta de coordinación, ha sido atrapado por un gato, ha chocado contra una ventana, está mojado o contaminado, ha quedado atrapado o no puede iniciar o mantener el vuelo.",
+    keywords: mergeFaqSearchKeywords(swiftRescueKeywords, [
+      "urgente",
+      "vencejo herido",
+      "señales",
+      "senales",
+      "sintomas",
+      "síntomas",
+      "respira",
+      "ojos",
+      "temblores",
     ]),
     showCreateNotice: true,
+  },
+  {
+    id: "vencejo-pollo-caido",
+    category: "Crías y animales jóvenes",
+    question: "¿Qué hago si es un pollo de vencejo caído del nido?",
+    answer:
+      "Si un pollo de vencejo aparece fuera del nido necesita ayuda. Puede tener plumón, plumas todavía dentro de sus cañones, alas sin desarrollar del todo, cola corta o musculatura insuficiente para volar. Recógelo con cuidado, protégelo en una caja de cartón ventilada y contacta cuanto antes con un centro especializado o con Agentes Forestales o Medioambientales.",
+    keywords: mergeFaqSearchKeywords(swiftRescueKeywords, swift.nest, [
+      "pollo de vencejo",
+      "polluelo de vencejo",
+      "cria de vencejo",
+      "cría de vencejo",
+      "vencejo cria",
+      "vencejo cría",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-atrapado",
+    category: "Animales heridos o atrapados",
+    question: "¿Qué hago si un vencejo está atrapado?",
+    answer:
+      "No tires del animal ni fuerces alas, patas, plumas o articulaciones. Observa el tipo de atrapamiento sin ponerte en riesgo, haz fotos si puedes hacerlo sin causar más estrés y pide ayuda especializada. Si consigues liberarlo siguiendo indicaciones, mantenlo después en una caja de cartón ventilada y comunica exactamente qué ha ocurrido.",
+    keywords: mergeFaqSearchKeywords(swiftRescueKeywords, swift.incidents, [
+      "enganchado",
+      "red",
+      "hilo",
+      "cuerda",
+      "rejilla",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-chimenea-extractor",
+    category: "Animales heridos o atrapados",
+    question: "¿Qué hago si un vencejo ha caído en una chimenea, extractor u otra estructura?",
+    answer:
+      "Trátalo como un atrapamiento que requiere valoración. No tires de él ni intentes sacarlo forzando alas o plumas. Si puedes documentar la situación sin riesgo, hazlo, y contacta con un centro especializado, Agentes Forestales o Medioambientales o emergencias si hace falta una intervención segura.",
+    keywords: mergeFaqSearchKeywords(swiftRescueKeywords, swift.incidents, [
+      "chimenea",
+      "extractor",
+      "conducto",
+      "rejilla",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-mojado-contaminado",
+    category: "Animales heridos o atrapados",
+    question: "¿Qué hago si el vencejo está mojado o manchado de aceite, hollín u otra sustancia?",
+    answer:
+      "Recógelo y mantenlo en una caja de cartón ventilada. No improvises limpiezas, comida, agua ni liberación. Comunica al centro o a los agentes si estaba mojado, si cayó en agua sucia o si tenía aceite, hollín u otras sustancias, porque esa información puede ayudar a valorar el caso.",
+    keywords: mergeFaqSearchKeywords(swiftRescueKeywords, swift.incidents, [
+      "sustancia",
+      "manchado",
+      "manchada",
+      "limpiar",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-donde-dejarlo",
+    category: "Manipulación y cuidados",
+    question: "¿Dónde debo dejar al vencejo mientras consigo ayuda?",
+    answer:
+      "Déjalo dentro de una caja de cartón ventilada, cerrada con seguridad y con papel de cocina limpio en el fondo. Coloca la caja de cartón en un lugar tranquilo, sin ruidos, protegido de animales domésticos, sin exposición directa al sol, sin calor excesivo y sin corrientes de aire. Manipúlalo lo mínimo indispensable.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "donde dejarlo",
+      "dónde dejarlo",
+      "mientras consigo ayuda",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-caja-carton-jaula",
+    category: "Manipulación y cuidados",
+    question: "¿Es mejor una caja de cartón o una jaula para un vencejo?",
+    answer:
+      "Para la custodia temporal utiliza una caja de cartón ventilada. No lo mantengas en una jaula: puede golpearse, engancharse o intentar escapar de forma repetida. La caja de cartón debe tener ventilación, estar bien cerrada, permitir que permanezca cómodo y no darle espacio para intentar volar y lesionarse.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "caja",
+      "carton",
+      "cartón",
+      "jaula",
+      "recipiente",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-fondo-caja",
+    category: "Manipulación y cuidados",
+    question: "¿Qué pongo en el fondo de la caja de cartón?",
+    answer:
+      "Pon papel de cocina limpio en el fondo. Además de mantener una superficie sencilla e higiénica, la caja de cartón puede aportar información útil: excrementos, sangre, restos de comida o parásitos deben comunicarse al centro, pero no conviene interpretarlos como un diagnóstico sin valoración especializada.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "fondo",
+      "papel",
+      "excrementos",
+      "sangre",
+      "parasitos",
+      "parásitos",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-manipulacion-minima",
+    category: "Manipulación y cuidados",
+    question: "¿Cuánto debo manipular a un vencejo recogido?",
+    answer:
+      "Lo mínimo indispensable. No le abras las alas a la fuerza, no tires de las plumas, no explores la garganta, no fuerces articulaciones ni intentes comprobar fracturas. Una persona sin formación debe limitarse a observaciones visibles y a mantenerlo protegido hasta recibir indicaciones.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "tocar",
+      "coger",
+      "abrir alas",
+      "plumas",
+      "explorar",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-volar-dentro-casa",
+    category: "Manipulación y cuidados",
+    question: "¿Puedo dejar que intente volar dentro de casa?",
+    answer:
+      "No conviene. La caja de cartón ventilada debe ser suficientemente cómoda, pero sin espacio para que intente volar y se lesione. Tampoco debe lanzarse ni obligarse a volar en una habitación, balcón, ventana o lugar elevado.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, swiftFlightKeywords, [
+      "dentro de casa",
+      "vencejo volar",
+      "habitacion",
+      "habitación",
+      "balcon",
+      "balcón",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-observar-sin-explorar",
+    category: "Manipulación y cuidados",
+    question: "¿Qué puedo observar sin hacer una exploración clínica?",
+    answer:
+      "Puedes informar de si está alerta o apagado, si abre los ojos, si mantiene la cabeza erguida, si respira con el pico abierto o hace sonidos al respirar, si tiene las plumas erizadas, si las alas están simétricas o hay un ala caída, si sangra, si muestra movimientos anormales, si puede mantenerse apoyado y si responde al entorno. No hagas palpaciones ni manipulaciones invasivas.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "observar",
+      "alerta",
+      "apagado",
+      "respiracion",
+      "respiración",
+      "alas simetricas",
+      "alas simétricas",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-fotos-utiles",
+    category: "Manipulación y cuidados",
+    question: "¿Qué fotos pueden ayudar a valorar el caso?",
+    answer:
+      "Si puedes hacerlas sin causarle más estrés, toma una foto desde arriba en la que se vea el cuerpo completo, otra de la cabeza y la cara, y alguna adicional si hay una lesión visible. Las fotos pueden ayudar al centro o a los agentes, pero no deben retrasar la protección del animal ni el contacto con ayuda especializada.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "foto",
+      "fotografia",
+      "fotografía",
+      "video",
+      "vídeo",
+      "cuerpo completo",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-informacion-crfs",
+    category: "Contacto y emergencias",
+    question: "¿Qué información preparo para el CRFS o los agentes?",
+    answer:
+      "Prepara lugar exacto, fecha y hora, si estaba en el suelo, acera, carretera o patio, si estaba mojado o manchado, si hubo gato, ventana, chimenea, extractor u obra, cuánto tiempo lleva recogido, si ha recibido comida, agua o medicamentos, si ha intentado volar y qué ocurrió. Si procede de un nido afectado por obras, indícalo para que puedan valorar otros nidos de la colonia.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, swiftRescueKeywords, [
+      "crfs",
+      "centro",
+      "agentes",
+      "informacion",
+      "información",
+      "datos",
+    ]),
+    showCreateNotice: true,
+    showRecoveryCenters: true,
+  },
+  {
+    id: "vencejo-transporte",
+    category: "Manipulación y cuidados",
+    question: "¿Cómo traslado temporalmente a un vencejo?",
+    answer:
+      "Trasládalo en una caja de cartón ventilada, cerrada con seguridad, con papel de cocina limpio en el fondo y sin espacio para que intente volar. Mantén la caja de cartón estable, tranquila, sin sol directo, sin calor excesivo, sin corrientes de aire y lejos de mascotas. Sigue siempre las indicaciones del centro o de los agentes.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "traslado",
+      "trasladar",
+      "transportar",
+      "transporte",
+      "coche",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-horas-sin-contacto",
+    category: "Manipulación y cuidados",
+    question: "¿Qué hago si pasan horas y todavía no consigo contactar con un centro?",
+    answer:
+      "Mantén al vencejo en una caja de cartón ventilada, tranquila y protegida, sin sol directo, sin calor excesivo, sin corrientes de aire y lejos de animales domésticos. No improvises comida, agua ni medicación, no lo pongas en una jaula y no lo fuerces a volar. Sigue intentando contactar con un CRFS, Agentes Forestales o Medioambientales, una entidad especializada o emergencias si la situación lo requiere. No existe un tiempo único de espera que pueda aplicarse con seguridad.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, swiftFoodWaterKeywords, [
+      "horas",
+      "no contestan",
+      "no consigo contactar",
+      "noche",
+    ]),
+    showCreateNotice: true,
+    showRecoveryCenters: true,
+  },
+  {
+    id: "vencejo-varios-dias",
+    category: "Manipulación y cuidados",
+    question: "¿Puedo mantener un vencejo varios días en casa?",
+    answer:
+      "No debe mantenerse varios días sin solicitar ayuda especializada. La custodia ciudadana debe ser temporal y orientada a protegerlo mientras consigues contacto o traslado. No improvises una atención prolongada, alimentación, hidratación, medicación o rehabilitación en casa.",
+    keywords: mergeFaqSearchKeywords(swiftCareKeywords, [
+      "varios dias",
+      "varios días",
+      "quedarmelo",
+      "quedármelo",
+      "casa",
+      "mascota",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-cerrar-hueco-nido",
+    category: "Contacto y emergencias",
+    question: "¿Puedo cerrar un hueco de un edificio donde entran vencejos?",
+    answer:
+      "No debe bloquearse ni destruirse un nido activo ni la entrada al hueco de nidificación. Una cavidad pequeña puede ser un lugar de cría reutilizado durante años, y el vencejo muestra mucha fidelidad al edificio, la colonia y el hueco concreto. Documenta la situación si es seguro y contacta con Agentes Forestales, Medioambientales o la autoridad ambiental competente.",
+    keywords: mergeFaqSearchKeywords(swiftRescueKeywords, swift.nest, [
+      "cerrar hueco",
+      "bloquear hueco",
+      "entrada al nido",
+      "hueco de edificio",
+      "grieta",
+      "cavidad",
+    ]),
+    showRecoveryCenters: true,
+  },
+  {
+    id: "vencejo-aturdido-descansar",
+    category: "Manipulación y cuidados",
+    question: "El vencejo está aturdido o desorientado, ¿debo dejarlo descansar?",
+    answer:
+      "Sí debes reducir estrés y dejarlo tranquilo en una caja de cartón ventilada mientras consigues ayuda. Tras una colisión, un vencejo puede parecer aturdido y recuperarse aparentemente después de descansar, pero también puede tener traumatismos, lesiones internas, daños en alas o problemas neurológicos. No inventes una prueba por tu cuenta ni lo lances para comprobar si vuela.",
+    keywords: mergeFaqSearchKeywords(swiftFlightKeywords, swiftCareKeywords, [
+      "aturdido",
+      "aturdida",
+      "desorientado",
+      "desorientada",
+      "descansar",
+      "shock",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-parece-mejor",
+    category: "Manipulación y cuidados",
+    question: "Después de descansar parece encontrarse mejor, ¿qué hago?",
+    answer:
+      "No lo lances ni des por resuelto el caso si había colisión, debilidad, caída al suelo u otra duda. Tras una colisión puede parecer que se recupera y aun así presentar lesiones internas, daños en alas o problemas neurológicos. Mantenlo protegido en una caja de cartón ventilada y consulta con un centro especializado.",
+    keywords: mergeFaqSearchKeywords(swiftFlightKeywords, swiftCareKeywords, [
+      "parece mejor",
+      "se recupero",
+      "se recuperó",
+      "recuperado",
+      "recuperada",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-cuando-no-prueba-vuelo",
+    category: "Manipulación y cuidados",
+    question: "¿Cuándo NO debo plantear una prueba de vuelo con un vencejo?",
+    answer:
+      "No debe plantearse si hay cualquier sospecha de lesión o enfermedad, debilidad, dificultad respiratoria, heridas, alas asimétricas, postura anómala, plumaje incompleto, restos de cañones o dudas sobre su desarrollo. Tampoco debe usarse para averiguar si un animal dudoso está bien. Ante dudas, prevalece la valoración especializada.",
+    keywords: mergeFaqSearchKeywords(swiftFlightKeywords, [
+      "cuando no",
+      "no hacer prueba",
+      "lesion",
+      "lesión",
+      "cañones",
+      "canones",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-no-sale-volando",
+    category: "Manipulación y cuidados",
+    question: "¿Qué significa que un vencejo no salga volando desde la mano?",
+    answer:
+      "Si se aferra a la mano, retrocede, cae o no mantiene el vuelo, puede no estar preparado o puede haber un problema. No debe forzarse la salida ni insistir de forma repetida. Si fracasa tras dos intentos realizados en condiciones seguras, debe interrumpirse la prueba y contactar con un centro especializado.",
+    keywords: mergeFaqSearchKeywords(swiftFlightKeywords, [
+      "no sale",
+      "se aferra",
+      "retrocede",
+      "cae",
+      "no mantiene el vuelo",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-deshidratado",
+    category: "Manipulación y cuidados",
+    question: "¿Puede estar deshidratado un vencejo recogido?",
+    answer:
+      "Sí. La deshidratación es frecuente en pollos caídos del nido, animales expuestos al calor, ejemplares debilitados, aves que llevan tiempo sin alimentarse, animales sometidos a estrés o aves con diarrea u otras pérdidas de líquidos. La valoración correcta depende de peso, edad, temperatura corporal, grado de deshidratación y estado clínico, así que no improvises hidratación por tu cuenta.",
+    keywords: mergeFaqSearchKeywords(swiftFoodWaterKeywords, swiftCareKeywords, [
+      "deshidratado",
+      "deshidratada",
+      "calor",
+      "diarrea",
+      "liquidos",
+      "líquidos",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-hidratar-indicacion-crfs",
+    category: "Manipulación y cuidados",
+    question: "Un CRFS me ha indicado que debo hidratarlo, ¿qué debo tener en cuenta?",
+    answer:
+      "Hazlo solo si un CRFS o profesional te lo ha indicado de forma expresa y sigue exactamente sus instrucciones. No introduzcas agua directamente dentro del pico, no fuerces al animal a beber y no uses jeringas o goteros si no te lo han indicado claramente. Si la indicación no es precisa, vuelve a contactar antes de actuar.",
+    keywords: mergeFaqSearchKeywords(swiftFoodWaterKeywords, [
+      "crfs hidratar",
+      "me han indicado",
+      "profesional",
+      "jeringa",
+      "gotero",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-dieta-incorrecta-plumaje",
+    category: "Manipulación y cuidados",
+    question: "¿Por qué una comida incorrecta puede ser tan grave para un vencejo?",
+    answer:
+      "El vencejo es un insectívoro aéreo especializado. Una alimentación inadecuada puede provocar daños digestivos, crecimiento deficiente, déficits nutricionales, alteraciones musculares, deformaciones o fragilidad del plumaje, pérdida de capacidad de vuelo y menor supervivencia tras la liberación. Aunque llegue a volar al principio, un plumaje defectuoso puede impedirle superar tormentas, migrar, capturar alimento o escapar de depredadores.",
+    keywords: mergeFaqSearchKeywords(swiftFoodWaterKeywords, swiftKnowledgeKeywords, [
+      "dieta incorrecta",
+      "plumaje",
+      "plumas",
+      "desarrollo",
+      "supervivencia",
+    ]),
+    showCreateNotice: true,
+  },
+  {
+    id: "vencejo-vida-aerea",
+    category: "Conocer al vencejo",
+    question: "¿Por qué se dice que el vencejo está tan adaptado a la vida aérea?",
+    answer:
+      "Porque su cuerpo favorece un vuelo rápido, prolongado y eficiente: alas largas, estrechas y en forma de hoz, cuerpo aerodinámico, pico corto con boca muy ancha para capturar insectos en vuelo, patas extremadamente cortas y pies con garras para aferrarse a superficies y entrar en cavidades. Sus patas no están adaptadas para caminar normalmente por el suelo.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "vida aerea",
+      "vida aérea",
+      "adaptado",
+      "alas",
+      "patas",
+    ]),
+  },
+  {
+    id: "vencejo-diez-meses-volando",
+    category: "Conocer al vencejo",
+    question: "¿Cuánto vuela un vencejo: puede pasar casi diez meses sin posarse?",
+    answer:
+      "En algunos ejemplares estudiados se ha registrado una fase aérea continua durante aproximadamente los diez meses situados fuera del periodo reproductor. Otros individuos pueden posarse ocasionalmente durante periodos cortos, aunque siguen pasando más del 99 % de ese tiempo en el aire. El dato procede de individuos seguidos con dispositivos y no significa que todos se comporten exactamente igual.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "diez meses",
+      "10 meses",
+      "99",
+      "sin posarse",
+      "cuanto vuela un vencejo",
+      "cuánto vuela un vencejo",
+      "cuanto vuela",
+      "cuánto vuela",
+    ]),
+  },
+  {
+    id: "vencejo-que-hace-en-vuelo",
+    category: "Conocer al vencejo",
+    question: "¿Qué puede hacer un vencejo durante su vida en el aire?",
+    answer:
+      "Puede alimentarse en vuelo, beber agua en vuelo, descansar o dormir durante el vuelo, realizar migraciones de larga distancia, permanecer meses sin posarse y, en algunos casos, aparearse en vuelo. Durante la reproducción usa el nido para la puesta, incubación, crianza de los pollos y descanso, y la cópula puede producirse tanto en vuelo como en el nido.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "que hace",
+      "qué hace",
+      "alimentarse en vuelo",
+      "beber en vuelo",
+      "aparearse",
+    ]),
+  },
+  {
+    id: "vencejo-como-bebe-agua",
+    category: "Conocer al vencejo",
+    question: "¿Cómo bebe agua un vencejo en vuelo?",
+    answer:
+      "Bebe agua mediante una maniobra precisa sobre masas de agua: desciende, reduce la velocidad antes del contacto y toca la superficie con el pico durante una pasada rasante. En una muestra de 163 maniobras reconstruidas, la velocidad media al tocar el agua fue de unos 11,7 m/s, aproximadamente 42 km/h.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swiftFoodWaterKeywords, [
+      "como bebe un vencejo",
+      "cómo bebe un vencejo",
+      "como bebe agua un vencejo",
+      "cómo bebe agua un vencejo",
+      "beber agua en vuelo",
+    ]),
+  },
+  {
+    id: "vencejo-duerme-volando",
+    category: "Conocer al vencejo",
+    question: "¿Cómo duerme un vencejo?",
+    answer:
+      "La vida aérea prolongada implica que el vencejo debe descansar o dormir durante el vuelo, pero el mecanismo exacto no se ha demostrado directamente mediante registros electroencefalográficos en Apus apus. El sueño unihemisférico es conocido en otras aves, pero no debe presentarse como mecanismo demostrado en el vencejo común.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "como duerme un vencejo",
+      "cómo duerme un vencejo",
+      "dormir",
+      "duerme",
+      "sueño",
+      "sueno",
+    ]),
+  },
+  {
+    id: "vencejo-ascensos-crepusculares",
+    category: "Conocer al vencejo",
+    question: "¿Por qué los vencejos ascienden al amanecer y al anochecer?",
+    answer:
+      "Durante la fase aérea prolongada se han observado ascensos alrededor del amanecer y el anochecer, que pueden alcanzar aproximadamente 2,5 kilómetros de altitud. Su función exacta no está demostrada. Se ha propuesto que podrían estar relacionados con información atmosférica, meteorológica u orientativa, pero no deben explicarse como un comportamiento cerrado ni exclusivamente asociado al sueño.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "ascensos crepusculares",
+      "amanecer",
+      "anochecer",
+      "2,5",
+      "altura",
+      "altitud",
+    ]),
+  },
+  {
+    id: "vencejo-aeroplancton-alimentacion",
+    category: "Conocer al vencejo",
+    question: "¿De qué se alimenta un vencejo?",
+    answer:
+      "Es un insectívoro aéreo especializado. Se alimenta de pequeños organismos voladores que forman el aeroplancton, como moscas, mosquitos, hormigas voladoras, pequeños himenópteros, chinches, neurópteros y otros insectos o artrópodos pequeños. Captura el alimento en vuelo con la boca abierta a modo de colector.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swiftFoodWaterKeywords, [
+      "aeroplancton",
+      "mosquitos",
+      "moscas",
+      "insectos",
+      "que come",
+      "qué come",
+    ]),
+  },
+  {
+    id: "vencejo-migracion-africa",
+    category: "Conocer al vencejo",
+    question: "¿Cómo migra el vencejo entre Europa y África?",
+    answer:
+      "El vencejo común se reproduce en gran parte del Paleártico y en España es principalmente estival. Regresa desde África en primavera, ocupa colonias sobre todo entre abril y mayo y la mayor parte abandona las colonias entre finales de julio y agosto. Inverna principalmente en África al sur del ecuador. Los estudios con geolocalizadores muestran rutas complejas, no una única ruta simple para todos los vencejos europeos.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "migracion",
+      "migración",
+      "vencejo migracion",
+      "vencejo migración",
+      "africa",
+      "áfrica",
+      "rutas",
+      "primavera",
+      "agosto",
+    ]),
+  },
+  {
+    id: "vencejo-mas-mil-km",
+    category: "Conocer al vencejo",
+    question: "¿Puede recorrer más de 1.000 kilómetros en un día?",
+    answer:
+      "Durante fases concretas de la migración primaveral se han estimado etapas superiores a 1.000 km al día. En vencejos del norte de Europa también se estimaron velocidades migratorias medias primaverales de unos 570 km/día y un máximo de 832 km/día mantenido durante nueve días. Son estimaciones de desplazamiento obtenidas con geolocalizadores, no recorridos continuos medidos por GPS.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "1000 km",
+      "1.000 km",
+      "mil kilometros",
+      "mil kilómetros",
+      "km dia",
+      "km día",
+    ]),
+  },
+  {
+    id: "vencejo-viento-navegacion",
+    category: "Conocer al vencejo",
+    question: "¿Cómo aprovecha el viento y cómo se orienta?",
+    answer:
+      "Puede modificar su dirección durante distintas etapas del viaje, ajustar sus desplazamientos a las condiciones de viento y compensar la deriva producida por el viento durante la migración. Como otras aves migratorias, probablemente combina distintas fuentes de información para orientarse, pero no se conoce con precisión qué señales sensoriales utiliza Apus apus ni cómo las integra.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "viento",
+      "orientacion",
+      "orientación",
+      "navegacion",
+      "navegación",
+      "deriva",
+    ]),
+  },
+  {
+    id: "vencejo-nidos-edificios",
+    category: "Conocer al vencejo",
+    question: "¿Dónde hacen el nido los vencejos?",
+    answer:
+      "Instalan el nido dentro de cavidades protegidas: huecos bajo tejados, grietas de fachadas, cámaras de edificios, espacios bajo tejas, aleros, mechinales, huecos en muros, cortados rocosos y, de forma ocasional, huecos de árboles. En España nidifican actualmente casi exclusivamente en construcciones humanas.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "nidos en edificios",
+      "huecos",
+      "grietas",
+      "cavidades",
+      "aleros",
+      "tejas",
+    ]),
+  },
+  {
+    id: "vencejo-materiales-nido",
+    category: "Conocer al vencejo",
+    question: "¿Con qué construye el nido un vencejo?",
+    answer:
+      "Construye una pequeña copa con plumas, fibras vegetales y otros materiales ligeros recogidos durante el vuelo. Usa saliva como elemento aglutinante para unir esos materiales.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "materiales",
+      "saliva",
+      "plumas",
+      "fibras",
+      "construye el nido",
+    ]),
+  },
+  {
+    id: "vencejo-fidelidad-hueco",
+    category: "Conocer al vencejo",
+    question: "¿Regresa al mismo lugar de nidificación cada año?",
+    answer:
+      "La especie muestra una elevada fidelidad a la pareja, al edificio, a la colonia y al lugar concreto de nidificación. Muchas parejas regresan cada año al mismo lugar, y estudios de seguimiento a largo plazo han cuantificado una reutilización del lugar de nidificación cercana al 94 % en adultos observados reproduciéndose en años sucesivos.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "mismo lugar",
+      "lugar de nidificacion",
+      "lugar de nidificación",
+      "hueco de nidificacion",
+      "hueco de nidificación",
+      "fidelidad",
+      "regresa",
+      "vuelve",
+    ]),
+  },
+  {
+    id: "vencejo-localiza-hueco",
+    category: "Conocer al vencejo",
+    question: "¿Cómo encuentra de nuevo el mismo lugar de nidificación después de regresar de África?",
+    answer:
+      "El vencejo muestra una memoria duradera del lugar de cría, pero no se conoce con precisión qué señales utiliza para identificar la entrada concreta al nido. La memoria espacial y las referencias visuales probablemente intervienen, aunque el mecanismo sensorial exacto sigue sin conocerse.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "encuentra el nido",
+      "localiza el nido",
+      "lugar de nidificacion",
+      "lugar de nidificación",
+      "entrada al nido",
+      "memoria",
+      "africa",
+      "áfrica",
+    ]),
+  },
+  {
+    id: "vencejo-reproduccion-huevos",
+    category: "Conocer al vencejo",
+    question: "¿Cuándo cría el vencejo y cuántos huevos pone?",
+    answer:
+      "La reproducción se desarrolla principalmente entre mayo y julio. Suele realizar una puesta anual, normalmente de dos o tres huevos, aunque ocasionalmente puede ser de uno a cuatro. Ambos progenitores incuban los huevos, alimentan a los pollos y participan en la crianza.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "reproduccion",
+      "reproducción",
+      "huevos",
+      "puesta",
+      "mayo",
+      "julio",
+    ]),
+  },
+  {
+    id: "vencejo-primer-vuelo-joven",
+    category: "Conocer al vencejo",
+    question: "¿Cómo se prepara un joven vencejo para su primer vuelo?",
+    answer:
+      "La salida del nido depende de una preparación física y aerodinámica compleja. Los jóvenes abandonan el nido aproximadamente a los 40-45 días, cuando su plumaje y desarrollo físico les permiten volar de forma autónoma. Durante la última fase pueden perder peso mientras las alas siguen desarrollándose, y los estudios experimentales sugieren que ajustan masa corporal y superficie alar para alcanzar una carga alar adecuada.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, swiftFlightKeywords, [
+      "primer vuelo",
+      "joven",
+      "40 dias",
+      "45 dias",
+      "40-45",
+      "carga alar",
+    ]),
+  },
+  {
+    id: "vencejo-no-volanton-normal",
+    category: "Conocer al vencejo",
+    question: "¿Por qué el vencejo no tiene una fase normal de volantón?",
+    answer:
+      "A diferencia de otras aves, el vencejo no pasa normalmente por una etapa de volantón atendido por sus padres en el suelo o en ramas. Al salir del nido debe ser capaz de mantener un vuelo sostenido, ganar altura, alimentarse por sí mismo y desenvolverse de forma autónoma. Por eso un joven encontrado en el suelo necesita recogida y valoración.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "volanton",
+      "volantón",
+      "padres",
+      "vencejo cria",
+      "vencejo cría",
+      "suelo",
+      "joven",
+    ]),
+  },
+  {
+    id: "vencejo-torpor",
+    category: "Conocer al vencejo",
+    question: "¿Qué es el torpor en los pollos de vencejo?",
+    answer:
+      "El torpor es un estado fisiológico reversible de ahorro energético. Durante episodios meteorológicos adversos puede disminuir la disponibilidad de insectos, los adultos pueden alejarse temporalmente y los pollos pueden reducir actividad y metabolismo para conservar energía. En vencejos silvestres se ha medido una reducción metabólica media de aproximadamente el 56 %. Esta adaptación no debe transformarse en una recomendación para mantener sin atención a un pollo encontrado.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "torpor",
+      "metabolismo",
+      "pollos",
+      "sin alimento",
+      "56",
+    ]),
+  },
+  {
+    id: "vencejo-plumaje-marcas",
+    category: "Conocer al vencejo",
+    question: "¿Puede una pluma contar algo de lo que le ocurrió mientras crecía?",
+    answer:
+      "El plumaje debe ser uniforme, con plumas alineadas, barbas cohesionadas, densidad adecuada y plumas de vuelo completas. Las marcas de crecimiento anómalo o marcas de estrés pueden indicar alteraciones durante la formación de la pluma, como falta de alimento, estrés físico, enfermedad u otras alteraciones fisiológicas. No permiten diagnosticar por sí solas una causa concreta sin valoración especializada.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "pluma",
+      "plumas",
+      "plumaje",
+      "marcas de estres",
+      "marcas de estrés",
+      "crecimiento",
+    ]),
+  },
+  {
+    id: "vencejo-amenazas-conservacion",
+    category: "Conocer al vencejo",
+    question: "¿Qué amenazas afectan al vencejo común?",
+    answer:
+      "Entre sus amenazas están la destrucción de nidos, rehabilitaciones de edificios sin medidas de protección, desaparición de huecos en construcciones modernas, obras durante la época de cría, pérdida de colonias, uso de pesticidas, disminución de insectos y efectos climáticos. La relación entre clima, insectos y reproducción no debe presentarse como una cadena simple: temperatura, lluvia y viento influyen de forma distinta según momento, intensidad y población.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, swift.nest, [
+      "amenazas",
+      "conservacion",
+      "conservación",
+      "pesticidas",
+      "clima",
+      "insectos",
+      "vulnerable",
+    ]),
+  },
+  {
+    id: "vencejo-ciencia-desconoce",
+    category: "Conocer al vencejo",
+    question: "¿Qué cosas sobre el vencejo común todavía no conocemos bien?",
+    answer:
+      "Aún hay varias preguntas abiertas: no se ha demostrado directamente el mecanismo exacto del sueño durante el vuelo en Apus apus; la función precisa de los ascensos crepusculares sigue sin estar establecida; no se conocen con precisión las señales sensoriales concretas que usa para navegar; tampoco se sabe exactamente cómo identifica la entrada concreta al nido tras regresar de África.",
+    keywords: mergeFaqSearchKeywords(swiftKnowledgeKeywords, [
+      "desconocido",
+      "no se sabe",
+      "ciencia",
+      "investigacion",
+      "investigación",
+      "pendiente",
+    ]),
   },
   {
     id: "que-hacer-si-encuentro-animal",
@@ -162,14 +916,16 @@ export const faqItems: FaqItem[] = [
   {
     id: "vencejo-padres-suelo",
     category: "Crías y animales jóvenes",
-    question: "¿Debo dejar un vencejo en el suelo para que sus padres lo atiendan?",
+    question: "¿Un vencejo joven en el suelo es un volantón?",
     answer:
-      "No. Los padres no bajarán al suelo para alimentar a un pollo de vencejo caído del nido. Un vencejo joven encontrado en el suelo debe recogerse y recibir valoración.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.contact, [
+      "No funciona como muchos otros pájaros: el vencejo no pasa normalmente por una fase de volantón atendido por sus padres en el suelo o en ramas. Si ha caído, los padres no bajarán a alimentarlo; protégelo en una caja de cartón ventilada y consulta cuanto antes.",
+    keywords: mergeFaqSearchKeywords(situations.baby, situations.contact, [
       "vencejo",
       "vencejos",
       "padres",
       "suelo",
+      "volantón",
+      "volanton",
       "caído del nido",
       "caido del nido",
     ]),
@@ -180,7 +936,7 @@ export const faqItems: FaqItem[] = [
     category: "Crías y animales jóvenes",
     question: "¿Qué debo hacer si encuentro una cría?",
     answer:
-      "No la recojas automáticamente. Observa si está herida, en peligro o expuesta. Muchas crías están atendidas por sus padres aunque parezcan solas. En vencejos caídos del nido, los padres no bajan al suelo a alimentarlos. Si hay riesgo real o dudas, contacta con un centro de recuperación o con el servicio competente.",
+      "No la recojas automáticamente. Observa si está herida, en peligro o expuesta. Muchas crías están atendidas por sus padres aunque parezcan solas. Si hay riesgo real o dudas, contacta con un centro de recuperación o con el servicio competente.",
     keywords: mergeFaqSearchKeywords(
       animals.birds,
       animals.mammals,
@@ -197,7 +953,7 @@ export const faqItems: FaqItem[] = [
     category: "Crías y animales jóvenes",
     question: "¿Cómo distingo un pollo de un volantón?",
     answer:
-      "Un pollo suele tener poco plumaje o plumón visible y normalmente debería estar en el nido. Un volantón está más emplumado, puede saltar o moverse por el suelo y sus padres suelen seguir alimentándolo mientras aprende. Esta pauta no se aplica a vencejos: un vencejo en el suelo debe recogerse y valorarse.",
+      "Un pollo suele tener poco plumaje o plumón visible y normalmente debería estar en el nido. Un volantón está más emplumado, puede saltar o moverse por el suelo y sus padres suelen seguir alimentándolo mientras aprende. Algunas especies tienen excepciones, así que si tienes dudas conviene pedir orientación.",
     keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, [
       "plumaje",
       "plumón",
@@ -211,7 +967,7 @@ export const faqItems: FaqItem[] = [
     category: "Crías y animales jóvenes",
     question: "¿Debo alejar una cría de sus padres?",
     answer:
-      "Solo si existe un peligro inmediato, como tráfico, depredadores domésticos o una zona insegura. Siempre que sea posible, mantenla cerca del lugar donde fue encontrada para no romper el vínculo con los adultos. En vencejos encontrados en el suelo, protégelos en una caja ventilada y consulta cuanto antes.",
+      "Solo si existe un peligro inmediato, como tráfico, depredadores domésticos o una zona insegura. Siempre que sea posible, mantenla cerca del lugar donde fue encontrada para no romper el vínculo con los adultos. Si no sabes si debes moverla, pide orientación antes de actuar.",
     keywords: mergeFaqSearchKeywords(
       animals.birds,
       animals.mammals,
@@ -248,42 +1004,29 @@ export const faqItems: FaqItem[] = [
     showCreateNotice: true,
   },
   {
-    id: "leche-a-cria",
-    category: "Crías y animales jóvenes",
-    question: "¿Puedo darle leche a una cría?",
-    answer:
-      "No le des leche salvo que un especialista te lo indique expresamente para esa especie. Muchos animales silvestres no pueden digerirla adecuadamente y podría empeorar su estado.",
-    keywords: mergeFaqSearchKeywords(animals.mammals, situations.baby, situations.feeding, [
-      "leche",
-      "biberón",
-      "biberon",
-      "recién nacido",
-      "recien nacido",
-      "cachorro",
-    ]),
-  },
-  {
     id: "vencejo-gato",
     category: "Animales heridos o atrapados",
-    question: "¿Qué hago si un gato ha tocado un vencejo?",
+    question: "¿Qué hago si un gato ha capturado un vencejo?",
     answer:
-      "Recógelo, mantenlo en una caja y no lo liberes directamente. Aunque no veas heridas, necesita valoración cuanto antes por un centro especializado.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.contact, [
+      "Recógelo, mantenlo en una caja de cartón ventilada y no lo liberes directamente. Aunque no veas heridas, el contacto con un gato puede causar lesiones pequeñas o profundas que necesitan valoración urgente.",
+    keywords: mergeFaqSearchKeywords(situations.injured, situations.contact, [
       "vencejo",
       "vencejos",
       "gato",
       "boca",
       "patas",
+      "lo ha cogido un gato",
+      "boca del gato",
     ]),
     showCreateNotice: true,
   },
   {
     id: "vencejo-cristal",
     category: "Animales heridos o atrapados",
-    question: "¿Qué hago si un vencejo ha chocado contra un cristal?",
+    question: "¿Qué hago si un vencejo ha chocado contra un cristal u obstáculo?",
     answer:
-      "No lo lances al aire para comprobar si vuela. Protégelo en una caja tranquila y consulta con un centro especializado, porque puede tener lesiones aunque parezca recuperarse.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.contact, [
+      "No lo lances para comprobar si vuela. Protégelo en una caja de cartón ventilada en un lugar tranquilo y consulta con un centro especializado, porque puede tener traumatismos, lesiones internas o problemas de vuelo aunque parezca recuperarse.",
+    keywords: mergeFaqSearchKeywords(situations.injured, situations.contact, [
       "vencejo",
       "vencejos",
       "cristal",
@@ -291,6 +1034,10 @@ export const faqItems: FaqItem[] = [
       "colisión",
       "colision",
       "aturdido",
+      "obstáculo",
+      "obstaculo",
+      "fachada",
+      "se ha golpeado",
     ]),
     showCreateNotice: true,
   },
@@ -331,7 +1078,7 @@ export const faqItems: FaqItem[] = [
     category: "Animales heridos o atrapados",
     question: "¿Qué hago si no puede volar?",
     answer:
-      "Puede tratarse de un volantón, un animal debilitado o un ejemplar lesionado. Observa si hay heridas, peligro o comportamiento anómalo. En vencejos, estar en el suelo o no mantener el vuelo requiere recogida y valoración. No lances al animal al aire para comprobar si vuela.",
+      "Puede tratarse de un volantón, un animal debilitado o un ejemplar lesionado. Observa si hay heridas, peligro o comportamiento anómalo, y no lances al animal al aire para comprobar si vuela. Si tienes dudas, pide orientación antes de manipularlo.",
     keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, situations.baby, [
       "ala",
       "vuelo",
@@ -377,7 +1124,7 @@ export const faqItems: FaqItem[] = [
     category: "Animales heridos o atrapados",
     question: "¿Qué hago si encuentro un ave que no puede volar?",
     answer:
-      "No siempre significa que esté herida: puede tratarse de un volantón. Observa el plumaje, la postura, la presencia de los padres y posibles signos visibles de lesión antes de intervenir. En vencejos, no lo dejes en el suelo ni lo lances al aire: protégelo y consulta con un centro especializado.",
+      "No siempre significa que esté herida: puede tratarse de un volantón. Observa el plumaje, la postura, la presencia de los padres y posibles signos visibles de lesión antes de intervenir. No la lances al aire para comprobar si vuela.",
     keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.injured, [
       "ala",
       "no vuela",
@@ -392,31 +1139,37 @@ export const faqItems: FaqItem[] = [
     category: "Manipulación y cuidados",
     question: "¿Puedo lanzar un vencejo al aire para ver si vuela?",
     answer:
-      "No. Si está débil, lesionado o todavía no está preparado, puede caer y sufrir más daños. Una prueba de vuelo no consiste en lanzar al animal.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, [
+      "No. Si está débil, lesionado o todavía no está preparado, puede caer y sufrir más daños. Una prueba de vuelo nunca consiste en lanzar ni arrojar al animal desde una altura.",
+    keywords: mergeFaqSearchKeywords(situations.injured, [
       "vencejo",
       "vencejos",
       "lanzar",
       "lanzarlo",
       "tirar",
       "vuelo",
+      "volar",
+      "vencejo volar",
     ]),
     showCreateNotice: true,
   },
   {
     id: "prueba-vuelo-vencejo",
     category: "Manipulación y cuidados",
-    question: "¿Cómo se hace una prueba de vuelo con un vencejo?",
+    question: "¿Puedo hacer una prueba de vuelo con un vencejo?",
     answer:
-      "Solo debe plantearse si no hay lesiones, muestra buen estado general y el plumaje está completamente desarrollado. Se coloca sobre la palma abierta y debe despegar por sí mismo. Si se aferra, cae o no mantiene el vuelo, recógelo y solicita ayuda especializada.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.injured, [
+      "No la utilices para averiguar si un animal dudoso está bien. Si hay cualquier duda sobre lesión, debilidad, desarrollo o plumaje, solicita valoración especializada. Y recuerda: nunca debe lanzarse al vencejo ni convertir esta orientación en un procedimiento de liberación.",
+    keywords: mergeFaqSearchKeywords(situations.injured, [
       "vencejo",
       "vencejos",
       "prueba de vuelo",
+      "vencejo volar",
       "palma",
       "plumaje",
       "cañones",
       "canones",
+      "cañón",
+      "canon",
+      "plumas rotas",
     ]),
     showCreateNotice: true,
   },
@@ -425,26 +1178,27 @@ export const faqItems: FaqItem[] = [
     category: "Manipulación y cuidados",
     question: "¿Puedo darle agua o comida a un vencejo?",
     answer:
-      "No introduzcas agua directamente en el pico y no le des pan, leche, carne ni pienso. Para una atención inicial breve, es más seguro mantenerlo tranquilo y pedir ayuda que improvisar comida o hidratación.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.feeding, situations.hydration, [
+      "No le des comida ni agua sin indicación especializada y no introduzcas agua directamente en el pico. Una alimentación inadecuada puede afectar a su desarrollo y al plumaje, esencial para poder volar y sobrevivir tras la liberación.",
+    keywords: mergeFaqSearchKeywords(situations.feeding, situations.hydration, [
       "vencejo",
       "vencejos",
       "agua",
-      "pan",
-      "leche",
-      "carne",
-      "pienso",
+      "vencejo agua",
+      "dar agua vencejo",
+      "vencejo comida",
       "hidratar",
+      "pico",
+      "plumaje",
     ]),
     showCreateNotice: true,
   },
   {
     id: "caja-vencejo",
     category: "Manipulación y cuidados",
-    question: "¿Por qué es importante meter al vencejo en una caja?",
+    question: "¿Por qué es importante meter al vencejo en una caja de cartón?",
     answer:
-      "La caja reduce el estrés, evita que se golpee intentando escapar y permite mantenerlo protegido hasta recibir indicaciones. Debe ser de cartón, estar ventilada y no dejar espacio para intentar volar dentro.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.transport, situations.stress, [
+      "La caja de cartón ventilada reduce el estrés, evita golpes e impide que intente volar dentro de casa o en un espacio inseguro. Debe tener papel de cocina en el fondo y no ser tan grande como para que pueda aletear y lesionarse.",
+    keywords: mergeFaqSearchKeywords(situations.transport, situations.stress, [
       "vencejo",
       "vencejos",
       "caja",
@@ -453,6 +1207,8 @@ export const faqItems: FaqItem[] = [
       "jaula",
       "estrés",
       "estres",
+      "balcón",
+      "balcon",
     ]),
     showCreateNotice: true,
   },
@@ -598,41 +1354,33 @@ export const faqItems: FaqItem[] = [
     showRecoveryCenters: true,
   },
   {
-    id: "nidos-vencejo-edificios",
+    id: "nidos-vencejo-obras",
     category: "Contacto y emergencias",
-    question: "¿Los vencejos hacen nidos en edificios?",
+    question: "¿Qué hago si hay nidos de vencejo en un edificio o una obra?",
     answer:
-      "Sí. En España suelen criar en huecos de edificios y muchas parejas regresan cada año al mismo nido. Si hay actividad de vencejos en un hueco, conviene no bloquearlo y consultar con la autoridad ambiental competente.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.contact, [
+      "No retires el nido ni bloquees la entrada al hueco. Los vencejos suelen criar en cavidades de edificios y muestran mucha fidelidad al lugar, así que cerrar un hueco de nidificación activo puede tener consecuencias graves; documenta la situación si es seguro y contacta con Agentes Forestales, Medioambientales o la autoridad ambiental competente.",
+    keywords: mergeFaqSearchKeywords(situations.baby, situations.contact, [
       "vencejo",
       "vencejos",
       "nido",
       "nidos",
-      "edificio",
-      "fachada",
-      "tejado",
-      "hueco",
-      "alero",
-    ]),
-    showRecoveryCenters: true,
-  },
-  {
-    id: "nidos-vencejo-obras",
-    category: "Contacto y emergencias",
-    question: "¿Qué hago si una obra afecta a un nido de vencejo?",
-    answer:
-      "No retires el nido ni bloquees la entrada al hueco. Si puedes hacerlo con seguridad, documenta la situación, la ubicación y si hay adultos entrando, huevos o pollos. Contacta con Agentes Forestales, Medioambientales o la autoridad ambiental competente.",
-    keywords: mergeFaqSearchKeywords(animals.birds, situations.baby, situations.contact, [
-      "vencejo",
-      "vencejos",
+      "vencejo nido",
       "obra",
       "obras",
+      "vencejo obra",
       "fachada",
       "tejado",
       "hueco",
+      "rendija",
+      "mechinal",
+      "alero",
       "colonia",
       "nido activo",
       "bloquear",
+      "rehabilitación",
+      "rehabilitacion",
+      "reforma",
+      "andamio",
     ]),
     showRecoveryCenters: true,
   },
