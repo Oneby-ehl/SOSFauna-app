@@ -77,10 +77,10 @@ const ANIMAL_STATE_ICONS: Record<RescueAnimalState, string> = {
   dead: "⚫",
 };
 
-const FLAG_LABELS: Array<{
+const FLAG_LABELS: {
   key: keyof RescueFlags;
   label: string;
-}> = [
+}[] = [
   { key: "bleeding", label: "Herido" },
   { key: "baby", label: "Es una cría" },
   { key: "catDog", label: "Ha sido atacado por un gato o un perro" },

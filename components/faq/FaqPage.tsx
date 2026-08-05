@@ -85,9 +85,37 @@ function prioritizeSelectedAnimalIntroItem(items: typeof faqItems) {
 }
 
 const GENERAL_SWIFT_QUERIES = new Set(["vencejo", "vencejos", "apus apus"]);
+const BAT_FLIGHT_OR_GROUND_TERMS = [
+  "no vuela",
+  "no puede volar",
+  "que no vuela",
+  "en el suelo",
+  "suelo",
+];
 
 function isGeneralSwiftQuery(query: string) {
   return GENERAL_SWIFT_QUERIES.has(normalizeSearchText(query));
+}
+
+function isBatFlightOrGroundQuery(
+  query: string,
+  selectedAnimal: AnimalSearchItem | null,
+) {
+  return (
+    selectedAnimal?.id.startsWith("murcielago") &&
+    BAT_FLIGHT_OR_GROUND_TERMS.some((term) =>
+      normalizeSearchText(query).includes(term),
+    )
+  );
+}
+
+function prioritizeBatIntroItem(items: typeof faqItems) {
+  return [...items].sort((firstItem, secondItem) => {
+    if (firstItem.id === "murcielago") return -1;
+    if (secondItem.id === "murcielago") return 1;
+
+    return 0;
+  });
 }
 
 function getAnimalSearchTerms(animal: AnimalSearchItem) {
@@ -153,7 +181,7 @@ function isSwiftFaqItem(itemId: string) {
 
 function getFaqSpeciesId(itemId: string) {
   if (isSwiftFaqItem(itemId)) return "vencejo";
-  if (itemId === "murcielago") return "murcielago";
+  if (itemId.startsWith("murcielago")) return "murcielago";
 
   return null;
 }
@@ -245,12 +273,19 @@ export default function FaqPage() {
 
   const groupedItems = useMemo(
     () => {
-      const searchResults = searchFaqItems(displayedFaqItems, searchQuery);
+      const queryAnimal = findAnimalCatalogTextMatch(searchQuery);
+      const searchSourceItems =
+        queryAnimal?.id.startsWith("murcielago")
+          ? filterFaqItemsBySelectedAnimal(displayedFaqItems, queryAnimal)
+          : displayedFaqItems;
+      const searchResults = searchFaqItems(searchSourceItems, searchQuery);
       const rankedResults = isSelectedAnimalIntroQuery(
         searchQuery,
         selectedAnimal,
       )
         ? prioritizeSelectedAnimalIntroItem(searchResults)
+        : isBatFlightOrGroundQuery(searchQuery, queryAnimal)
+          ? prioritizeBatIntroItem(searchResults)
         : selectedAnimal?.id === "vencejo" && isGeneralSwiftQuery(searchQuery)
           ? prioritizeSwiftFaqItems(searchResults)
           : searchResults;

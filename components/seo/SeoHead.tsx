@@ -3,7 +3,6 @@ import { Platform } from "react-native";
 
 const SITE_NAME = "SOS Fauna España";
 const SITE_URL = "https://sosfauna.es";
-const THEME_COLOR = "#14532d";
 const ORGANIZATION_LOGO_URL = `${SITE_URL}/google-logo.png`;
 const SOCIAL_IMAGE_URL = `${SITE_URL}/og-image.jpg`;
 const SOCIAL_IMAGE_ALT =

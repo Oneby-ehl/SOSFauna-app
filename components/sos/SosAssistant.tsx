@@ -386,10 +386,10 @@ return (
  return (
   "🦇 CRÍA DE MURCIÉLAGO\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
-  "• Una cría de murciélago no siempre necesita ser trasladada a un centro de recuperación.\n" +
-  "• Si localizas la colonia, puedes intentar dejar la cría cerca de ella al atardecer para favorecer la reunificación con los adultos.\n" +
-  "• Hazlo únicamente si no presenta heridas ni está muy débil.\n" +
-  "• Si tienes dudas, consulta con el centro de recuperación más cercano.\n\n" +
+  "• No te fíes solo del tamaño: algunos murciélagos adultos son muy pequeños.\n" +
+  "• Si parece una cría, intenta localizar el refugio o la colonia de la que pudo caer.\n" +
+  "• Consulta con el centro de recuperación más cercano o con una entidad especializada antes de intentar devolverla o reunificarla.\n" +
+  "• La devolución al refugio o la reunificación al anochecer solo deben plantearse si la cría está en buen estado y te indican que procede.\n\n" +
   "🚨 PUEDE NECESITAR AYUDA SI\n" +
   "• Presenta heridas.\n" +
   "• Está muy débil.\n" +
@@ -813,7 +813,7 @@ const commonEnd =
   return (
     "🦇 MURCIÉLAGO\n\n" +
     "⚠️ ANTES DE INTERVENIR\n" +
-    "• Encontrar un murciélago durante el día o en el suelo suele indicar que algo no va bien. Probablemente esté debilitado, desorientado o lesionado.\n" +
+    "• Encontrar un murciélago durante el día o en el suelo puede indicar que necesita ayuda o valoración especializada.\n" +
     "• Un murciélago encontrado en el suelo suele ser un animal vulnerable, no una amenaza.\n" +
     "• Mantén alejados a los niños y a los animales domésticos y observa la situación con calma.\n" +
     (needsHelp
@@ -834,7 +834,6 @@ const commonEnd =
     "• Si ha tenido contacto con una persona o con un animal doméstico, comunícalo al centro de recuperación.\n" +
     "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
     "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
-    "• Los murciélagos desempeñan un papel esencial en los ecosistemas y ayudan al control natural de numerosos insectos.\n" +
     "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
   commonEnd
   );
