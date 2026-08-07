@@ -8,6 +8,17 @@ export type AnimalSearchItem = {
   aliases?: string[];
 };
 
+type IndexedAnimalSearchItem = {
+  item: AnimalSearchItem;
+  terms: string[];
+  wholeTermMatchers: ((text: string) => boolean)[];
+};
+
+export type AnimalCatalogSearchState = {
+  textMatch: AnimalSearchItem | null;
+  results: AnimalSearchItem[];
+};
+
 export const animalSearchCatalog: AnimalSearchItem[] = [
   {
     id: "abubilla",
@@ -733,7 +744,7 @@ export function normalizeAnimalSearchText(value: string) {
     .replace(/\s+/g, " ");
 }
 
-function getAnimalSearchTerms(item: AnimalSearchItem) {
+function normalizeAnimalSearchTerms(item: AnimalSearchItem) {
   return [item.name, item.id, ...(item.aliases ?? [])].map(
     normalizeAnimalSearchText,
   );
@@ -750,15 +761,43 @@ function containsWholeAnimalTerm(text: string, term: string) {
   ).test(text);
 }
 
-function getMentionedAnimalMatches(query: string): AnimalSearchItem[] {
-  const normalizedQuery = normalizeAnimalSearchText(query);
+function createWholeAnimalTermMatcher(term: string) {
+  const matcher = new RegExp(
+    `(^|[^\\p{L}\\p{N}])${escapeRegExp(term)}($|[^\\p{L}\\p{N}])`,
+    "u",
+  );
 
+  return (text: string) => matcher.test(text);
+}
+
+const indexedAnimalSearchCatalog: IndexedAnimalSearchItem[] =
+  animalSearchCatalog.map((item) => {
+    const terms = normalizeAnimalSearchTerms(item);
+
+    return {
+      item,
+      terms,
+      wholeTermMatchers: terms.map(createWholeAnimalTermMatcher),
+    };
+  });
+
+export function getAnimalSearchTerms(item: AnimalSearchItem) {
+  return (
+    indexedAnimalSearchCatalog.find(
+      (indexedItem) => indexedItem.item === item,
+    )?.terms ?? normalizeAnimalSearchTerms(item)
+  );
+}
+
+function getMentionedAnimalMatchesFromNormalizedQuery(
+  normalizedQuery: string,
+): AnimalSearchItem[] {
   if (!normalizedQuery) return [];
 
-  const matches = animalSearchCatalog
-    .map((item) => {
-      const matchedTerms = getAnimalSearchTerms(item).filter((term) =>
-        containsWholeAnimalTerm(normalizedQuery, term),
+  const matches = indexedAnimalSearchCatalog
+    .map((indexedItem) => {
+      const matchedTerms = indexedItem.terms.filter((_, index) =>
+        indexedItem.wholeTermMatchers[index](normalizedQuery),
       );
       const longestMatchedTermLength = Math.max(
         0,
@@ -766,7 +805,7 @@ function getMentionedAnimalMatches(query: string): AnimalSearchItem[] {
       );
 
       return {
-        item,
+        indexedItem,
         longestMatchedTermLength,
       };
     })
@@ -774,13 +813,17 @@ function getMentionedAnimalMatches(query: string): AnimalSearchItem[] {
 
   return matches
     .filter((match) =>
-      getAnimalSearchTerms(match.item).some((term) => {
-        if (!containsWholeAnimalTerm(normalizedQuery, term)) return false;
+      match.indexedItem.terms.some((term, termIndex) => {
+        if (!match.indexedItem.wholeTermMatchers[termIndex](normalizedQuery)) {
+          return false;
+        }
 
         return !matches.some((otherMatch) => {
-          if (otherMatch.item.id === match.item.id) return false;
+          if (otherMatch.indexedItem.item.id === match.indexedItem.item.id) {
+            return false;
+          }
 
-          return getAnimalSearchTerms(otherMatch.item).some(
+          return otherMatch.indexedItem.terms.some(
             (otherTerm) =>
               otherTerm.length > term.length &&
               containsWholeAnimalTerm(otherTerm, term),
@@ -793,51 +836,76 @@ function getMentionedAnimalMatches(query: string): AnimalSearchItem[] {
         secondMatch.longestMatchedTermLength -
         firstMatch.longestMatchedTermLength,
     )
-    .map((match) => match.item);
+    .map((match) => match.indexedItem.item);
+}
+
+function getExactAnimalCatalogMatchFromNormalizedQuery(
+  normalizedQuery: string,
+): AnimalSearchItem | null {
+  if (!normalizedQuery) return null;
+
+  const exactMatches = indexedAnimalSearchCatalog.filter((indexedItem) =>
+    indexedItem.terms.some((term) => term === normalizedQuery),
+  );
+
+  return exactMatches.length === 1 ? exactMatches[0].item : null;
+}
+
+export function getAnimalCatalogSearchState(
+  query: string,
+): AnimalCatalogSearchState {
+  const normalizedQuery = normalizeAnimalSearchText(query);
+
+  if (!normalizedQuery) {
+    return {
+      textMatch: null,
+      results: [],
+    };
+  }
+
+  const exactMatch = getExactAnimalCatalogMatchFromNormalizedQuery(
+    normalizedQuery,
+  );
+  const mentionedMatches = getMentionedAnimalMatchesFromNormalizedQuery(
+    normalizedQuery,
+  );
+  const textMatch =
+    exactMatch ?? (mentionedMatches.length === 1 ? mentionedMatches[0] : null);
+
+  if (mentionedMatches.length > 0) {
+    return {
+      textMatch,
+      results: mentionedMatches.slice(0, 8),
+    };
+  }
+
+  return {
+    textMatch,
+    results: indexedAnimalSearchCatalog
+      .filter((indexedItem) =>
+        indexedItem.terms.some((term) =>
+          term.includes(normalizedQuery),
+        ),
+      )
+      .slice(0, 8)
+      .map((indexedItem) => indexedItem.item),
+  };
 }
 
 export function searchAnimalCatalog(query: string): AnimalSearchItem[] {
-  const normalizedQuery = normalizeAnimalSearchText(query);
-
-  if (!normalizedQuery) return [];
-
-  const mentionedMatches = getMentionedAnimalMatches(query);
-
-  if (mentionedMatches.length > 0) {
-    return mentionedMatches.slice(0, 8);
-  }
-
-  return animalSearchCatalog
-    .filter((item) =>
-      getAnimalSearchTerms(item).some((term) =>
-        term.includes(normalizedQuery),
-      ),
-    )
-    .slice(0, 8);
+  return getAnimalCatalogSearchState(query).results;
 }
 
 export function findExactAnimalCatalogMatch(
   query: string,
 ): AnimalSearchItem | null {
-  const normalizedQuery = normalizeAnimalSearchText(query);
-
-  if (!normalizedQuery) return null;
-
-  const exactMatches = animalSearchCatalog.filter((item) =>
-    getAnimalSearchTerms(item).some((term) => term === normalizedQuery),
+  return getExactAnimalCatalogMatchFromNormalizedQuery(
+    normalizeAnimalSearchText(query),
   );
-
-  return exactMatches.length === 1 ? exactMatches[0] : null;
 }
 
 export function findAnimalCatalogTextMatch(
   query: string,
 ): AnimalSearchItem | null {
-  const exactMatch = findExactAnimalCatalogMatch(query);
-
-  if (exactMatch) return exactMatch;
-
-  const mentionedMatches = getMentionedAnimalMatches(query);
-
-  return mentionedMatches.length === 1 ? mentionedMatches[0] : null;
+  return getAnimalCatalogSearchState(query).textMatch;
 }

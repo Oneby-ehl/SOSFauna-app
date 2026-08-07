@@ -1,7 +1,8 @@
 import {
+  type AnimalCatalogSearchState,
   type AnimalSearchItem,
-  findAnimalCatalogTextMatch,
-  searchAnimalCatalog,
+  getAnimalCatalogSearchState,
+  getAnimalSearchTerms,
 } from "@/data/animalSearchCatalog";
 import { faqCategories, faqItems, swiftFaqPriorityIds } from "@/data/faq";
 import {
@@ -118,12 +119,6 @@ function prioritizeBatIntroItem(items: typeof faqItems) {
   });
 }
 
-function getAnimalSearchTerms(animal: AnimalSearchItem) {
-  return [animal.name, animal.id, ...(animal.aliases ?? [])].map(
-    normalizeSearchText,
-  );
-}
-
 function isSelectedAnimalIntroQuery(
   query: string,
   selectedAnimal: AnimalSearchItem | null,
@@ -217,9 +212,16 @@ function getVisibleFaqCategories(selectedAnimal: AnimalSearchItem | null) {
   );
 }
 
+const emptyAnimalCatalogSearchState: AnimalCatalogSearchState = {
+  textMatch: null,
+  results: [],
+};
+
 export default function FaqPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [animalCatalogSearchState, setAnimalCatalogSearchState] =
+    useState<AnimalCatalogSearchState>(emptyAnimalCatalogSearchState);
   const [selectedAnimal, setSelectedAnimal] =
     useState<AnimalSearchItem | null>(null);
   const [openItemId, setOpenItemId] = useState<string | null>(null);
@@ -266,14 +268,11 @@ export default function FaqPage() {
     [selectedAnimal],
   );
 
-  const animalSearchResults = useMemo(
-    () => searchAnimalCatalog(searchQuery),
-    [searchQuery],
-  );
+  const queryAnimal = animalCatalogSearchState.textMatch;
+  const animalSearchResults = animalCatalogSearchState.results;
 
   const groupedItems = useMemo(
     () => {
-      const queryAnimal = findAnimalCatalogTextMatch(searchQuery);
       const searchSourceItems =
         queryAnimal?.id.startsWith("murcielago")
           ? filterFaqItemsBySelectedAnimal(displayedFaqItems, queryAnimal)
@@ -294,17 +293,35 @@ export default function FaqPage() {
         searchQuery,
         selectedAnimal,
       );
+      const visibleCategorySet = new Set(visibleFaqCategories);
+      const groupsByCategory = new Map<
+        string,
+        {
+          category: (typeof visibleFaqCategories)[number];
+          items: typeof faqItems;
+          firstRank: number;
+        }
+      >();
 
-      return visibleFaqCategories
-        .map((category) => ({
-          category,
-          items: rankedResults.filter((item) => item.category === category),
-          firstRank: rankedResults.findIndex(
-            (item) => item.category === category,
-          ),
-        }))
-        .filter((group) => group.items.length > 0)
-        .sort((firstGroup, secondGroup) => {
+      rankedResults.forEach((item, index) => {
+        if (!visibleCategorySet.has(item.category)) return;
+
+        const existingGroup = groupsByCategory.get(item.category);
+
+        if (existingGroup) {
+          existingGroup.items.push(item);
+          return;
+        }
+
+        groupsByCategory.set(item.category, {
+          category: item.category,
+          items: [item],
+          firstRank: index,
+        });
+      });
+
+      return Array.from(groupsByCategory.values()).sort(
+        (firstGroup, secondGroup) => {
           if (shouldUseEditorialCategoryOrder) {
             return (
               getSpeciesOverviewCategoryIndex(firstGroup.category) -
@@ -320,9 +337,16 @@ export default function FaqPage() {
           }
 
           return firstGroup.firstRank - secondGroup.firstRank;
-        });
+        },
+      );
     },
-    [displayedFaqItems, searchQuery, selectedAnimal, visibleFaqCategories],
+    [
+      displayedFaqItems,
+      queryAnimal,
+      searchQuery,
+      selectedAnimal,
+      visibleFaqCategories,
+    ],
   );
 
   const hasResults = groupedItems.length > 0;
@@ -347,6 +371,7 @@ export default function FaqPage() {
 
   const handleCategoryPress = (category: string) => {
     setSearchQuery("");
+    setAnimalCatalogSearchState(emptyAnimalCatalogSearchState);
     setSelectedAnimal(null);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => scrollToCategory(category));
@@ -355,6 +380,7 @@ export default function FaqPage() {
 
   const clearSearch = () => {
     setSearchQuery("");
+    setAnimalCatalogSearchState(emptyAnimalCatalogSearchState);
     setSelectedAnimal(null);
     setOpenItemId(null);
     requestAnimationFrame(() => searchInputRef.current?.focus());
@@ -371,15 +397,22 @@ export default function FaqPage() {
   };
 
   const selectAnimalSearchResult = (animal: AnimalSearchItem) => {
+    const nextAnimalCatalogSearchState = getAnimalCatalogSearchState(
+      animal.name,
+    );
+
     setSelectedAnimal(animal);
     setSearchQuery(animal.name);
+    setAnimalCatalogSearchState(nextAnimalCatalogSearchState);
     setOpenItemId("que-hacer-si-encuentro-animal");
   };
 
   const handleSearchQueryChange = (value: string) => {
-    const animalMatch = findAnimalCatalogTextMatch(value);
+    const nextAnimalCatalogSearchState = getAnimalCatalogSearchState(value);
+    const animalMatch = nextAnimalCatalogSearchState.textMatch;
 
     setSearchQuery(value);
+    setAnimalCatalogSearchState(nextAnimalCatalogSearchState);
     setSelectedAnimal(animalMatch);
     setOpenItemId(animalMatch ? "que-hacer-si-encuentro-animal" : null);
   };

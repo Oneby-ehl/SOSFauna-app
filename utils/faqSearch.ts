@@ -1,12 +1,15 @@
-import type { FaqItem } from "@/data/faq";
+import { faqItems, type FaqItem } from "@/data/faq";
 
-type NormalizedFaqItem = {
+type NormalizedFaqItemData = {
   item: FaqItem;
-  originalIndex: number;
   question: string;
   answer: string;
   category: string;
   keywords: string[];
+};
+
+type NormalizedFaqItem = NormalizedFaqItemData & {
+  originalIndex: number;
 };
 
 type ScoredFaqItem = {
@@ -14,6 +17,11 @@ type ScoredFaqItem = {
   originalIndex: number;
   matchedTermCount: number;
   score: number;
+};
+
+type SearchPhraseMatcher = {
+  phrase: string;
+  matches: (text: string) => boolean;
 };
 
 const MIN_SINGLE_TERM_SCORE = 10;
@@ -49,11 +57,17 @@ export const normalizeSearchText = (value: string) =>
     .trim()
     .replace(/\s+/g, " ");
 
-const containsSearchPhrase = (text: string, phrase: string) =>
-  new RegExp(
+const createSearchPhraseMatcher = (phrase: string): SearchPhraseMatcher => {
+  const matcher = new RegExp(
     `(^|[^\\p{L}\\p{N}])${escapeRegExp(phrase)}($|[^\\p{L}\\p{N}])`,
     "u",
-  ).test(text);
+  );
+
+  return {
+    phrase,
+    matches: (text: string) => matcher.test(text),
+  };
+};
 
 export const tokenizeFaqSearchQuery = (query: string): string[] => {
   const tokens = normalizeSearchText(query).split(" ").filter(Boolean);
@@ -66,39 +80,69 @@ export const tokenizeFaqSearchQuery = (query: string): string[] => {
 
 const normalizeFaqItem = (
   item: FaqItem,
-  originalIndex: number,
-): NormalizedFaqItem => ({
+): NormalizedFaqItemData => ({
   item,
-  originalIndex,
   question: normalizeSearchText(item.question),
   answer: normalizeSearchText(item.answer),
   category: normalizeSearchText(item.category),
   keywords: (item.keywords ?? []).map(normalizeSearchText),
 });
 
-const hasKeywordPhraseMatch = (keywords: string[], phrase: string) =>
+const normalizedFaqItemCache = new WeakMap<FaqItem, NormalizedFaqItemData>();
+
+const getNormalizedFaqItem = (
+  item: FaqItem,
+  originalIndex: number,
+): NormalizedFaqItem => {
+  const cachedItem = normalizedFaqItemCache.get(item);
+
+  if (cachedItem) {
+    return {
+      ...cachedItem,
+      originalIndex,
+    };
+  }
+
+  const normalizedItem = normalizeFaqItem(item);
+  normalizedFaqItemCache.set(item, normalizedItem);
+
+  return {
+    ...normalizedItem,
+    originalIndex,
+  };
+};
+
+faqItems.forEach((item) => {
+  normalizedFaqItemCache.set(item, normalizeFaqItem(item));
+});
+
+const hasKeywordPhraseMatch = (
+  keywords: string[],
+  phraseMatcher: SearchPhraseMatcher,
+) =>
   keywords.some(
-    (keyword) => keyword === phrase || containsSearchPhrase(keyword, phrase),
+    (keyword) =>
+      keyword === phraseMatcher.phrase || phraseMatcher.matches(keyword),
   );
 
 const scoreFaqItem = (
   normalizedItem: NormalizedFaqItem,
-  terms: string[],
-  phrase: string,
+  termMatchers: SearchPhraseMatcher[],
+  phraseMatcher: SearchPhraseMatcher,
 ): ScoredFaqItem | null => {
   let score = 0;
   let matchedTermCount = 0;
 
-  for (const term of terms) {
+  for (const termMatcher of termMatchers) {
     const keywordExactMatch = normalizedItem.keywords.some(
-      (keyword) => keyword === term,
+      (keyword) => keyword === termMatcher.phrase,
     );
     const keywordPartialMatch = normalizedItem.keywords.some((keyword) =>
-      containsSearchPhrase(keyword, term),
+      termMatcher.matches(keyword),
     );
-    const questionMatch = containsSearchPhrase(normalizedItem.question, term);
-    const categoryMatch = containsSearchPhrase(normalizedItem.category, term);
-    const answerMatch = containsSearchPhrase(normalizedItem.answer, term);
+    const questionMatch = termMatcher.matches(normalizedItem.question);
+    const categoryMatch = termMatcher.matches(normalizedItem.category);
+    const answerMatch = termMatcher.matches(normalizedItem.answer);
     const termMatched =
       keywordPartialMatch || questionMatch || categoryMatch || answerMatch;
 
@@ -119,22 +163,30 @@ const scoreFaqItem = (
     if (answerMatch) score += 2;
   }
 
-  const allTermsMatch = matchedTermCount === terms.length;
-  const meaningfulRankingTerms =
-    terms.length > 1
-      ? terms.filter((term) => !GENERIC_RANKING_TERMS.has(term))
-      : terms;
-  const termsForQuestionKeywordBonus =
-    meaningfulRankingTerms.length > 0 ? meaningfulRankingTerms : terms;
-  const allTermsInQuestionOrKeywords = termsForQuestionKeywordBonus.every(
-    (term) =>
-      containsSearchPhrase(normalizedItem.question, term) ||
-      normalizedItem.keywords.some((keyword) =>
-        containsSearchPhrase(keyword, term),
-      ),
+  const allTermsMatch = matchedTermCount === termMatchers.length;
+  const meaningfulRankingTermMatchers =
+    termMatchers.length > 1
+      ? termMatchers.filter(
+          (termMatcher) => !GENERIC_RANKING_TERMS.has(termMatcher.phrase),
+        )
+      : termMatchers;
+  const termMatchersForQuestionKeywordBonus =
+    meaningfulRankingTermMatchers.length > 0
+      ? meaningfulRankingTermMatchers
+      : termMatchers;
+  const allTermsInQuestionOrKeywords =
+    termMatchersForQuestionKeywordBonus.every(
+      (termMatcher) =>
+        termMatcher.matches(normalizedItem.question) ||
+        normalizedItem.keywords.some((keyword) =>
+          termMatcher.matches(keyword),
+        ),
+    );
+  const phraseInQuestion = phraseMatcher.matches(normalizedItem.question);
+  const phraseInKeyword = hasKeywordPhraseMatch(
+    normalizedItem.keywords,
+    phraseMatcher,
   );
-  const phraseInQuestion = containsSearchPhrase(normalizedItem.question, phrase);
-  const phraseInKeyword = hasKeywordPhraseMatch(normalizedItem.keywords, phrase);
 
   if (allTermsMatch) score += 20;
   if (allTermsInQuestionOrKeywords) score += 15;
@@ -142,7 +194,7 @@ const scoreFaqItem = (
   if (phraseInKeyword) score += 20;
 
   const minimumScore =
-    terms.length > 1 ? MIN_MULTI_TERM_SCORE : MIN_SINGLE_TERM_SCORE;
+    termMatchers.length > 1 ? MIN_MULTI_TERM_SCORE : MIN_SINGLE_TERM_SCORE;
   const shouldInclude =
     allTermsMatch ||
     score >= minimumScore ||
@@ -169,10 +221,12 @@ export function searchFaqItems(items: FaqItem[], query: string): FaqItem[] {
   }
 
   const phrase = normalizeSearchText(query);
+  const termMatchers = terms.map(createSearchPhraseMatcher);
+  const phraseMatcher = createSearchPhraseMatcher(phrase);
 
   return items
-    .map(normalizeFaqItem)
-    .map((item) => scoreFaqItem(item, terms, phrase))
+    .map(getNormalizedFaqItem)
+    .map((item) => scoreFaqItem(item, termMatchers, phraseMatcher))
     .filter((item): item is ScoredFaqItem => item !== null)
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
