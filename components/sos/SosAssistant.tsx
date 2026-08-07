@@ -21,6 +21,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -1178,7 +1179,9 @@ export default function HomeScreen({
   initialAnimalType = null,
 }: SosAssistantProps) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const router = useRouter();
+  const isMobileAdviceText = width <= 480;
   const [currentCase, setCurrentCase] = useState<RescueCase | null>(initialCase);
   const currentCaseRef = useRef<RescueCase | null>(initialCase);
   const [step, setStep] = useState<Step>(normalizeInitialStep(initialCase?.step));
@@ -2655,7 +2658,15 @@ const saveCurrentProgress = async (
               ) : null}
             </View>
 
-            <Text style={[styles.summaryBox, styles.adviceBox]}>{advice}</Text>
+            <Text
+              style={[
+                styles.summaryBox,
+                styles.adviceBox,
+                isMobileAdviceText && styles.adviceBoxMobile,
+              ]}
+            >
+              {advice}
+            </Text>
           </View>
         </SectionCard>
       );
@@ -3039,6 +3050,10 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     backgroundColor: "#eef8f0",
     borderColor: "#b7dfc0",
+  },
+  adviceBoxMobile: {
+    fontSize: 16,
+    lineHeight: 24,
   },
   primaryButton: {
     backgroundColor: "#14532d",
