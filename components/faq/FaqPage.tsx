@@ -15,6 +15,7 @@ import { Link, Stack, useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import {
   Pressable,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -211,6 +212,24 @@ function getVisibleFaqCategories(selectedAnimal: AnimalSearchItem | null) {
       category !== "Conocer al vencejo" || selectedAnimal?.id === "vencejo",
   );
 }
+
+const defaultFaqStructuredDataItems = filterFaqItemsBySelectedAnimal(
+  faqItems,
+  null,
+);
+
+const faqPageStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: defaultFaqStructuredDataItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
 
 const emptyAnimalCatalogSearchState: AnimalCatalogSearchState = {
   textMatch: null,
@@ -466,6 +485,7 @@ export default function FaqPage() {
         title="Preguntas frecuentes | SOS Fauna España"
         description="Respuestas a las preguntas más habituales sobre cómo actuar ante fauna silvestre y sobre el funcionamiento de SOS Fauna España."
         path="/faq"
+        structuredData={faqPageStructuredData}
       />
       <Stack.Screen
         options={{ title: "Preguntas frecuentes | SOS Fauna España" }}
@@ -590,6 +610,7 @@ export default function FaqPage() {
                 <View style={styles.questionList}>
                   {group.items.map((item) => {
                     const isOpen = openItemId === item.id;
+                    const shouldRenderAnswer = isOpen || Platform.OS === "web";
 
                     return (
                       <View key={item.id} style={styles.faqCard}>
@@ -608,8 +629,17 @@ export default function FaqPage() {
                           </Text>
                         </Pressable>
 
-                        {isOpen ? (
-                          <View style={styles.answerContent}>
+                        {shouldRenderAnswer ? (
+                          <View
+                            accessibilityElementsHidden={!isOpen}
+                            importantForAccessibility={
+                              isOpen ? "auto" : "no-hide-descendants"
+                            }
+                            style={[
+                              styles.answerContent,
+                              !isOpen && styles.hiddenAnswerContent,
+                            ]}
+                          >
                             <Text style={styles.answerText}>{item.answer}</Text>
                             {item.showCreateNotice
                               ? renderCreateNoticePrompt()
@@ -801,6 +831,9 @@ const styles = StyleSheet.create({
     color: "#374151",
     paddingHorizontal: 18,
     paddingVertical: 16,
+  },
+  hiddenAnswerContent: {
+    display: "none",
   },
   answerText: {
     color: "#374151",
