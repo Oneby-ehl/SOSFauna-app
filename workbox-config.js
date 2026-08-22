@@ -4,4 +4,5 @@ module.exports = {
   globIgnores: ["**/version.json"],
   swDest: "dist/sw.js",
   cleanupOutdatedCaches: true,
+  maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
 };

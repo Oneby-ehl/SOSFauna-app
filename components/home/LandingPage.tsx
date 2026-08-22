@@ -40,6 +40,10 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
+type LandingDataState = "checking" | "ready" | "failed";
+
+const LANDING_DATA_TIMEOUT_MS = 4000;
+
 const homePageStructuredData = {
   "@context": "https://schema.org",
   "@type": "WebPage",
@@ -55,6 +59,17 @@ const homePageStructuredData = {
     "SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda.",
 };
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error("Landing data check timed out."));
+      }, timeoutMs);
+    }),
+  ]);
+}
+
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -62,7 +77,9 @@ export default function LandingPage() {
   const isCompact = !hydrated || width < 760;
   const [pendingCase, setPendingCase] = useState<RescueCase | null>(null);
   const [hasHistory, setHasHistory] = useState(false);
-  const [checkingCase, setCheckingCase] = useState(true);
+  const [landingDataState, setLandingDataState] =
+    useState<LandingDataState>("checking");
+  const checkingCase = landingDataState === "checking";
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
 
@@ -100,17 +117,18 @@ export default function LandingPage() {
 
   const refreshLandingData = useCallback(async () => {
     try {
-      setCheckingCase(true);
+      setLandingDataState("checking");
 
-      const [currentCase, history] = await Promise.all([
-        recoverCurrentCase(),
-        getHistory(),
-      ]);
+      const [currentCase, history] = await withTimeout(
+        Promise.all([recoverCurrentCase(), getHistory()]),
+        LANDING_DATA_TIMEOUT_MS,
+      );
 
       setPendingCase(currentCase);
       setHasHistory(history.length > 0);
-    } finally {
-      setCheckingCase(false);
+      setLandingDataState("ready");
+    } catch {
+      setLandingDataState("failed");
     }
   }, []);
 
@@ -126,7 +144,16 @@ export default function LandingPage() {
     router.push({ pathname: "/aviso", params: { mode: "new" } });
   };
 
+  const openNewCaseWithoutDiscardingStoredCase = () => {
+    router.push({ pathname: "/aviso", params: { mode: "new" } });
+  };
+
   const handleStartNewCase = () => {
+    if (landingDataState === "failed" && !pendingCase) {
+      openNewCaseWithoutDiscardingStoredCase();
+      return;
+    }
+
     if (!pendingCase) {
       void openNewCase();
       return;
