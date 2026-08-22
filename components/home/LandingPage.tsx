@@ -39,6 +39,21 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
+const homePageStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "SOS Fauna España",
+  url: "https://sosfauna.es/",
+  inLanguage: "es",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "SOS Fauna España",
+    url: "https://sosfauna.es/",
+  },
+  description:
+    "SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda.",
+};
+
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -169,6 +184,7 @@ export default function LandingPage() {
           title="SOS Fauna España | Ayuda a la fauna silvestre"
           description="SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda."
           path="/"
+          structuredData={homePageStructuredData}
         />
         <Stack.Screen
           options={{ title: "SOS Fauna España | Ayuda a la fauna silvestre" }}
@@ -176,7 +192,9 @@ export default function LandingPage() {
 
       <View style={styles.header}>
         <View style={styles.headerInner}>
-          <Text style={styles.brand}>SOS Fauna España</Text>
+          <Link href="/">
+            <Text style={styles.brand}>SOS Fauna España</Text>
+          </Link>
 
           <Pressable
             style={styles.headerButton}
@@ -202,8 +220,9 @@ export default function LandingPage() {
             </Text>
 
             <Text style={styles.heroDescription}>
-              Te ayudamos paso a paso a valorar la situación, recopilar
-			  la información necesaria y contactar con los recursos adecuados.
+              SOS Fauna España te ayuda paso a paso a valorar la situación con
+              calma, recopilar la información necesaria y contactar con los
+              recursos adecuados.
             </Text>
 
             {!isCompact ? (
@@ -440,7 +459,9 @@ export default function LandingPage() {
       <View style={styles.footer}>
         <View style={styles.footerInner}>
           <View>
-            <Text style={styles.footerBrand}>SOS Fauna España</Text>
+            <Link href="/">
+              <Text style={styles.footerBrand}>SOS Fauna España</Text>
+            </Link>
             <Text style={styles.footerText}>
               Asistencia guiada para ayudar a la fauna silvestre de forma
               segura y responsable.

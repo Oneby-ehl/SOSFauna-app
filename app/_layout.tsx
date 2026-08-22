@@ -20,6 +20,10 @@ export default function RootLayout() {
             headerLeft: () => null,
           }}
         />
+        <Stack.Screen
+          name="about"
+          options={{ title: "Sobre SOS Fauna España" }}
+        />
       </Stack>
     </AppVersionGate>
   );

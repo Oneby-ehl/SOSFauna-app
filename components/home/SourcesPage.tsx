@@ -183,7 +183,7 @@ export default function SourcesPage() {
 
         <Link href="/" asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver al inicio</Text>
+            <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
           </Pressable>
         </Link>
       </ScrollView>

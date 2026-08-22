@@ -1,7 +1,14 @@
 import { Link, Stack } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import * as Clipboard from "expo-clipboard";
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { SeoHead } from "@/components/seo/SeoHead";
+import {
+  buildSosFaunaShareMessage,
+  SOS_FAUNA_SHARE_TEXT,
+  SOS_FAUNA_SHARE_TITLE,
+  SOS_FAUNA_SHARE_URL,
+} from "@/utils/rescueShareMessage";
 
 const principles = ["Calma", "Claridad", "Prudencia", "Acción"];
 
@@ -16,6 +23,39 @@ const aboutPageStructuredData = {
 };
 
 export default function AboutPage() {
+  const shareSosFauna = async () => {
+    if (
+      Platform.OS === "web" &&
+      typeof navigator !== "undefined" &&
+      navigator.share
+    ) {
+      try {
+        await navigator.share({
+          title: SOS_FAUNA_SHARE_TITLE,
+          text: SOS_FAUNA_SHARE_TEXT,
+          url: SOS_FAUNA_SHARE_URL,
+        });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    await Clipboard.setStringAsync(buildSosFaunaShareMessage());
+
+    if (Platform.OS === "web") {
+      window.alert("Mensaje copiado al portapapeles.");
+      return;
+    }
+
+    Alert.alert(
+      "Mensaje copiado",
+      "El mensaje de SOS Fauna España se ha copiado al portapapeles.",
+    );
+  };
+
   return (
     <>
       <SeoHead
@@ -24,7 +64,7 @@ export default function AboutPage() {
         path="/about"
         structuredData={aboutPageStructuredData}
       />
-      <Stack.Screen options={{ title: "Sobre SOS Fauna España | SOS Fauna España" }} />
+      <Stack.Screen options={{ title: "Sobre SOS Fauna España" }} />
 
       <ScrollView
         style={styles.screen}
@@ -129,9 +169,13 @@ export default function AboutPage() {
           </Text>
         </View>
 
+        <Pressable style={styles.shareButton} onPress={shareSosFauna}>
+          <Text style={styles.shareButtonText}>Compartir SOS Fauna España</Text>
+        </Pressable>
+
         <Link href="/" asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver al inicio</Text>
+            <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
           </Pressable>
         </Link>
       </ScrollView>
@@ -239,6 +283,20 @@ const styles = StyleSheet.create({
     color: "#14532d",
     fontSize: 20,
     lineHeight: 30,
+    fontWeight: "800",
+  },
+  shareButton: {
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "#b7dfc0",
+    borderRadius: 14,
+    backgroundColor: "#eef8f0",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  shareButtonText: {
+    color: "#166534",
+    fontSize: 15,
     fontWeight: "800",
   },
   backButton: {

@@ -42,8 +42,10 @@ const organizationStructuredData = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: SITE_NAME,
+  alternateName: "SOS Fauna",
   url: `${SITE_URL}/`,
   logo: ORGANIZATION_LOGO_URL,
+  description: SITE_DESCRIPTION,
 };
 
 type SeoHeadProps = {
