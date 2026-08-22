@@ -33,6 +33,7 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { RecoveryCentersContent } from "@/components/contacts/RecoveryCentersPage";
 import { SectionCard } from "@/components/SectionCard";
+import { buildRescueShareMessage } from "@/utils/rescueShareMessage";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -1323,11 +1324,6 @@ export default function HomeScreen({
     [flags],
   );
 
-  const selectedFlags = useMemo(
-    () => selectedFlagLabels.join(", ") || "Sin marcas",
-    [selectedFlagLabels],
-  );
-
   const selectedAnimalLabel = useMemo(
     () =>
       ANIMAL_OPTIONS.find((option) => option.key === animalType)?.label ||
@@ -1551,26 +1547,22 @@ export default function HomeScreen({
   );
 
   const generatedSummary = useMemo(() => {
-    return [
-      "AVISO DE RESCATE DE FAUNA",
-      `Estado del animal: ${selectedAnimalStateLabel}`,
-      `Tipo de animal: ${selectedAnimalLabel}`,
-      animalPosition
-        ? `Dónde está: ${selectedAnimalPositionLabel}`
+    return buildRescueShareMessage({
+      animalStateLabel: selectedAnimalStateLabel,
+      animalTypeLabel: selectedAnimalLabel,
+      animalPositionLabel: animalPosition ? selectedAnimalPositionLabel : null,
+      animalEnvironmentLabel: animalEnvironment
+        ? selectedAnimalEnvironmentLabel
         : null,
-      animalEnvironment
-        ? `Entorno: ${selectedAnimalEnvironmentLabel}`
-        : null,
-      !animalPosition && !animalEnvironment && animalPlace
-        ? `Dónde está el animal: ${selectedAnimalPlaceLabel}`
-        : null,
-      ...locationSummaryLines,
-      `Señales observadas: ${selectedFlags}`,
-      `Foto capturada: ${photoUri ? "sí" : "no"}`,
-      `Vídeo capturado: ${videoUri ? "sí" : "no"}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
+      animalPlaceLabel:
+        !animalPosition && !animalEnvironment && animalPlace
+          ? selectedAnimalPlaceLabel
+          : null,
+      observedSigns: selectedFlagLabels,
+      locationLines: locationSummaryLines,
+      hasPhoto: Boolean(photoUri),
+      hasVideo: Boolean(videoUri),
+    });
   }, [
     locationSummaryLines,
     animalEnvironment,
@@ -1582,7 +1574,7 @@ export default function HomeScreen({
     selectedAnimalPlaceLabel,
     selectedAnimalPositionLabel,
     selectedAnimalStateLabel,
-    selectedFlags,
+    selectedFlagLabels,
     videoUri,
   ]);
 

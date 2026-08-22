@@ -8,6 +8,7 @@ import {
 import AppVersionFooter from "@/components/AppVersionFooter";
 import { SeoHead } from "@/components/seo/SeoHead";
 import { getHistory } from "@/services/rescueStorage";
+import { shareSosFaunaApp } from "@/utils/rescueShareMessage";
 import {
   Alert,
   Platform,
@@ -494,6 +495,13 @@ export default function LandingPage() {
                <Text style={styles.footerLink}>Contacto</Text>
              </Link>
 
+             <Pressable
+               accessibilityRole="button"
+               onPress={shareSosFaunaApp}
+             >
+               <Text style={styles.footerLink}>Compartir SOS Fauna España</Text>
+             </Pressable>
+
              <View style={styles.footerLegalLinks}>
                <Link href="/privacy">
                  <Text style={styles.footerLink}>Política de privacidad</Text>
@@ -885,9 +893,11 @@ const styles = StyleSheet.create({
   },
   animalScopeTitle: {
     maxWidth: "100%",
+    textAlign: "center",
   },
   animalScopeText: {
     maxWidth: "100%",
+    textAlign: "center",
   },
   animalScopeGrid: {
     width: "100%",

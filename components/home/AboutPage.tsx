@@ -1,14 +1,8 @@
 import { Link, Stack } from "expo-router";
-import * as Clipboard from "expo-clipboard";
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { SeoHead } from "@/components/seo/SeoHead";
-import {
-  buildSosFaunaShareMessage,
-  SOS_FAUNA_SHARE_TEXT,
-  SOS_FAUNA_SHARE_TITLE,
-  SOS_FAUNA_SHARE_URL,
-} from "@/utils/rescueShareMessage";
+import { shareSosFaunaApp } from "@/utils/rescueShareMessage";
 
 const principles = ["Calma", "Claridad", "Prudencia", "Acción"];
 
@@ -23,39 +17,6 @@ const aboutPageStructuredData = {
 };
 
 export default function AboutPage() {
-  const shareSosFauna = async () => {
-    if (
-      Platform.OS === "web" &&
-      typeof navigator !== "undefined" &&
-      navigator.share
-    ) {
-      try {
-        await navigator.share({
-          title: SOS_FAUNA_SHARE_TITLE,
-          text: SOS_FAUNA_SHARE_TEXT,
-          url: SOS_FAUNA_SHARE_URL,
-        });
-        return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-      }
-    }
-
-    await Clipboard.setStringAsync(buildSosFaunaShareMessage());
-
-    if (Platform.OS === "web") {
-      window.alert("Mensaje copiado al portapapeles.");
-      return;
-    }
-
-    Alert.alert(
-      "Mensaje copiado",
-      "El mensaje de SOS Fauna España se ha copiado al portapapeles.",
-    );
-  };
-
   return (
     <>
       <SeoHead
@@ -169,7 +130,7 @@ export default function AboutPage() {
           </Text>
         </View>
 
-        <Pressable style={styles.shareButton} onPress={shareSosFauna}>
+        <Pressable style={styles.shareButton} onPress={shareSosFaunaApp}>
           <Text style={styles.shareButtonText}>Compartir SOS Fauna España</Text>
         </Pressable>
 

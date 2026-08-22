@@ -19,6 +19,7 @@ import {
 } from "@/services/rescueStorage";
 import { NoIndexHead } from "@/components/seo/SeoHead";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { buildRescueShareMessage } from "@/utils/rescueShareMessage";
 import type {
   RescueAnimalState,
   RescueAnimalEnvironment,
@@ -213,26 +214,21 @@ function buildCaseSummary(rescueCase: RescueCase): string {
   const animalEnvironmentLabel = getAnimalEnvironmentLabel(rescueCase);
   const animalPlaceLabel = getAnimalPlaceLabel(rescueCase);
 
-  return [
-    "SOS Fauna España",
-    "",
-    `Fecha del aviso: ${formatDate(
+  return buildRescueShareMessage({
+    animalStateLabel: ANIMAL_STATE_LABELS[rescueCase.animalState],
+    animalTypeLabel: ANIMAL_TYPE_LABELS[rescueCase.animalType],
+    animalPositionLabel,
+    animalEnvironmentLabel,
+    animalPlaceLabel:
+      !animalPositionLabel && !animalEnvironmentLabel
+        ? animalPlaceLabel
+        : null,
+    observedSigns: flagLabels,
+    locationLines: buildLocationSummaryLines(rescueCase),
+    dateLine: `Fecha del aviso: ${formatDate(
       rescueCase.completedAt ?? rescueCase.updatedAt,
     )}`,
-    `Animal: ${ANIMAL_TYPE_LABELS[rescueCase.animalType]}`,
-    `Estado: ${ANIMAL_STATE_LABELS[rescueCase.animalState]}`,
-    animalPositionLabel ? `Dónde está: ${animalPositionLabel}` : null,
-    animalEnvironmentLabel ? `Entorno: ${animalEnvironmentLabel}` : null,
-    !animalPositionLabel && !animalEnvironmentLabel && animalPlaceLabel
-      ? `Dónde está el animal: ${animalPlaceLabel}`
-      : null,
-    `Situación observada: ${
-      flagLabels.length > 0
-        ? flagLabels.join(", ")
-        : "Sin circunstancias adicionales seleccionadas"
-    }`,
-    ...buildLocationSummaryLines(rescueCase),
-  ].filter(Boolean).join("\n");
+  });
 }
 
 function HistoryCard({

@@ -1,3 +1,6 @@
+import * as Clipboard from "expo-clipboard";
+import { Alert, Platform } from "react-native";
+
 type RescueShareMessageInput = {
   animalStateLabel: string;
   animalTypeLabel: string;
@@ -19,6 +22,10 @@ function lowercaseFirst(value: string) {
 function normalizeLine(value: string | null | undefined) {
   const normalized = value?.trim();
   return normalized && normalized.length > 0 ? normalized : undefined;
+}
+
+function keepMessageLine(line: string | null | undefined): line is string {
+  return line !== null && line !== undefined;
 }
 
 export function buildRescueShareMessage({
@@ -87,7 +94,7 @@ export function buildRescueShareMessage({
     "Información recopilada con SOS Fauna España",
     "https://sosfauna.es",
   ]
-    .filter(Boolean)
+    .filter(keepMessageLine)
     .join("\n");
 }
 
@@ -102,4 +109,37 @@ export function buildSosFaunaShareMessage() {
     SOS_FAUNA_SHARE_TEXT,
     SOS_FAUNA_SHARE_URL,
   ].join("\n");
+}
+
+export async function shareSosFaunaApp() {
+  if (
+    Platform.OS === "web" &&
+    typeof navigator !== "undefined" &&
+    navigator.share
+  ) {
+    try {
+      await navigator.share({
+        title: SOS_FAUNA_SHARE_TITLE,
+        text: SOS_FAUNA_SHARE_TEXT,
+        url: SOS_FAUNA_SHARE_URL,
+      });
+      return;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+    }
+  }
+
+  await Clipboard.setStringAsync(buildSosFaunaShareMessage());
+
+  if (Platform.OS === "web") {
+    window.alert("Mensaje copiado al portapapeles.");
+    return;
+  }
+
+  Alert.alert(
+    "Mensaje copiado",
+    "El mensaje de SOS Fauna España se ha copiado al portapapeles.",
+  );
 }
