@@ -1,7 +1,7 @@
 {
   "short_name": "SOS Fauna",
   "name": "SOS Fauna España",
-  "description": "Asistente web para avisos de fauna silvestre herida, atrapada o en peligro.",
+  "description": "Asistente web para avisos de fauna silvestre herida, atrapada, varada o en peligro.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

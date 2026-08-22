@@ -16,6 +16,12 @@ import {
   HELP_CONTACTS_LEGAL_NOTICE,
   NATIONAL_HELP_CONTACTS,
 } from "@/data/helpContacts";
+import {
+  marineHelpContacts,
+  type MarineHelpContactItem,
+  type MarineHelpResourceType,
+} from "@/data/marineHelpContacts";
+import type { ProvinceContactItem } from "@/lib/provinceContacts";
 
 type RecoveryCentersContentProps = {
   provinceSearch: string;
@@ -40,12 +46,62 @@ const callNumber = async (phoneNumber: string) => {
   await Linking.openURL(`tel:${phoneNumber}`);
 };
 
+type ProvinceHelpGroup = {
+  province: string;
+  terrestrialContacts: ProvinceContactItem[];
+  marineContacts: MarineHelpContactItem[];
+};
+
 const getNationalContactLabel = (phone: string) => {
   if (phone === "112") return "🚨 Emergencias";
   if (phone === "062") return "🌿 SEPRONA";
   if (phone === "092") return "🚓 Policía Municipal / Local";
 
   return "👮 Policía Nacional";
+};
+
+const getMarineResourceTypeLabel = (type: MarineHelpResourceType) => {
+  if (type === "emergency") return "Emergencias";
+  if (type === "strandingNetwork") return "Red de varamientos";
+  if (type === "recoveryCenter") return "Centro especializado";
+  if (type === "specializedEntity") return "Entidad especializada";
+
+  return "Contacto adicional";
+};
+
+const getVisibleContactCount = (item: ProvinceHelpGroup) =>
+  item.terrestrialContacts.length +
+  item.marineContacts.filter((contact) => Boolean(contact.phone)).length;
+
+const getProvinceHelpGroups = (): ProvinceHelpGroup[] => {
+  const provinceMap = new Map<string, ProvinceHelpGroup>();
+
+  getRecoveryCenterProvinceContacts().forEach((item) => {
+    provinceMap.set(item.province, {
+      province: item.province,
+      terrestrialContacts: [...item.contacts],
+      marineContacts: [],
+    });
+  });
+
+  marineHelpContacts.forEach((item) => {
+    const existing = provinceMap.get(item.province);
+
+    if (existing) {
+      existing.marineContacts = [...item.contacts];
+      return;
+    }
+
+    provinceMap.set(item.province, {
+      province: item.province,
+      terrestrialContacts: [],
+      marineContacts: [...item.contacts],
+    });
+  });
+
+  return [...provinceMap.values()].sort((a, b) =>
+    a.province.localeCompare(b.province, "es"),
+  );
 };
 
 export function RecoveryCentersContent({
@@ -59,7 +115,7 @@ export function RecoveryCentersContent({
   onShowHelpSourcesChange,
   onShowProvinceListChange,
 }: RecoveryCentersContentProps) {
-  const provinceGroups = useMemo(getRecoveryCenterProvinceContacts, []);
+  const provinceGroups = useMemo(getProvinceHelpGroups, []);
   const filteredProvinceContacts = useMemo(() => {
     const normalizedSearch = normalizeProvinceSearch(provinceSearch);
 
@@ -72,6 +128,65 @@ export function RecoveryCentersContent({
   const province = provinceGroups.find(
     (item) => item.province === selectedProvince,
   );
+
+  const renderTerrestrialContact = (contact: ProvinceContactItem) => (
+    <Pressable
+      key={`terrestrial-${province?.province}-${contact.name}-${contact.phone}`}
+      style={styles.contactRow}
+      onPress={() => callNumber(contact.phone)}
+    >
+      <View style={styles.contactTextBlock}>
+        <Text style={styles.contactName}>{contact.name}</Text>
+        <Text style={styles.contactNote}>{contact.note}</Text>
+      </View>
+      <Text style={styles.contactPhone}>{contact.phone}</Text>
+    </Pressable>
+  );
+
+  const renderMarineContact = (contact: MarineHelpContactItem) => {
+    const content = (
+      <>
+        <View style={styles.contactTextBlock}>
+          <Text style={styles.contactName}>{contact.name}</Text>
+          <Text style={styles.contactType}>
+            {getMarineResourceTypeLabel(contact.type)}
+          </Text>
+          <Text style={styles.contactNote}>{contact.note}</Text>
+        </View>
+        {contact.phone ? (
+          <Text style={styles.contactPhone}>{contact.phone}</Text>
+        ) : (
+          <Text style={styles.infoOnlyLabel}>Info</Text>
+        )}
+      </>
+    );
+
+    if (!contact.phone) {
+      return (
+        <View
+          key={`marine-${province?.province}-${contact.name}`}
+          style={[styles.contactRow, styles.contactRowInfoOnly]}
+        >
+          {content}
+        </View>
+      );
+    }
+
+    const phone = contact.phone;
+
+    return (
+      <Pressable
+        key={`marine-${province?.province}-${contact.name}-${phone}`}
+        style={[
+          styles.contactRow,
+          phone === "112" && styles.contactRowEmergency,
+        ]}
+        onPress={() => callNumber(phone)}
+      >
+        {content}
+      </Pressable>
+    );
+  };
 
   const openProvinceList = () => {
     onShowProvinceListChange(true);
@@ -96,19 +211,34 @@ export function RecoveryCentersContent({
             Estos son los contactos disponibles para esta provincia.
           </Text>
 
-          {province.contacts.map((contact) => (
-            <Pressable
-              key={`${province.province}-${contact.name}-${contact.phone}`}
-              style={styles.contactRow}
-              onPress={() => callNumber(contact.phone)}
-            >
-              <View style={styles.contactTextBlock}>
-                <Text style={styles.contactName}>{contact.name}</Text>
-                <Text style={styles.contactNote}>{contact.note}</Text>
-              </View>
-              <Text style={styles.contactPhone}>{contact.phone}</Text>
-            </Pressable>
-          ))}
+          {province.terrestrialContacts.length ? (
+            <View style={[styles.contactGroup, styles.contactGroupTerrestrial]}>
+              <Text
+                style={[
+                  styles.contactGroupLabel,
+                  styles.contactGroupLabelTerrestrial,
+                ]}
+              >
+                🍃 Fauna terrestre y aves
+              </Text>
+              {province.terrestrialContacts.map(renderTerrestrialContact)}
+            </View>
+          ) : null}
+
+          {province.marineContacts.length ? (
+            <View style={[styles.contactGroup, styles.contactGroupMarine]}>
+              <Text
+                style={[styles.contactGroupLabel, styles.contactGroupLabelMarine]}
+              >
+                🌊 Fauna marina
+              </Text>
+              <Text style={styles.contactGroupDescription}>
+                Cetáceos, tortugas marinas, focas, tiburones/rayas y otros
+                animales marinos varados o en problemas.
+              </Text>
+              {province.marineContacts.map(renderMarineContact)}
+            </View>
+          ) : null}
         </View>
       </SectionCard>
     );
@@ -128,7 +258,7 @@ export function RecoveryCentersContent({
           ) : null}
 
           <Text style={styles.sectionDescription}>
-            Selecciona una provincia para ver los centros disponibles.
+            Selecciona una provincia para ver los recursos disponibles.
           </Text>
 
           <TextInput
@@ -149,8 +279,9 @@ export function RecoveryCentersContent({
                 <View style={styles.contactTextBlock}>
                   <Text style={styles.contactName}>{item.province}</Text>
                   <Text style={styles.contactNote}>
-                    {item.contacts.length} contacto
-                    {item.contacts.length === 1 ? "" : "s"}
+                    {getVisibleContactCount(item)} contacto
+                    {getVisibleContactCount(item) === 1 ? "" : "s"} telefónico
+                    {getVisibleContactCount(item) === 1 ? "" : "s"}
                   </Text>
                 </View>
                 <Text style={styles.contactPhone}>Ver</Text>
@@ -178,6 +309,11 @@ export function RecoveryCentersContent({
         <Text style={styles.sectionDescription}>
           Llama al 112 si existe peligro inmediato para personas, tráfico o
           seguridad. Para otros casos, contacta con el servicio más adecuado.
+        </Text>
+
+        <Text style={styles.sectionDescription}>
+          Ante fauna marina varada, herida o en problemas, el 112 activa los
+          servicios correspondientes en muchos territorios.
         </Text>
 
         <Text style={styles.subheading}>Ayuda inmediata</Text>
@@ -242,8 +378,8 @@ export default function RecoveryCentersPage() {
           Centros de Recuperación y teléfonos de ayuda
         </Text>
         <Text style={styles.intro}>
-          Consulta teléfonos de ayuda inmediata y centros de recuperación de
-          fauna silvestre por provincia.
+          Consulta teléfonos de ayuda inmediata, centros de recuperación, redes
+          y recursos especializados por provincia.
         </Text>
       </View>
 
@@ -317,6 +453,38 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 4,
   },
+  contactGroup: {
+    borderWidth: 1,
+    borderRadius: 12,
+    gap: 9,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  contactGroupTerrestrial: {
+    backgroundColor: "#f4fbf5",
+    borderColor: "#d7eadb",
+  },
+  contactGroupMarine: {
+    backgroundColor: "#f3f8fb",
+    borderColor: "#d5e7f0",
+  },
+  contactGroupLabel: {
+    color: "#4b5563",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  contactGroupLabelTerrestrial: {
+    color: "#166534",
+  },
+  contactGroupLabelMarine: {
+    color: "#1e6091",
+  },
+  contactGroupDescription: {
+    color: "#4b5563",
+    fontSize: 13,
+    lineHeight: 18,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#d1d5db",
@@ -363,8 +531,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fef3c7",
     borderColor: "#f59e0b",
   },
+  contactRowInfoOnly: {
+    backgroundColor: "#ffffff",
+  },
   contactTextBlock: {
     flex: 1,
+    minWidth: 0,
   },
   contactName: {
     color: "#111827",
@@ -376,10 +548,21 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
   },
+  contactType: {
+    color: "#1e6091",
+    fontSize: 12,
+    fontWeight: "800",
+    marginTop: 2,
+  },
   contactPhone: {
     color: "#14532d",
     fontSize: 14,
     fontWeight: "700",
+  },
+  infoOnlyLabel: {
+    color: "#64748b",
+    fontSize: 12,
+    fontWeight: "800",
   },
   contactPhonePill: {
     backgroundColor: "#14532d",

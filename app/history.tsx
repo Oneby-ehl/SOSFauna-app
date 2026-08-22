@@ -37,6 +37,12 @@ const ANIMAL_TYPE_LABELS: Record<RescueAnimalType, string> = {
   smallMammal: "Mamífero pequeño",
   largeMammal: "Mamífero grande",
   reptileAmphibian: "Reptil o anfibio",
+  dolphin: "Delfín",
+  largeCetacean: "Ballena / cetáceo grande",
+  seal: "Foca",
+  seaTurtle: "Tortuga marina",
+  sharkRay: "Tiburón / raya",
+  otherMarine: "Otro animal marino",
   unknown: "Animal sin identificar",
 };
 
@@ -62,6 +68,11 @@ const ANIMAL_POSITION_LABELS: Record<RescueAnimalPosition, string> = {
   treeOrBush: "En un árbol o arbusto",
   buildingOrRoof: "En un edificio o tejado",
   water: "En el agua",
+  beachSand: "En arena / playa",
+  shoreShallowWater: "En la orilla / agua somera",
+  rocksBreakwater: "En rocas / espigón",
+  portDock: "En un puerto / muelle",
+  onBoat: "En una embarcación",
   otherPlace: "Otro lugar",
 };
 
@@ -70,6 +81,12 @@ const ANIMAL_ENVIRONMENT_LABELS: Record<RescueAnimalEnvironment, string> = {
   parkOrGarden: "En un parque o jardín",
   fieldOrNatural: "En el campo o entorno natural",
   industrialArea: "En una zona industrial",
+  urbanArea: "En una zona urbana",
+  coastBeach: "En costa / playa",
+  rockyCoastCliff: "Zona rocosa / acantilado",
+  portMarina: "En puerto / marina",
+  openSea: "En mar abierto",
+  estuaryMouth: "Desembocadura / estuario",
   otherEnvironment: "Otro entorno",
 };
 
@@ -87,12 +104,17 @@ const FLAG_LABELS: {
   { key: "catDog", label: "Ha sido atacado por un gato o un perro" },
   { key: "canNotMove", label: "No puede moverse" },
   { key: "roadRisk", label: "Está cerca de una carretera" },
-  { key: "ringGps", label: "Lleva anilla o dispositivo GPS" },
+  { key: "ringGps", label: "Lleva marca o dispositivo de seguimiento" },
   { key: "trapped", label: "Está atrapado" },
   { key: "cannotFly", label: "No puede volar" },
   { key: "weakness", label: "Muestra debilidad" },
   { key: "normalAppearance", label: "Presenta apariencia normal" },
   { key: "breathing", label: "Tiene dificultad para respirar" },
+  { key: "stranded", label: "Está varado o fuera del agua" },
+  { key: "fishingLineHook", label: "Tiene sedal, anzuelo o aparejos" },
+  { key: "moreAnimals", label: "Hay más animales afectados" },
+  { key: "peopleDogsNearby", label: "Hay personas o perros cerca" },
+  { key: "restingOnLand", label: "Está descansando en tierra" },
   { key: "other", label: "Presenta otra situación" },
 ];
 

@@ -95,8 +95,56 @@ const BAT_FLIGHT_OR_GROUND_TERMS = [
   "suelo",
 ];
 
+const marineAnimalCategories = new Set<AnimalType>([
+  "dolphin",
+  "largeCetacean",
+  "seal",
+  "seaTurtle",
+  "sharkRay",
+  "otherMarine",
+]);
+
 function isGeneralSwiftQuery(query: string) {
   return GENERAL_SWIFT_QUERIES.has(normalizeSearchText(query));
+}
+
+function isMarineAnimal(animal: AnimalSearchItem | null) {
+  return Boolean(
+    animal && marineAnimalCategories.has(animal.category as AnimalType),
+  );
+}
+
+function getMarineAnimalFaqAnswer(animal: AnimalSearchItem) {
+  const isFeminine = animal.grammaticalGender === "feminine";
+  const marineFaqAnimalName =
+    animal.faqDisplayNameWithArticle ?? animal.displayNameWithArticle;
+  const usesMixedPluralAgreement = animal.category === "sharkRay";
+  const injured = usesMixedPluralAgreement
+    ? "heridos"
+    : isFeminine
+      ? "herida"
+      : "herido";
+  const stranded = usesMixedPluralAgreement
+    ? "varados"
+    : isFeminine
+      ? "varada"
+      : "varado";
+  const entangled = usesMixedPluralAgreement
+    ? "enredados"
+    : isFeminine
+      ? "enredada"
+      : "enredado";
+  const weak = usesMixedPluralAgreement ? "débiles" : "débil";
+
+  if (animal.category === "seal") {
+    return "Una foca en tierra puede estar simplemente descansando. Si parece herida, muy débil, enredada o hay alguna situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.";
+  }
+
+  if (animal.category === "otherMarine") {
+    return "Si has encontrado un animal marino herido, varado, enredado, débil o en una situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.";
+  }
+
+  return `Si has encontrado ${marineFaqAnimalName} ${injured}, ${stranded}, ${entangled}, ${weak} o en una situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.`;
 }
 
 function isBatFlightOrGroundQuery(
@@ -254,6 +302,10 @@ export default function FaqPage() {
 
   const selectedAnimalAdvice = useMemo(() => {
     if (!selectedAnimal?.category) return null;
+
+    if (isMarineAnimal(selectedAnimal)) {
+      return getMarineAnimalFaqAnswer(selectedAnimal);
+    }
 
     return removeAssistantNextStepParagraph(
       getAdvice(
@@ -482,13 +534,15 @@ export default function FaqPage() {
   return (
     <>
       <SeoHead
-        title="Preguntas frecuentes | SOS Fauna España"
-        description="Respuestas a las preguntas más habituales sobre cómo actuar ante fauna silvestre y sobre el funcionamiento de SOS Fauna España."
+        title="Preguntas frecuentes sobre fauna silvestre | SOS Fauna España"
+        description="Respuestas sobre qué hacer ante fauna silvestre herida, atrapada o varada, incluidas aves, mamíferos, reptiles, anfibios y fauna marina."
         path="/faq"
         structuredData={faqPageStructuredData}
       />
       <Stack.Screen
-        options={{ title: "Preguntas frecuentes | SOS Fauna España" }}
+        options={{
+          title: "Preguntas frecuentes sobre fauna silvestre | SOS Fauna España",
+        }}
       />
 
       <ScrollView

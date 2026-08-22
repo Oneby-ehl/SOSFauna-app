@@ -10,7 +10,7 @@ const SOCIAL_IMAGE_ALT =
 const SOCIAL_IMAGE_WIDTH = "1200";
 const SOCIAL_IMAGE_HEIGHT = "630";
 const SITE_DESCRIPTION =
-  "SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda.";
+  "SOS Fauna España ofrece orientación paso a paso si encuentras fauna silvestre herida, atrapada, debilitada, varada o en peligro.";
 
 const globalStructuredData = [
   {

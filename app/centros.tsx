@@ -7,14 +7,14 @@ export default function CentrosRoute() {
   return (
     <>
       <SeoHead
-        title="Centros de recuperación de fauna y teléfonos de ayuda | SOS Fauna España"
-        description="Consulta centros de recuperación de fauna silvestre y teléfonos de ayuda por provincia en España."
+        title="Centros, redes y teléfonos de ayuda para fauna | SOS Fauna España"
+        description="Consulta por provincia centros de recuperación, redes de varamientos, recursos especializados y teléfonos de ayuda para fauna silvestre."
         path="/centros"
       />
       <Stack.Screen
         options={{
           title:
-            "Centros de recuperación de fauna y teléfonos de ayuda | SOS Fauna España",
+            "Centros, redes y teléfonos de ayuda para fauna | SOS Fauna España",
         }}
       />
 

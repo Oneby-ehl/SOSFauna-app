@@ -16,6 +16,11 @@ export type RescueAnimalPosition =
   | "treeOrBush"
   | "buildingOrRoof"
   | "water"
+  | "beachSand"
+  | "shoreShallowWater"
+  | "rocksBreakwater"
+  | "portDock"
+  | "onBoat"
   | "otherPlace";
 
 export type RescueAnimalEnvironment =
@@ -23,6 +28,12 @@ export type RescueAnimalEnvironment =
   | "parkOrGarden"
   | "fieldOrNatural"
   | "industrialArea"
+  | "urbanArea"
+  | "coastBeach"
+  | "rockyCoastCliff"
+  | "portMarina"
+  | "openSea"
+  | "estuaryMouth"
   | "otherEnvironment";
 
 export type RescueAnimalType =
@@ -32,6 +43,12 @@ export type RescueAnimalType =
   | "smallMammal"
   | "largeMammal"
   | "reptileAmphibian"
+  | "dolphin"
+  | "largeCetacean"
+  | "seal"
+  | "seaTurtle"
+  | "sharkRay"
+  | "otherMarine"
   | "unknown";
 
 export type RescueFlags = {
@@ -46,6 +63,11 @@ export type RescueFlags = {
   weakness: boolean;
   normalAppearance: boolean;
   breathing: boolean;
+  stranded: boolean;
+  fishingLineHook: boolean;
+  moreAnimals: boolean;
+  peopleDogsNearby: boolean;
+  restingOnLand: boolean;
   other: boolean;
 };
 

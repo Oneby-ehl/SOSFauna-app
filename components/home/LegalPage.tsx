@@ -22,7 +22,7 @@ const sections = [
   {
     title: "3. Ámbito de la aplicación",
     paragraphs: [
-      "SOS Fauna España se centra actualmente en cubrir las incidencias más habituales relacionadas con fauna silvestre no marina, especialmente aves, mamíferos, reptiles y anfibios.",
+      "SOS Fauna España se centra actualmente en cubrir las incidencias más habituales relacionadas con fauna silvestre, incluyendo fauna terrestre, aves y fauna marina.",
       "El contenido y los grupos de fauna incluidos podrán ampliarse o modificarse en futuras actualizaciones.",
     ],
   },

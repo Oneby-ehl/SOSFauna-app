@@ -80,6 +80,12 @@ function normalizeAnimalTypeParam(
     "smallMammal",
     "largeMammal",
     "reptileAmphibian",
+    "dolphin",
+    "largeCetacean",
+    "seal",
+    "seaTurtle",
+    "sharkRay",
+    "otherMarine",
     "unknown",
   ];
 

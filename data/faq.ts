@@ -48,6 +48,7 @@ const allWildlifeSearchGroups = [
   animals.bats,
   animals.reptiles,
   animals.amphibians,
+  animals.marine,
 ] as const;
 
 const transportableSmallWildlifeSearchGroups = [

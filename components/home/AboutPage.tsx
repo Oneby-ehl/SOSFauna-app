@@ -88,7 +88,7 @@ export default function AboutPage() {
           <Text style={styles.sectionTitle}>Información y criterios técnicos</Text>
 
           <Text style={styles.paragraph}>
-            El contenido del proyecto se elabora a partir de recursos oficiales, criterios técnicos y formación especializada en recuperación de fauna silvestre.
+            El contenido del proyecto se elabora a partir de recursos oficiales, criterios técnicos, documentación especializada y formación en recuperación de fauna silvestre. Para fauna marina, se apoya también en documentación técnica, redes de varamientos, entidades especializadas y servicios competentes.
           </Text>
 
           <Text style={styles.paragraph}>
@@ -108,7 +108,7 @@ export default function AboutPage() {
           </Text>
 
           <Text style={styles.disclaimerText}>
-            No sustituye la valoración de veterinarios, centros de recuperación de fauna, agentes medioambientales, fuerzas de seguridad o servicios de emergencia.
+            No sustituye la valoración de veterinarios, centros de recuperación de fauna, redes de varamientos, entidades especializadas, agentes medioambientales, fuerzas de seguridad o servicios de emergencia.
           </Text>
 
           <Text style={styles.disclaimerText}>

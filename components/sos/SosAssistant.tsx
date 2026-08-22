@@ -49,6 +49,11 @@ export type FlagsState = {
   weakness: boolean;
   normalAppearance: boolean;
   breathing: boolean;
+  stranded: boolean;
+  fishingLineHook: boolean;
+  moreAnimals: boolean;
+  peopleDogsNearby: boolean;
+  restingOnLand: boolean;
   other: boolean;
 };
 
@@ -59,6 +64,12 @@ export type AnimalType =
   | "smallMammal"
   | "largeMammal"
   | "reptileAmphibian"
+  | "dolphin"
+  | "largeCetacean"
+  | "seal"
+  | "seaTurtle"
+  | "sharkRay"
+  | "otherMarine"
   | "unknown";
 
 export type AnimalState = "alive" | "dead";
@@ -74,15 +85,69 @@ const GREFA_WHATSAPP = "34648539901";
 export const COMMON_END =
   "En el siguiente paso podrás facilitar una foto y la ubicación del hallazgo. Contacta con un centro especializado, con los Agentes Forestales o con Emergencias y facilita la información recopilada por el medio que prefieras.";
 
-const ANIMAL_OPTIONS: { key: AnimalType; label: string }[] = [
+type AnimalOption = { key: AnimalType; label: string };
+type FlagOption = { key: keyof FlagsState; label: string };
+type PositionOption = { key: AnimalPosition; label: string };
+type EnvironmentOption = { key: AnimalEnvironment; label: string };
+
+const TERRESTRIAL_ANIMAL_OPTIONS: AnimalOption[] = [
   { key: "smallBird", label: "Ave pequeña" },
   { key: "largeBird", label: "Ave mediana / grande" },
   { key: "bat", label: "Murciélago" },
   { key: "smallMammal", label: "Pequeño mamífero" },
   { key: "largeMammal", label: "Mamífero grande" },
   { key: "reptileAmphibian", label: "Reptil / anfibio" },
-  { key: "unknown", label: "No estoy seguro" },
 ];
+
+const MARINE_ANIMAL_OPTIONS: AnimalOption[] = [
+  { key: "dolphin", label: "Delfín" },
+  { key: "largeCetacean", label: "Ballena / cetáceo grande" },
+  { key: "seal", label: "Foca" },
+  { key: "seaTurtle", label: "Tortuga marina" },
+  { key: "sharkRay", label: "Tiburón / raya" },
+  { key: "otherMarine", label: "Otro animal marino" },
+];
+
+const UNKNOWN_ANIMAL_OPTION: AnimalOption = {
+  key: "unknown",
+  label: "No estoy seguro",
+};
+
+const ANIMAL_OPTIONS: AnimalOption[] = [
+  ...TERRESTRIAL_ANIMAL_OPTIONS,
+  ...MARINE_ANIMAL_OPTIONS,
+  UNKNOWN_ANIMAL_OPTION,
+];
+
+const ANIMAL_OPTION_GROUPS: {
+  title: string;
+  options: AnimalOption[];
+  kind: "terrestrial" | "marine";
+}[] = [
+  {
+    title: "🍃 Fauna terrestre y aves",
+    options: TERRESTRIAL_ANIMAL_OPTIONS,
+    kind: "terrestrial",
+  },
+  {
+    title: "🌊 Fauna marina",
+    options: MARINE_ANIMAL_OPTIONS,
+    kind: "marine",
+  },
+];
+
+const MARINE_ANIMAL_TYPES = new Set<AnimalType>([
+  "dolphin",
+  "largeCetacean",
+  "seal",
+  "seaTurtle",
+  "sharkRay",
+  "otherMarine",
+]);
+
+function isMarineAnimal(animalType: AnimalType) {
+  return MARINE_ANIMAL_TYPES.has(animalType);
+}
 
 const ANIMAL_STATE_OPTIONS: { key: AnimalState; label: string }[] = [
   { key: "alive", label: "Vivo" },
@@ -101,39 +166,387 @@ const ANIMAL_PLACE_OPTIONS: { key: AnimalPlace; label: string }[] = [
   { key: "otherPlace", label: "Otro lugar" },
 ];
 
-const ANIMAL_POSITION_OPTIONS: { key: AnimalPosition; label: string }[] = [
+const ANIMAL_POSITION_OPTIONS: PositionOption[] = [
   { key: "ground", label: "En el suelo" },
   { key: "treeOrBush", label: "En un árbol o arbusto" },
   { key: "buildingOrRoof", label: "En un edificio o tejado" },
   { key: "water", label: "En el agua" },
+  { key: "beachSand", label: "En arena / playa" },
+  { key: "shoreShallowWater", label: "En la orilla / agua somera" },
+  { key: "rocksBreakwater", label: "En rocas / espigón" },
+  { key: "portDock", label: "En un puerto / muelle" },
+  { key: "onBoat", label: "En una embarcación" },
   { key: "otherPlace", label: "Otro lugar" },
 ];
 
-const ANIMAL_ENVIRONMENT_OPTIONS: {
-  key: AnimalEnvironment;
-  label: string;
-}[] = [
+const ANIMAL_ENVIRONMENT_OPTIONS: EnvironmentOption[] = [
   { key: "roadOrStreet", label: "En una carretera o calle" },
   { key: "parkOrGarden", label: "En un parque o jardín" },
   { key: "fieldOrNatural", label: "En el campo o entorno natural" },
   { key: "industrialArea", label: "En una zona industrial" },
+  { key: "urbanArea", label: "En una zona urbana" },
+  { key: "coastBeach", label: "En costa / playa" },
+  { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
+  { key: "portMarina", label: "En puerto / marina" },
+  { key: "openSea", label: "En mar abierto" },
+  { key: "estuaryMouth", label: "Desembocadura / estuario" },
   { key: "otherEnvironment", label: "Otro entorno" },
 ];
 
-const FLAG_LABELS: { key: keyof FlagsState; label: string }[] = [
+const VISIBLE_POSITION_OPTIONS_BY_ANIMAL_TYPE: Record<
+  AnimalType,
+  PositionOption[]
+> = {
+  smallBird: [
+    { key: "ground", label: "En el suelo" },
+    { key: "treeOrBush", label: "En un árbol o arbusto" },
+    { key: "buildingOrRoof", label: "En un edificio o tejado" },
+    { key: "water", label: "En el agua" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  largeBird: [
+    { key: "ground", label: "En el suelo" },
+    { key: "treeOrBush", label: "En un árbol o arbusto" },
+    { key: "buildingOrRoof", label: "En un edificio o tejado" },
+    { key: "water", label: "En el agua" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  bat: [
+    { key: "ground", label: "En el suelo" },
+    { key: "treeOrBush", label: "En un árbol o arbusto" },
+    { key: "buildingOrRoof", label: "En un edificio o tejado" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  smallMammal: [
+    { key: "ground", label: "En el suelo" },
+    { key: "treeOrBush", label: "En un árbol o arbusto" },
+    { key: "buildingOrRoof", label: "En un edificio o tejado" },
+    { key: "water", label: "En el agua" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  largeMammal: [
+    { key: "ground", label: "En el suelo" },
+    { key: "buildingOrRoof", label: "En un edificio o tejado" },
+    { key: "water", label: "En el agua" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  reptileAmphibian: [
+    { key: "ground", label: "En el suelo" },
+    { key: "treeOrBush", label: "En un árbol o arbusto" },
+    { key: "buildingOrRoof", label: "En un edificio o tejado" },
+    { key: "water", label: "En el agua" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  dolphin: [
+    { key: "beachSand", label: "En arena / playa" },
+    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
+    { key: "water", label: "En el agua" },
+    { key: "rocksBreakwater", label: "En rocas / espigón" },
+    { key: "portDock", label: "En un puerto / muelle" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  largeCetacean: [
+    { key: "beachSand", label: "En arena / playa" },
+    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
+    { key: "water", label: "En el agua" },
+    { key: "rocksBreakwater", label: "En rocas / espigón" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  seal: [
+    { key: "beachSand", label: "En arena / playa" },
+    { key: "rocksBreakwater", label: "En rocas / piedras / espigón" },
+    { key: "portDock", label: "En un puerto / muelle" },
+    { key: "water", label: "En el agua" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  seaTurtle: [
+    { key: "beachSand", label: "En arena / playa" },
+    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
+    { key: "water", label: "En el agua" },
+    { key: "rocksBreakwater", label: "En rocas / espigón" },
+    { key: "portDock", label: "En un puerto / muelle" },
+    { key: "onBoat", label: "En una embarcación" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  sharkRay: [
+    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
+    { key: "water", label: "En el agua" },
+    { key: "beachSand", label: "En arena / playa" },
+    { key: "rocksBreakwater", label: "En rocas / espigón" },
+    { key: "portDock", label: "En un puerto / muelle" },
+    { key: "onBoat", label: "En una embarcación" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  otherMarine: [
+    { key: "beachSand", label: "En arena / playa" },
+    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
+    { key: "water", label: "En el agua" },
+    { key: "rocksBreakwater", label: "En rocas / piedras / espigón" },
+    { key: "portDock", label: "En un puerto / muelle" },
+    { key: "onBoat", label: "En una embarcación" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+  unknown: [
+    { key: "ground", label: "En el suelo" },
+    { key: "treeOrBush", label: "En un árbol o arbusto" },
+    { key: "buildingOrRoof", label: "En un edificio o tejado" },
+    { key: "water", label: "En el agua" },
+    { key: "shoreShallowWater", label: "En playa / orilla" },
+    { key: "otherPlace", label: "Otro lugar" },
+  ],
+};
+
+const VISIBLE_ENVIRONMENT_OPTIONS_BY_ANIMAL_TYPE: Record<
+  AnimalType,
+  EnvironmentOption[]
+> = {
+  smallBird: [
+    { key: "roadOrStreet", label: "En una carretera o calle" },
+    { key: "parkOrGarden", label: "En un parque o jardín" },
+    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+    { key: "industrialArea", label: "En una zona industrial" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  largeBird: [
+    { key: "roadOrStreet", label: "En una carretera o calle" },
+    { key: "parkOrGarden", label: "En un parque o jardín" },
+    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+    { key: "industrialArea", label: "En una zona industrial" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  bat: [
+    { key: "urbanArea", label: "En una zona urbana" },
+    { key: "parkOrGarden", label: "En un parque o jardín" },
+    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+    { key: "industrialArea", label: "En una zona industrial" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  smallMammal: [
+    { key: "roadOrStreet", label: "En una carretera o calle" },
+    { key: "parkOrGarden", label: "En un parque o jardín" },
+    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+    { key: "urbanArea", label: "En una zona urbana" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  largeMammal: [
+    { key: "roadOrStreet", label: "En una carretera o calle" },
+    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+    { key: "urbanArea", label: "En una zona urbana" },
+    { key: "parkOrGarden", label: "En un parque o jardín" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  reptileAmphibian: [
+    { key: "roadOrStreet", label: "En una carretera o calle" },
+    { key: "parkOrGarden", label: "En un parque o jardín" },
+    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+    { key: "urbanArea", label: "En una zona urbana" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  dolphin: [
+    { key: "coastBeach", label: "Costa / playa" },
+    { key: "portMarina", label: "Puerto / marina" },
+    { key: "openSea", label: "Mar abierto" },
+    { key: "estuaryMouth", label: "Desembocadura / estuario" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  largeCetacean: [
+    { key: "coastBeach", label: "Costa / playa" },
+    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
+    { key: "portMarina", label: "Puerto / marina" },
+    { key: "openSea", label: "Mar abierto" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  seal: [
+    { key: "coastBeach", label: "Costa / playa" },
+    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
+    { key: "portMarina", label: "Puerto / marina" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  seaTurtle: [
+    { key: "coastBeach", label: "Costa / playa" },
+    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
+    { key: "portMarina", label: "Puerto / marina" },
+    { key: "openSea", label: "Mar abierto" },
+    { key: "estuaryMouth", label: "Desembocadura / estuario" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  sharkRay: [
+    { key: "coastBeach", label: "Costa / playa" },
+    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
+    { key: "portMarina", label: "Puerto / marina" },
+    { key: "openSea", label: "Mar abierto" },
+    { key: "estuaryMouth", label: "Desembocadura / estuario" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  otherMarine: [
+    { key: "coastBeach", label: "Costa / playa" },
+    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
+    { key: "portMarina", label: "Puerto / marina" },
+    { key: "openSea", label: "Mar abierto" },
+    { key: "estuaryMouth", label: "Desembocadura / estuario" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+  unknown: [
+    { key: "roadOrStreet", label: "En una carretera o calle" },
+    { key: "parkOrGarden", label: "En un parque o jardín" },
+    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
+    { key: "coastBeach", label: "En costa / playa" },
+    { key: "portMarina", label: "En puerto / marina" },
+    { key: "otherEnvironment", label: "Otro entorno" },
+  ],
+};
+
+const FLAG_LABELS: FlagOption[] = [
   { key: "bleeding", label: "Herido" },
   { key: "baby", label: "Es cría" },
   { key: "catDog", label: "Ataque de gato/perro" },
   { key: "canNotMove", label: "No se mueve bien" },
   { key: "roadRisk", label: "Peligro en carretera" },
-  { key: "ringGps", label: "Anilla / GPS" },
+  { key: "ringGps", label: "Marca o dispositivo de seguimiento" },
   { key: "trapped", label: "Atrapado" },
   { key: "cannotFly", label: "No vuela" },
-  { key: "weakness", label: "Debilidad / decaimiento" },
+  { key: "weakness", label: "Debilidad / inmovilidad" },
   { key: "normalAppearance", label: "Apariencia normal" },
   { key: "breathing", label: "Respiración agitada" },
-  { key: "other", label: "Otro" },
+  { key: "stranded", label: "Varado / fuera del agua" },
+  { key: "fishingLineHook", label: "Sedal / anzuelo" },
+  { key: "moreAnimals", label: "Hay más animales" },
+  { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+  { key: "restingOnLand", label: "Está descansando en tierra" },
+  { key: "other", label: "Otro / No estoy seguro" },
 ];
+
+const VISIBLE_FLAG_LABELS_BY_ANIMAL_TYPE: Record<AnimalType, FlagOption[]> = {
+  smallBird: [
+    { key: "bleeding", label: "Herido" },
+    { key: "baby", label: "Es cría" },
+    { key: "catDog", label: "Ataque de gato/perro" },
+    { key: "trapped", label: "Atrapado" },
+    { key: "cannotFly", label: "No vuela" },
+    { key: "weakness", label: "Debilidad / inmovilidad" },
+    { key: "roadRisk", label: "Peligro en carretera" },
+    { key: "ringGps", label: "Marca o dispositivo de seguimiento" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  largeBird: [
+    { key: "bleeding", label: "Herido" },
+    { key: "baby", label: "Es cría" },
+    { key: "catDog", label: "Ataque de gato/perro" },
+    { key: "trapped", label: "Atrapado" },
+    { key: "cannotFly", label: "No vuela" },
+    { key: "weakness", label: "Debilidad / inmovilidad" },
+    { key: "roadRisk", label: "Peligro en carretera" },
+    { key: "ringGps", label: "Marca o dispositivo de seguimiento" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  bat: [
+    { key: "bleeding", label: "Herido" },
+    { key: "baby", label: "Es cría" },
+    { key: "catDog", label: "Ataque de gato/perro" },
+    { key: "trapped", label: "Atrapado" },
+    { key: "cannotFly", label: "No vuela" },
+    { key: "weakness", label: "Debilidad / inmovilidad" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  smallMammal: [
+    { key: "bleeding", label: "Herido" },
+    { key: "baby", label: "Es cría" },
+    { key: "catDog", label: "Ataque de gato/perro" },
+    { key: "trapped", label: "Atrapado" },
+    { key: "weakness", label: "Debilidad / inmovilidad" },
+    { key: "roadRisk", label: "Peligro en carretera" },
+    { key: "ringGps", label: "Marca o dispositivo de seguimiento" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  largeMammal: [
+    { key: "bleeding", label: "Herido" },
+    { key: "baby", label: "Es cría" },
+    { key: "catDog", label: "Ataque de gato/perro" },
+    { key: "trapped", label: "Atrapado" },
+    { key: "weakness", label: "Debilidad / inmovilidad" },
+    { key: "roadRisk", label: "Peligro en carretera" },
+    { key: "ringGps", label: "Marca o dispositivo de seguimiento" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  reptileAmphibian: [
+    { key: "bleeding", label: "Herido" },
+    { key: "baby", label: "Es cría" },
+    { key: "catDog", label: "Ataque de gato/perro" },
+    { key: "trapped", label: "Atrapado" },
+    { key: "weakness", label: "Debilidad / inmovilidad" },
+    { key: "roadRisk", label: "Peligro en carretera" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  dolphin: [
+    { key: "stranded", label: "Varado / fuera del agua" },
+    { key: "trapped", label: "Enredado" },
+    { key: "bleeding", label: "Herido" },
+    { key: "weakness", label: "Muy débil / inmóvil" },
+    { key: "moreAnimals", label: "Hay más animales" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  largeCetacean: [
+    { key: "stranded", label: "Varado / fuera del agua" },
+    { key: "trapped", label: "Enredado" },
+    { key: "bleeding", label: "Herido" },
+    { key: "weakness", label: "Muy débil / inmóvil" },
+    { key: "moreAnimals", label: "Hay más animales" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  seal: [
+    { key: "restingOnLand", label: "Está descansando en tierra" },
+    { key: "bleeding", label: "Herida" },
+    { key: "weakness", label: "Muy débil / inmóvil" },
+    { key: "trapped", label: "Enredada" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  seaTurtle: [
+    { key: "trapped", label: "Enredada" },
+    { key: "fishingLineHook", label: "Sedal / anzuelo" },
+    { key: "bleeding", label: "Herida / caparazón dañado" },
+    { key: "weakness", label: "Muy débil / inmóvil" },
+    { key: "stranded", label: "En playa / fuera del agua" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  sharkRay: [
+    { key: "stranded", label: "Varado / fuera del agua" },
+    { key: "trapped", label: "Enredado / aparejos" },
+    { key: "fishingLineHook", label: "Sedal / anzuelo" },
+    { key: "bleeding", label: "Herido" },
+    { key: "weakness", label: "Muy débil / inmóvil" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  otherMarine: [
+    { key: "stranded", label: "Varado / fuera del agua" },
+    { key: "trapped", label: "Enredado" },
+    { key: "fishingLineHook", label: "Sedal / anzuelo" },
+    { key: "bleeding", label: "Herido" },
+    { key: "weakness", label: "Muy débil / inmóvil" },
+    { key: "moreAnimals", label: "Hay más animales" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+  unknown: [
+    { key: "bleeding", label: "Herido" },
+    { key: "baby", label: "Es cría" },
+    { key: "catDog", label: "Ataque de gato/perro" },
+    { key: "trapped", label: "Atrapado" },
+    { key: "cannotFly", label: "No vuela" },
+    { key: "weakness", label: "Debilidad / inmovilidad" },
+    { key: "roadRisk", label: "Peligro en carretera" },
+    { key: "ringGps", label: "Marca o dispositivo de seguimiento" },
+    { key: "peopleDogsNearby", label: "Personas/perros cerca" },
+    { key: "other", label: "Otro / No estoy seguro" },
+  ],
+};
 
 export function createInitialFlags(): FlagsState {
   return {
@@ -148,7 +561,19 @@ export function createInitialFlags(): FlagsState {
     weakness: false,
     normalAppearance: false,
     breathing: false,
+    stranded: false,
+    fishingLineHook: false,
+    moreAnimals: false,
+    peopleDogsNearby: false,
+    restingOnLand: false,
     other: false,
+  };
+}
+
+function normalizeFlags(flags?: Partial<FlagsState> | null): FlagsState {
+  return {
+    ...createInitialFlags(),
+    ...(flags ?? {}),
   };
 }
 
@@ -315,7 +740,7 @@ function getBabyAdvice(animalType: AnimalType) {
 return (
   "🐣 POLLO O VOLANTÓN\n\n" +
   "⚠️ ANTES DE INTERVENIR\n" +
-  "• Antes de actuar, intenta distinguir si se trata de un pollo o de un volantón. No todas las aves jóvenes encontradas en el suelo necesitan ayuda.\n\n" +
+  "• Antes de actuar, intenta distinguir si se trata de un pollo o de un volantón. No todas las aves jóvenes encontradas en el suelo necesitan ayuda.\n" +
   "• Si crees que es un vencejo, no lo dejes en el suelo esperando a sus padres. Recógelo, mantenlo en una caja de cartón ventilada y contacta con un centro especializado.\n\n" +
 
   "🐥 POLLO\n" +
@@ -536,11 +961,19 @@ function hasPhysicalWarning(flags: FlagsState) {
 }
 
 function hasImmediateRisk(flags: FlagsState) {
-  return flags.roadRisk;
+  return flags.roadRisk || flags.peopleDogsNearby;
 }
 
 function hasAnyConcern(flags: FlagsState) {
-  return hasPhysicalWarning(flags) || hasImmediateRisk(flags) || flags.other;
+  return (
+    hasPhysicalWarning(flags) ||
+    hasImmediateRisk(flags) ||
+    flags.stranded ||
+    flags.fishingLineHook ||
+    flags.moreAnimals ||
+    flags.restingOnLand ||
+    flags.other
+  );
 }
 
 function getObservedSigns(flags: FlagsState, includeCannotFly = false) {
@@ -552,6 +985,13 @@ function getObservedSigns(flags: FlagsState, includeCannotFly = false) {
   if (includeCannotFly && flags.cannotFly) signs.push("• No puede volar.");
   if (flags.weakness) signs.push("• Presenta debilidad o decaimiento.");
   if (flags.breathing) signs.push("• Presenta respiración agitada.");
+  if (flags.stranded) signs.push("• Está varado o fuera del agua.");
+  if (flags.fishingLineHook)
+    signs.push("• Tiene sedal, anzuelo o aparejos.");
+  if (flags.moreAnimals) signs.push("• Hay más animales afectados.");
+  if (flags.peopleDogsNearby)
+    signs.push("• Hay personas o perros cerca del animal.");
+  if (flags.restingOnLand) signs.push("• Está descansando en tierra.");
   if (flags.roadRisk)
     signs.push("• Se encuentra en una zona con tráfico o peligro inmediato.");
   if (flags.other)
@@ -566,9 +1006,9 @@ function addSupplementalAdvice(baseAdvice: string, flags: FlagsState) {
 
   if (flags.ringGps) {
     supplementalBlocks.push(
-      "🔎 ANILLA O DISPOSITIVO DE SEGUIMIENTO\n" +
-        "• La anilla o el dispositivo puede aportar información importante sobre el animal y su seguimiento.\n" +
-        "• No retires ni manipules la anilla o el dispositivo.\n" +
+      "🔎 MARCA O DISPOSITIVO DE SEGUIMIENTO\n" +
+        "• La marca o el dispositivo puede aportar información importante sobre el animal y su seguimiento.\n" +
+        "• No retires ni manipules la marca o el dispositivo.\n" +
         "• Si puedes hacerlo sin molestar al animal, fotografía los números, letras, marcas o etiquetas visibles.\n" +
         "• Anota también cualquier información que puedas leer y comunícala al centro de recuperación o a los agentes medioambientales.",
     );
@@ -932,6 +1372,380 @@ const commonEnd =
   );
 }
 
+function hasMarineWaterInterventionRisk(
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
+) {
+  return (
+    animalPosition === "water" ||
+    animalPosition === "shoreShallowWater" ||
+    animalPosition === "beachSand" ||
+    animalEnvironment === "coastBeach" ||
+    animalEnvironment === "openSea" ||
+    animalEnvironment === "estuaryMouth"
+  );
+}
+
+function isCoastalSealPosition(
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
+) {
+  return (
+    animalPosition === "beachSand" ||
+    animalPosition === "rocksBreakwater" ||
+    animalPosition === "portDock" ||
+    animalEnvironment === "coastBeach" ||
+    animalEnvironment === "rockyCoastCliff" ||
+    animalEnvironment === "portMarina"
+  );
+}
+
+function isStrandedCetaceanPosition(
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
+) {
+  return (
+    animalPosition === "beachSand" ||
+    animalPosition === "shoreShallowWater" ||
+    animalPosition === "water" ||
+    animalEnvironment === "coastBeach"
+  );
+}
+
+function mayNeedTurtleHeatOrAirReminder(
+  flags: FlagsState,
+  animalPosition?: AnimalPosition | null,
+) {
+  return (
+    flags.stranded ||
+    animalPosition === "beachSand" ||
+    animalPosition === "onBoat"
+  );
+}
+
+function addUnique(target: string[], text: string) {
+  if (!target.includes(text)) {
+    target.push(text);
+  }
+}
+
+function addMarineFlagAdvice(
+  flags: FlagsState,
+  dont: string[],
+  actions: string[],
+) {
+  if (flags.stranded) {
+    addUnique(dont, "• No intentes devolverlo al agua por tu cuenta.");
+  }
+
+  if (flags.trapped) {
+    addUnique(
+      dont,
+      "• No retires redes, cabos o aparejos enganchados por tu cuenta.",
+    );
+    addUnique(
+      actions,
+      "• Describe el tipo de enredo y dónde está enganchado, sin tocarlo.",
+    );
+  }
+
+  if (flags.fishingLineHook) {
+    addUnique(
+      dont,
+      "• No tires del sedal ni intentes extraer el anzuelo.",
+    );
+    addUnique(
+      actions,
+      "• Indica si ves sedal, anzuelo o aparejos y en qué zona del cuerpo están.",
+    );
+  }
+
+  if (flags.moreAnimals) {
+    addUnique(
+      actions,
+      "• Indica aproximadamente cuántos animales hay y dónde se encuentran.",
+    );
+  }
+
+  if (flags.peopleDogsNearby) {
+    addUnique(
+      actions,
+      "• Mantén personas y perros alejados si puedes hacerlo sin riesgo.",
+    );
+  }
+
+  if (flags.bleeding) {
+    addUnique(dont, "• No manipules la herida ni intentes curarla.");
+    addUnique(
+      actions,
+      "• Documenta las lesiones visibles desde distancia y comunícalas al servicio competente.",
+    );
+  }
+
+  if (flags.weakness) {
+    addUnique(
+      dont,
+      "• No lo muevas para comprobar si puede desplazarse.",
+    );
+    addUnique(
+      actions,
+      "• Observa su estado desde lejos e informa de si parece débil o inmóvil.",
+    );
+  }
+
+  if (flags.other) {
+    addUnique(
+      actions,
+      "• Describe con claridad al servicio competente cualquier otra circunstancia que te preocupe.",
+    );
+  }
+}
+
+function getMarineAnimalAdvice(
+  animalType: AnimalType,
+  flags: FlagsState,
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
+) {
+  const signs = getObservedSigns(flags);
+  const hasSigns = signs.length > 0;
+  const title =
+    animalType === "dolphin"
+      ? "🐬 DELFÍN"
+      : animalType === "largeCetacean"
+        ? "🐋 BALLENA O CETÁCEO GRANDE"
+        : animalType === "seal"
+          ? "🦭 FOCA"
+          : animalType === "seaTurtle"
+            ? "🐢 TORTUGA MARINA"
+            : animalType === "sharkRay"
+              ? "🦈 TIBURÓN O RAYA"
+              : "🌊 ANIMAL MARINO";
+  const isCetacean =
+    animalType === "dolphin" || animalType === "largeCetacean";
+
+  const before =
+    animalType === "largeCetacean"
+      ? [
+          "• Mantén una distancia especialmente prudente por su tamaño y evita ruido o aglomeraciones.",
+          "• No manipules al animal ni intentes moverlo por tu cuenta.",
+          "• No le des comida ni agua.",
+        ]
+      : animalType === "sharkRay"
+        ? [
+            "• Prioriza tu seguridad y mantén una distancia especialmente prudente.",
+            "• No manipules al animal ni intentes moverlo por tu cuenta.",
+            "• No le des comida ni agua.",
+          ]
+        : [
+            "• Mantén distancia y evita ruidos, aglomeraciones o molestias.",
+            "• No manipules al animal ni intentes moverlo por tu cuenta.",
+            "• No le des comida ni agua.",
+          ];
+  const dont: string[] = [];
+  const actions = [
+    "• Anota la ubicación exacta del hallazgo.",
+    "• Haz fotos o vídeos solo si puedes hacerlo sin acercarte ni molestar.",
+  ];
+
+  if (animalType === "seal") {
+    if (flags.restingOnLand || isCoastalSealPosition(animalPosition, animalEnvironment)) {
+      addUnique(
+        before,
+        "• Una foca en tierra puede estar simplemente descansando; obsérvala desde una distancia prudente.",
+      );
+      addUnique(dont, "• No la rodees ni bloquees su posible regreso al agua.");
+      if (!flags.peopleDogsNearby) {
+        addUnique(
+          actions,
+          "• Si hay perros en la zona, mantenlos atados y alejados.",
+        );
+      }
+    }
+
+    if (flags.restingOnLand) {
+      addUnique(
+        actions,
+        "• Permite que descanse y avisa si observas heridas, debilidad, enredo o acoso de personas o perros.",
+      );
+    }
+  }
+
+  if (
+    isCetacean &&
+    flags.stranded
+  ) {
+    addUnique(dont, "• No lo empujes ni lo arrastres.");
+
+    if (animalType === "largeCetacean") {
+      addUnique(
+        dont,
+        "• No utilices vehículos, embarcaciones ni medios mecánicos para moverlo.",
+      );
+    }
+  }
+
+  if (
+    isCetacean &&
+    flags.stranded &&
+    isStrandedCetaceanPosition(animalPosition, animalEnvironment)
+  ) {
+    addUnique(
+      actions,
+      "• Indica si está en arena, orilla o agua somera para que el equipo valore cómo intervenir.",
+    );
+  }
+
+  if (isCetacean) {
+    addUnique(
+      actions,
+      flags.moreAnimals
+        ? "• Si puedes observarlos sin acercarte, indica la hora, tamaño aproximado y comportamiento visible."
+        : "• Si puedes observarlo sin acercarte, indica la hora, tamaño aproximado y comportamiento visible.",
+    );
+  }
+
+  if (
+    animalType === "dolphin" &&
+    animalEnvironment === "openSea" &&
+    !flags.stranded
+  ) {
+    addUnique(
+      dont,
+      "• No lo persigas, interceptes ni intentes dirigir su movimiento.",
+    );
+  }
+
+  if (animalType === "seaTurtle") {
+    addUnique(dont, "• No le des la vuelta ni la coloques boca arriba.");
+
+    if (flags.trapped || flags.fishingLineHook) {
+      addUnique(
+        before,
+        "• En tortugas marinas, redes, sedales y anzuelos requieren valoración especializada.",
+      );
+    }
+
+    if (flags.bleeding) {
+      addUnique(
+        dont,
+        "• No intentes vendar, entablillar ni tratar el caparazón o las heridas.",
+      );
+      addUnique(
+        actions,
+        "• Indica si observas daños en el caparazón o heridas visibles.",
+      );
+    }
+
+    if (animalPosition === "onBoat") {
+      addUnique(
+        actions,
+        "• Si está en una embarcación, evita maniobras de rescate por iniciativa propia y espera instrucciones profesionales.",
+      );
+    }
+
+    if (flags.fishingLineHook && animalPosition === "onBoat") {
+      addUnique(
+        dont,
+        "• No uses el sedal, garfios ni objetos punzantes para moverla.",
+      );
+    }
+
+    if (mayNeedTurtleHeatOrAirReminder(flags, animalPosition)) {
+      addUnique(
+        before,
+        "• Las tortugas marinas respiran aire; mantenla tranquila y evita sol o calor directo mientras esperas instrucciones.",
+      );
+    }
+  }
+
+  if (animalType === "sharkRay") {
+    addUnique(dont, "• Evita acercarte a la cabeza, cola o aletas.");
+
+    if (flags.stranded || animalPosition === "shoreShallowWater") {
+      addUnique(
+        dont,
+        "• No lo toques para desplazarlo.",
+      );
+    }
+  }
+
+  if (animalPosition === "onBoat" && animalType !== "seaTurtle") {
+    addUnique(
+      actions,
+      "• Si el animal está en una embarcación, contacta cuanto antes y sigue solo instrucciones profesionales.",
+    );
+  }
+
+  if (animalType === "otherMarine") {
+    addUnique(
+      actions,
+      "• Si puedes observarlo sin acercarte, indica la hora, tamaño aproximado, estado aparente y comportamiento visible.",
+    );
+  }
+
+  if (hasMarineWaterInterventionRisk(animalPosition, animalEnvironment)) {
+    addUnique(
+      dont,
+      "• No entres al agua ni te pongas en riesgo para intervenir.",
+    );
+  }
+
+  addMarineFlagAdvice(flags, dont, actions);
+
+  actions.push(
+    "• Contacta con Emergencias o con el servicio especializado competente y espera instrucciones.",
+  );
+
+  return (
+    title +
+    "\n\n⚠️ ANTES DE INTERVENIR\n" +
+    before.join("\n") +
+    "\n" +
+    (hasSigns ? "\n🚨 SEÑALES OBSERVADAS\n" + signs + "\n\n" : "\n") +
+    "❌ QUÉ NO HACER\n" +
+    (dont.length > 0
+      ? dont.join("\n")
+      : "• No improvises maniobras de rescate ni actuaciones no indicadas por profesionales.") +
+    "\n\n" +
+    "✅ QUÉ HACER\n" +
+    actions.join("\n") +
+    "\n\n" +
+    COMMON_END
+  );
+}
+
+function getDeadMarineAnimalAdvice(animalType: AnimalType) {
+  const title =
+    animalType === "dolphin"
+      ? "☠️ DELFÍN MUERTO"
+      : animalType === "largeCetacean"
+        ? "☠️ BALLENA O CETÁCEO GRANDE MUERTO"
+        : animalType === "seal"
+          ? "☠️ FOCA MUERTA"
+          : animalType === "seaTurtle"
+            ? "☠️ TORTUGA MARINA MUERTA"
+            : animalType === "sharkRay"
+              ? "☠️ TIBURÓN O RAYA MUERTO"
+              : "☠️ ANIMAL MARINO MUERTO";
+
+  return (
+    title +
+    "\n\n⚠️ ANTES DE INTERVENIR\n" +
+    "• Un animal marino muerto puede aportar información sanitaria, científica y de conservación.\n" +
+    "• Mantén personas y perros alejados si puedes hacerlo sin riesgo.\n\n" +
+    "❌ QUÉ NO HACER\n" +
+    "• No toques ni muevas el cadáver.\n" +
+    "• No alteres el lugar del hallazgo.\n\n" +
+    "✅ QUÉ HACER\n" +
+    "• Registra la ubicación exacta.\n" +
+    "• Realiza fotos si puedes hacerlo sin riesgo.\n" +
+    "• Avisa a Emergencias o al servicio competente.\n" +
+    "• Indica la especie aproximada, el tamaño, la hora y cómo lo encontraste, y si existen más ejemplares.\n\n" +
+    COMMON_END
+  );
+}
+
 function getUnknownAnimalAdvice(flags: FlagsState) {
   const needsHelp = hasAnyConcern(flags) || flags.cannotFly;
 const commonEnd =
@@ -965,7 +1779,13 @@ export function getAdvice(
   animalState: AnimalState,
   animalType: AnimalType,
   flags: FlagsState,
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
 ) {
+  if (animalState === "dead" && isMarineAnimal(animalType)) {
+    return getDeadMarineAnimalAdvice(animalType);
+  }
+
      if (animalState === "dead") {
 		 const commonEnd =
     COMMON_END;
@@ -990,6 +1810,21 @@ export function getAdvice(
   commonEnd
   );
    }
+
+  if (isMarineAnimal(animalType)) {
+    return addSupplementalAdvice(
+      getMarineAnimalAdvice(
+        animalType,
+        flags,
+        animalPosition,
+        animalEnvironment,
+      ),
+      {
+        ...flags,
+        normalAppearance: false,
+      },
+    );
+  }
 
   // Prioridad 1: el atrapamiento requiere instrucciones específicas de liberación y seguridad.
   if (flags.trapped) {
@@ -1183,6 +2018,9 @@ export default function HomeScreen({
   const { width } = useWindowDimensions();
   const router = useRouter();
   const isMobileAdviceText = width <= 480;
+  const isNarrowFlagLayout = width <= 430;
+  const shouldUseFullWidthFlag = (label: string) =>
+    isNarrowFlagLayout && label.length >= 19;
   const [currentCase, setCurrentCase] = useState<RescueCase | null>(initialCase);
   const currentCaseRef = useRef<RescueCase | null>(initialCase);
   const [step, setStep] = useState<Step>(normalizeInitialStep(initialCase?.step));
@@ -1256,7 +2094,7 @@ export default function HomeScreen({
   const [scrollContentHeight, setScrollContentHeight] = useState(0);
   const [scrollLayoutHeight, setScrollLayoutHeight] = useState(0);
   const [flags, setFlags] = useState<FlagsState>(
-    initialCase?.flags ?? createInitialFlags(),
+    normalizeFlags(initialCase?.flags),
   );
   const step2ScrollProgress =
     scrollContentHeight <= scrollLayoutHeight
@@ -1264,8 +2102,15 @@ export default function HomeScreen({
       : (scrollY + scrollLayoutHeight) / scrollContentHeight;
 
   const advice = useMemo(
-    () => getAdvice(animalState, animalType, flags),
-    [animalState, animalType, flags],
+    () =>
+      getAdvice(
+        animalState,
+        animalType,
+        flags,
+        animalPosition,
+        animalEnvironment,
+      ),
+    [animalState, animalType, flags, animalPosition, animalEnvironment],
   );
 
   const finishSpeaking = useCallback(() => {
@@ -1319,9 +2164,34 @@ export default function HomeScreen({
     };
   }, [advice, step]);
 
+  const visibleFlagLabels = useMemo(
+    () => VISIBLE_FLAG_LABELS_BY_ANIMAL_TYPE[animalType],
+    [animalType],
+  );
+
+  const visiblePositionOptions = useMemo(
+    () => VISIBLE_POSITION_OPTIONS_BY_ANIMAL_TYPE[animalType],
+    [animalType],
+  );
+
+  const visibleEnvironmentOptions = useMemo(
+    () => VISIBLE_ENVIRONMENT_OPTIONS_BY_ANIMAL_TYPE[animalType],
+    [animalType],
+  );
+
   const selectedFlagLabels = useMemo(
-    () => FLAG_LABELS.filter(({ key }) => flags[key]).map(({ label }) => label),
-    [flags],
+    () => {
+      const visibleKeys = new Set(visibleFlagLabels.map(({ key }) => key));
+      const visibleLabels = visibleFlagLabels
+        .filter(({ key }) => flags[key])
+        .map(({ label }) => label);
+      const legacyLabels = FLAG_LABELS.filter(
+        ({ key }) => !visibleKeys.has(key) && flags[key],
+      ).map(({ label }) => label);
+
+      return [...visibleLabels, ...legacyLabels];
+    },
+    [flags, visibleFlagLabels],
   );
 
   const selectedAnimalLabel = useMemo(
@@ -1710,6 +2580,11 @@ export default function HomeScreen({
     "cannotFly",
     "weakness",
     "breathing",
+    "stranded",
+    "fishingLineHook",
+    "moreAnimals",
+    "peopleDogsNearby",
+    "restingOnLand",
     "other",
   ];
 
@@ -2507,27 +3382,77 @@ const saveCurrentProgress = async (
               <>
                   <View style={styles.sectionGroup}>
                     <Text style={styles.subheading}>🐾 ¿Qué animal has encontrado?</Text>
-                    <View style={styles.flagGrid}>
-                      {ANIMAL_OPTIONS.map((option) => {
-                        const active = animalType === option.key;
+                    {ANIMAL_OPTION_GROUPS.map((group) => (
+                      <View
+                        key={group.title}
+                        style={[
+                          styles.optionGroup,
+                          group.kind === "terrestrial" &&
+                            styles.optionGroupTerrestrial,
+                          group.kind === "marine" && styles.optionGroupMarine,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.optionGroupLabel,
+                            group.kind === "terrestrial" &&
+                              styles.optionGroupLabelTerrestrial,
+                            group.kind === "marine" &&
+                              styles.optionGroupLabelMarine,
+                          ]}
+                        >
+                          {group.title}
+                        </Text>
+                        <View style={styles.flagGrid}>
+                          {group.options.map((option) => {
+                            const active = animalType === option.key;
 
-                        return (
-                          <Pressable
-                            key={option.key}
-                            style={[styles.flag, active && styles.flagActive]}
-                            onPress={() => selectAnimalType(option.key)}
-                          >
-                            <Text
-                              style={[
-                                styles.flagText,
-                                active && styles.flagTextActive,
-                              ]}
-                            >
-                              {option.label}
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
+                            return (
+                              <Pressable
+                                key={option.key}
+                                style={[
+                                  styles.flag,
+                                  styles.optionGroupFlag,
+                                  shouldUseFullWidthFlag(option.label) &&
+                                    styles.flagFullWidthNarrow,
+                                  active && styles.flagActive,
+                                ]}
+                                onPress={() => selectAnimalType(option.key)}
+                              >
+                                <Text
+                                  style={[
+                                    styles.flagText,
+                                    styles.optionGroupFlagText,
+                                    active && styles.flagTextActive,
+                                  ]}
+                                >
+                                  {option.label}
+                                </Text>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    ))}
+                    <View style={styles.unknownAnimalRow}>
+                      <Pressable
+                        style={[
+                          styles.flag,
+                          animalType === UNKNOWN_ANIMAL_OPTION.key &&
+                            styles.flagActive,
+                        ]}
+                        onPress={() => selectAnimalType(UNKNOWN_ANIMAL_OPTION.key)}
+                      >
+                        <Text
+                          style={[
+                            styles.flagText,
+                            animalType === UNKNOWN_ANIMAL_OPTION.key &&
+                              styles.flagTextActive,
+                          ]}
+                        >
+                          🔍 {UNKNOWN_ANIMAL_OPTION.label}
+                        </Text>
+                      </Pressable>
                     </View>
                   </View>
 
@@ -2535,13 +3460,18 @@ const saveCurrentProgress = async (
                   <View style={styles.sectionGroup}>
                     <Text style={styles.subheading}>👀 ¿Qué observas?</Text>
                     <View style={styles.flagGrid}>
-                      {FLAG_LABELS.map(({ key, label }) => {
+                      {visibleFlagLabels.map(({ key, label }) => {
                         const active = flags[key];
 
                         return (
                           <Pressable
                             key={key}
-                            style={[styles.flag, active && styles.flagActive]}
+                            style={[
+                              styles.flag,
+                              shouldUseFullWidthFlag(label) &&
+                                styles.flagFullWidthNarrow,
+                              active && styles.flagActive,
+                            ]}
                             onPress={() => toggleFlag(key)}
                           >
                             <Text
@@ -2562,13 +3492,18 @@ const saveCurrentProgress = async (
                   <View style={styles.sectionGroup}>
                     <Text style={styles.subheading}>📍 ¿Dónde está exactamente?</Text>
                     <View style={styles.flagGrid}>
-                      {ANIMAL_POSITION_OPTIONS.map((option) => {
+                      {visiblePositionOptions.map((option) => {
                         const active = animalPosition === option.key;
 
                         return (
                           <Pressable
                             key={option.key}
-                            style={[styles.flag, active && styles.flagActive]}
+                            style={[
+                              styles.flag,
+                              shouldUseFullWidthFlag(option.label) &&
+                                styles.flagFullWidthNarrow,
+                              active && styles.flagActive,
+                            ]}
                             onPress={() => setAnimalPosition(option.key)}
                           >
                             <Text
@@ -2588,13 +3523,18 @@ const saveCurrentProgress = async (
                   <View style={styles.sectionGroup}>
                     <Text style={styles.subheading}>🌍 ¿En qué entorno se encuentra?</Text>
                     <View style={styles.flagGrid}>
-                      {ANIMAL_ENVIRONMENT_OPTIONS.map((option) => {
+                      {visibleEnvironmentOptions.map((option) => {
                         const active = animalEnvironment === option.key;
 
                         return (
                           <Pressable
                             key={option.key}
-                            style={[styles.flag, active && styles.flagActive]}
+                            style={[
+                              styles.flag,
+                              shouldUseFullWidthFlag(option.label) &&
+                                styles.flagFullWidthNarrow,
+                              active && styles.flagActive,
+                            ]}
                             onPress={() => setAnimalEnvironment(option.key)}
                           >
                             <Text
@@ -3124,6 +4064,43 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
+  optionGroup: {
+    borderWidth: 1,
+    borderRadius: 12,
+    gap: 9,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  optionGroupTerrestrial: {
+    backgroundColor: "#f4fbf5",
+    borderColor: "#d7eadb",
+  },
+  optionGroupMarine: {
+    backgroundColor: "#f3f8fb",
+    borderColor: "#d5e7f0",
+  },
+  optionGroupLabel: {
+    color: "#4b5563",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  optionGroupLabelTerrestrial: {
+    color: "#166534",
+  },
+  optionGroupLabelMarine: {
+    color: "#1e6091",
+  },
+  optionGroupFlag: {
+    maxWidth: "100%",
+  },
+  optionGroupFlagText: {
+    flexShrink: 1,
+  },
+  unknownAnimalRow: {
+    alignItems: "flex-start",
+    marginTop: 2,
+  },
   successBox: {
     backgroundColor: "#dcfce7",
     borderWidth: 1,
@@ -3158,6 +4135,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#cbd5e1",
     borderRadius: 999,
+    maxWidth: "100%",
     paddingHorizontal: 12,
     paddingVertical: 10,
     backgroundColor: "#ffffff",
@@ -3168,7 +4146,11 @@ const styles = StyleSheet.create({
   },
   flagText: {
     color: "#111827",
+    flexShrink: 1,
     fontWeight: "600",
+  },
+  flagFullWidthNarrow: {
+    flexBasis: "100%",
   },
   flagTextActive: {
     color: "#166534",

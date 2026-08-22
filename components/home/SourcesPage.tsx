@@ -64,7 +64,7 @@ export default function SourcesPage() {
     <>
       <SeoHead
         title="Recursos de información sobre fauna silvestre | SOS Fauna España"
-        description="Teléfonos, organismos públicos, normativa y recursos útiles para actuar ante incidencias con fauna silvestre en España."
+        description="Organismos públicos, normativa y recursos útiles para actuar ante incidencias con fauna silvestre terrestre o marina en España."
         path="/sources"
       />
       <Stack.Screen

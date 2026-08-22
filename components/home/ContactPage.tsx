@@ -80,7 +80,7 @@ export default function ContactPage() {
           </Text>
 
           <Text style={styles.noticeText}>
-            Si un animal o una persona se encuentra en peligro, contacta directamente con el 112, los agentes medioambientales o el centro de recuperación correspondiente.
+            Si un animal o una persona se encuentra en peligro, contacta directamente con el 112, los agentes medioambientales o el centro, red o servicio competente.
           </Text>
         </View>
 

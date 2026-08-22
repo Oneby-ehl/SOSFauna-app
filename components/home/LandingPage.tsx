@@ -56,7 +56,7 @@ const homePageStructuredData = {
     url: "https://sosfauna.es/",
   },
   description:
-    "SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda.",
+    "SOS Fauna España ofrece orientación paso a paso si encuentras fauna silvestre herida, atrapada, debilitada, varada o en peligro.",
 };
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
@@ -209,13 +209,16 @@ export default function LandingPage() {
         showsVerticalScrollIndicator
       >
         <SeoHead
-          title="SOS Fauna España | Ayuda a la fauna silvestre"
-          description="SOS Fauna España ofrece orientación paso a paso para actuar cuando encuentras un animal silvestre herido, atrapado, desorientado o que puede necesitar ayuda."
+          title="SOS Fauna España | Qué hacer ante fauna silvestre herida o varada"
+          description="SOS Fauna España te orienta paso a paso si encuentras fauna silvestre herida, atrapada, debilitada, varada o en peligro, terrestre o marina."
           path="/"
           structuredData={homePageStructuredData}
         />
         <Stack.Screen
-          options={{ title: "SOS Fauna España | Ayuda a la fauna silvestre" }}
+          options={{
+            title:
+              "SOS Fauna España | Qué hacer ante fauna silvestre herida o varada",
+          }}
         />
 
       <View style={styles.header}>
@@ -456,13 +459,14 @@ export default function LandingPage() {
           </Text>
 
           <Text style={[styles.sectionDescription, styles.animalScopeText]}>
-            SOS Fauna España se centra en cubrir las incidencias más habituales de la fauna silvestre no marina.
+            SOS Fauna España se centra en cubrir las incidencias más habituales de fauna silvestre, incluyendo fauna terrestre, aves y fauna marina.
           </Text>
 
           <View style={styles.animalScopeGrid}>
             <AnimalScopeGroup icon="🦉" label="Aves" />
             <AnimalScopeGroup icon="🦊" label="Mamíferos" />
             <AnimalScopeGroup icon="🦎" label="Reptiles y anfibios" />
+            <AnimalScopeGroup icon="🌊" label="Fauna marina" />
           </View>
         </View>
 

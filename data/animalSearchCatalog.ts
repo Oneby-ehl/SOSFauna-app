@@ -5,6 +5,8 @@ export type AnimalSearchItem = {
   name: string;
   displayNameWithArticle: string;
   category: RescueAnimalType;
+  faqDisplayNameWithArticle?: string;
+  grammaticalGender?: "masculine" | "feminine";
   aliases?: string[];
 };
 
@@ -578,6 +580,63 @@ export const animalSearchCatalog: AnimalSearchItem[] = [
     displayNameWithArticle: "una nutria",
     category: "largeMammal",
     aliases: ["nutrias"],
+  },
+  {
+    id: "delfin",
+    name: "Delfín",
+    displayNameWithArticle: "un delfín",
+    grammaticalGender: "masculine",
+    category: "dolphin",
+    aliases: ["delfin", "delfines"],
+  },
+  {
+    id: "ballena-cetaceo",
+    name: "Ballena / cetáceo",
+    displayNameWithArticle: "una ballena o un cetáceo",
+    faqDisplayNameWithArticle: "un cetáceo grande",
+    grammaticalGender: "masculine",
+    category: "largeCetacean",
+    aliases: ["ballena", "ballenas", "cetáceo", "cetaceo", "cetáceos", "cetaceos"],
+  },
+  {
+    id: "foca",
+    name: "Foca",
+    displayNameWithArticle: "una foca",
+    grammaticalGender: "feminine",
+    category: "seal",
+    aliases: ["focas"],
+  },
+  {
+    id: "tortuga-marina",
+    name: "Tortuga marina",
+    displayNameWithArticle: "una tortuga marina",
+    grammaticalGender: "feminine",
+    category: "seaTurtle",
+    aliases: [
+      "tortugas marinas",
+      "tortuga boba",
+      "tortugas bobas",
+      "tortuga de mar",
+      "tortugas de mar",
+      "caretta caretta",
+    ],
+  },
+  {
+    id: "tiburon-raya",
+    name: "Tiburón / raya",
+    displayNameWithArticle: "un tiburón o una raya",
+    faqDisplayNameWithArticle: "un tiburón o una raya",
+    grammaticalGender: "masculine",
+    category: "sharkRay",
+    aliases: ["tiburon", "tiburones", "raya", "rayas"],
+  },
+  {
+    id: "animal-marino",
+    name: "Animal marino",
+    displayNameWithArticle: "un animal marino",
+    grammaticalGender: "masculine",
+    category: "otherMarine",
+    aliases: ["animales marinos", "fauna marina"],
   },
   {
     id: "corzo",

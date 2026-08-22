@@ -16,8 +16,18 @@ export const provinceContacts: ProvinceContactGroup[] = [
     contacts: [
       {
         name: 'CRFS de Albacete',
-        phone: '967557852',
-        note: 'Alternativo 967198588',
+        phone: '967198588',
+        note: 'Alternativo 967557852',
+      },
+    ],
+  },
+{
+    province: 'A Coruña',
+    contacts: [
+      {
+        name: 'CRFS de Santa Cruz de Oleiros',
+        phone: '881960405',
+        note: 'Oleiros · Alternativo 686597745',
       },
     ],
   },
@@ -38,6 +48,16 @@ export const provinceContacts: ProvinceContactGroup[] = [
         name: 'Centro de Recuperación de Fauna de Infiesto',
         phone: '985105500',
         note: 'Piloña · Emergencias 112 · Extensión 13704',
+      },
+    ],
+  },
+{
+    province: 'Alicante',
+    contacts: [
+      {
+        name: 'CRFS Santa Faç',
+        phone: '965938085',
+        note: 'Centro de recuperación de fauna silvestre',
       },
     ],
   },
@@ -83,6 +103,16 @@ export const provinceContacts: ProvinceContactGroup[] = [
         name: 'Centro de Recuperación de Aves Silvestres de Burgos',
         phone: '947461189',
         note: 'Albillos',
+      },
+    ],
+  },
+{
+    province: 'Bizkaia',
+    contacts: [
+      {
+        name: 'CRFS de Bizkaia / Gorliz',
+        phone: '944465297',
+        note: 'Recogida y atención ciudadana · Centro 946774852',
       },
     ],
   },
@@ -149,6 +179,16 @@ export const provinceContacts: ProvinceContactGroup[] = [
         name: 'CREA Los Villares',
         phone: '670947901',
         note: 'Carretera de Obejo-Córdoba · Emergencias 112',
+      },
+    ],
+  },
+{
+    province: 'Castellón',
+    contacts: [
+      {
+        name: 'CRFS Forn del Vidre',
+        phone: '977430821',
+        note: 'Centro de recuperación de fauna silvestre',
       },
     ],
   },
@@ -228,6 +268,16 @@ export const provinceContacts: ProvinceContactGroup[] = [
     ],
   },
   {
+    province: 'La Rioja',
+    contacts: [
+      {
+        name: 'CRFS La Fombera',
+        phone: '112',
+        note: 'Vía ciudadana de activación: SOS Rioja 112',
+      },
+    ],
+  },
+  {
     province: 'León',
     contacts: [
       {
@@ -244,6 +294,16 @@ export const provinceContacts: ProvinceContactGroup[] = [
         name: 'Centre de Fauna de Vallcalent',
         phone: '973282276',
         note: 'Lleida',
+      },
+    ],
+  },
+  {
+    province: 'Lugo',
+    contacts: [
+      {
+        name: 'CRF O Veral',
+        phone: '982828441',
+        note: 'Alternativo 649668923',
       },
     ],
   },
@@ -289,6 +349,41 @@ export const provinceContacts: ProvinceContactGroup[] = [
         name: 'Centre de Recuperació de la Fauna Silvestre de Menorca',
         phone: '971350762',
         note: 'Maó · Móvil 619834597',
+      },
+    ],
+  },
+  {
+    province: 'Murcia',
+    contacts: [
+      {
+        name: 'CRFS El Valle',
+        phone: '968177500',
+        note: 'Centro de recuperación · avisos y recogida vía CECOFOR',
+      },
+      {
+        name: 'CECOFOR',
+        phone: '968177500',
+        note: 'Centro de Coordinación Forestal · vía operativa ciudadana',
+      },
+    ],
+  },
+  {
+    province: 'Ourense',
+    contacts: [
+      {
+        name: 'CRF Alto do Rodicio',
+        phone: '628358652',
+        note: 'Maceda',
+      },
+    ],
+  },
+  {
+    province: 'Pontevedra',
+    contacts: [
+      {
+        name: 'CRF de Carballedo',
+        phone: '606656017',
+        note: 'Cerdedo-Cotobade',
       },
     ],
   },
@@ -368,8 +463,18 @@ export const provinceContacts: ProvinceContactGroup[] = [
     contacts: [
       {
         name: 'CERI',
-        phone: '925455156',
+        phone: '925455004',
         note: 'Sevilleja de la Jara',
+      },
+    ],
+  },
+{
+    province: 'Valencia',
+    contacts: [
+      {
+        name: 'CRFS La Granja / El Saler',
+        phone: '963868025',
+        note: 'Centro de recuperación de fauna silvestre',
       },
     ],
   },
@@ -389,7 +494,7 @@ export const provinceContacts: ProvinceContactGroup[] = [
       {
         name: 'CRFS de Zamora',
         phone: '618735088',
-        note: 'Villaralbo',
+        note: 'Villaralbo · Alternativo 980559600',
       },
     ],
   },  

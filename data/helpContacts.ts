@@ -35,6 +35,11 @@ export const MADRID_PROVINCE_CONTACTS = [
     note: "Centro de Recuperación de Animales Silvestres de la Comunidad de Madrid",
   },
   {
+    name: "Brinzal",
+    phone: "91 479 45 65",
+    note: "Centro especializado en rapaces nocturnas · Urgencias 670 933 240",
+  },
+  {
     name: "Agentes Forestales de Madrid",
     phone: "900 181 628",
     note: "Avisos e incidencias sobre fauna y medio natural",
