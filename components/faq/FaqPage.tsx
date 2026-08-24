@@ -147,6 +147,21 @@ function getMarineAnimalFaqAnswer(animal: AnimalSearchItem) {
   return `Si has encontrado ${marineFaqAnimalName} ${injured}, ${stranded}, ${entangled}, ${weak} o en una situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.`;
 }
 
+function getSwiftAnimalFaqAnswer() {
+  return (
+    "🐦 AVE PEQUEÑA\n\n" +
+    "⚠️ ANTES DE INTERVENIR\n" +
+    "• Si parece un vencejo, estar en el suelo no es normal: protégelo en una caja de cartón ventilada y consulta cuanto antes.\n\n" +
+    "❌ QUÉ NO HACER\n" +
+    "• No le des comida ni agua sin indicación.\n" +
+    "• No lo manipules para comprobar si está sano.\n\n" +
+    "✅ QUÉ HACER\n" +
+    "• Recógelo con cuidado y con la mínima manipulación posible.\n" +
+    "• Mantenlo en una caja de cartón ventilada y bien cerrada, en un lugar tranquilo y protegido del frío o del calor extremo.\n" +
+    "• Contacta cuanto antes con un centro especializado, Agentes Forestales o Medioambientales."
+  );
+}
+
 function isBatFlightOrGroundQuery(
   query: string,
   selectedAnimal: AnimalSearchItem | null,
@@ -307,6 +322,10 @@ export default function FaqPage() {
       return getMarineAnimalFaqAnswer(selectedAnimal);
     }
 
+    if (selectedAnimal.id === "vencejo") {
+      return getSwiftAnimalFaqAnswer();
+    }
+
     return removeAssistantNextStepParagraph(
       getAdvice(
         "alive",
@@ -421,6 +440,7 @@ export default function FaqPage() {
   );
 
   const hasResults = groupedItems.length > 0;
+  const shouldShowCategoryNavigation = searchQuery.trim().length === 0;
 
   const toggleItem = (itemId: string) => {
     setOpenItemId((current) => (current === itemId ? null : itemId));
@@ -440,13 +460,22 @@ export default function FaqPage() {
     });
   };
 
-  const handleCategoryPress = (category: string) => {
-    setSearchQuery("");
-    setAnimalCatalogSearchState(emptyAnimalCatalogSearchState);
-    setSelectedAnimal(null);
+  const scheduleCategoryScroll = (category: string) => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => scrollToCategory(category));
     });
+  };
+
+  const handleCategoryPress = (category: string) => {
+    if (selectedAnimal || queryAnimal || searchQuery.trim().length > 0) {
+      scheduleCategoryScroll(category);
+      return;
+    }
+
+    setSearchQuery("");
+    setAnimalCatalogSearchState(emptyAnimalCatalogSearchState);
+    setSelectedAnimal(null);
+    scheduleCategoryScroll(category);
   };
 
   const clearSearch = () => {
@@ -622,25 +651,27 @@ export default function FaqPage() {
             </View>
           ) : null}
 
-          <View style={styles.categoryList}>
-            {visibleFaqCategories.map((category) => (
-              <Pressable
-                key={category}
-                accessibilityRole="button"
-                accessibilityLabel={`Ir a la categoría ${category}`}
-                onPress={() => handleCategoryPress(category)}
-                onFocus={() => setFocusedCategory(category)}
-                onBlur={() => setFocusedCategory(null)}
-                style={({ pressed }) => [
-                  styles.categoryPill,
-                  pressed && styles.categoryPillPressed,
-                  focusedCategory === category && styles.categoryPillFocused,
-                ]}
-              >
-                <Text style={styles.categoryPillText}>{category}</Text>
-              </Pressable>
-            ))}
-          </View>
+          {shouldShowCategoryNavigation ? (
+            <View style={styles.categoryList}>
+              {visibleFaqCategories.map((category) => (
+                <Pressable
+                  key={category}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ir a la categoría ${category}`}
+                  onPress={() => handleCategoryPress(category)}
+                  onFocus={() => setFocusedCategory(category)}
+                  onBlur={() => setFocusedCategory(null)}
+                  style={({ pressed }) => [
+                    styles.categoryPill,
+                    pressed && styles.categoryPillPressed,
+                    focusedCategory === category && styles.categoryPillFocused,
+                  ]}
+                >
+                  <Text style={styles.categoryPillText}>{category}</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
         </View>
 
         {hasResults ? (
