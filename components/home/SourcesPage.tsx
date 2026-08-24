@@ -59,6 +59,75 @@ const legalSources = [
   },
 ];
 
+const terrestrialSources = [
+  {
+    name: "SEO/BirdLife",
+    description:
+      "Organización de conservación de referencia para aves. Aporta información sobre aves silvestres, aves jóvenes, vencejos y orientación general útil para decidir cuándo observar y cuándo pedir ayuda especializada.",
+    url: "https://seo.org/",
+    displayUrl: "SEO/BirdLife",
+  },
+  {
+    name: "GREFA",
+    description:
+      "Centro especializado y referencia práctica en recuperación de fauna silvestre. Sus recursos ayudan a contextualizar la atención inicial prudente ante animales heridos o debilitados.",
+    url: "https://grefa.org/",
+    displayUrl: "GREFA",
+  },
+  {
+    name: "Falciot Negre",
+    description:
+      "Recurso especializado en vencejos. Respalda criterios prácticos sobre cuidados iniciales, comportamiento, biología y liberación segura sin lanzar al animal al aire.",
+    url: "http://www.falciotnegre.com/",
+    displayUrl: "Falciot Negre",
+  },
+  {
+    name: "SECEMU",
+    description:
+      "Entidad técnica dedicada al estudio y conservación de los murciélagos. Aporta orientación sobre identificación de crías y adultos, manipulación segura y contacto con centros o especialistas.",
+    url: "https://secemu.org/recomendaciones/que-hacer-si-te-encuentras-un-murcielago/",
+    displayUrl: "SECEMU",
+  },
+];
+
+const marineSources = [
+  {
+    name: "Fundación Oceanogràfic — animales marinos en problemas",
+    description:
+      "Centro especializado de referencia en la Comunitat Valenciana. Resume criterios ciudadanos generales ante cetáceos, tortugas y tiburones: avisar al 112, mantener distancia, no manipular ni alimentar, no retirar residuos enganchados y registrar información útil.",
+    url: "https://fundacionoceanografic.org/sumate/que-hacer-si-encuentras-un-animalmarino-en-problemas/",
+    displayUrl: "Fundación Oceanogràfic",
+  },
+  {
+    name: "Fundación Palma Aquarium — tortugas marinas",
+    description:
+      "Centro de rescate de referencia en Baleares. Aporta pautas específicas para tortugas marinas vivas, como avisar al 112, no retirar redes o sedales, evitar molestias y esperar indicaciones de especialistas.",
+    url: "https://palmaaquarium.com/tortugas-del-centro-de-rescate",
+    displayUrl: "Palma Aquarium",
+  },
+  {
+    name: "Junta de Andalucía — varamientos de mamíferos y tortugas marinas",
+    description:
+      "Página oficial sobre la atención de emergencias frente a varamientos en Andalucía. Respalda la comunicación a través del 112 y la intervención de equipos técnicos ante animales vivos o muertos.",
+    url: "https://www.juntadeandalucia.es/medioambiente/portal/areas-tematicas/biodiversidad-y-vegetacion/ecosistemas-y-capital-natural/medio-marino/atencion-de-emergencias-frente-a-varamientos-de-mamiferos-y-tortugas-marinas",
+    displayUrl: "Junta de Andalucía",
+  },
+  {
+    name: "Gobierno de Canarias — protocolo de tortugas marinas",
+    description:
+      "Documentación oficial canaria sobre varamientos de tortugas marinas. Sirve como referencia técnica sobre respuesta, toma de datos, recuperación, gestión de animales muertos y liberación de ejemplares recuperados.",
+    url: "https://www.gobiernodecanarias.org/medioambiente/publicaciones/material-publicado/libros/varamiento-cetaceos-tortugas/index.html",
+    displayUrl: "Gobierno de Canarias",
+  },
+  {
+    name: "MITECO y Gobierno de Canarias — buenas prácticas en ZEC marinas",
+    description:
+      "Guía institucional de buenas prácticas para Zonas Especiales de Conservación marinas de Canarias. Aporta contexto de conservación, reducción de molestias y prevención de impactos sobre cetáceos y tortugas marinas.",
+    url: "https://www.gobiernodecanarias.org/medioambiente/descargas/Biodiversidad/documentos-interes/buenas-practicas/2012_09_18_Guia_BPRCT_REDNATURA_web_tcm7-229984.pdf",
+    displayUrl: "guía en PDF",
+  },
+];
+
 export default function SourcesPage() {
   return (
     <>
@@ -140,6 +209,52 @@ export default function SourcesPage() {
             desplazamiento, conviene confirmar que el teléfono o el centro
             continúan operativos.
           </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🍃 Fauna terrestre y aves</Text>
+
+          <Text style={styles.sectionIntro}>
+            Estas fuentes recogen algunos de los criterios utilizados para
+            orientar la actuación ante aves, vencejos, murciélagos y otros
+            animales silvestres terrestres que puedan necesitar ayuda.
+          </Text>
+
+          {terrestrialSources.map((source) => (
+            <View key={source.name} style={styles.card}>
+              <Text style={styles.cardTitle}>{source.name}</Text>
+
+              <Text style={styles.cardText}>{source.description}</Text>
+
+              <ExternalLink href={source.url} asChild>
+                <Pressable style={styles.linkButton}>
+                  <Text style={styles.linkButtonText}>
+                    Visitar {source.displayUrl}
+                  </Text>
+                </Pressable>
+              </ExternalLink>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🌊 Fauna marina</Text>
+
+          {marineSources.map((source) => (
+            <View key={source.name} style={styles.card}>
+              <Text style={styles.cardTitle}>{source.name}</Text>
+
+              <Text style={styles.cardText}>{source.description}</Text>
+
+              <ExternalLink href={source.url} asChild>
+                <Pressable style={styles.linkButton}>
+                  <Text style={styles.linkButtonText}>
+                    Visitar {source.displayUrl}
+                  </Text>
+                </Pressable>
+              </ExternalLink>
+            </View>
+          ))}
         </View>
 
         <View style={styles.section}>
