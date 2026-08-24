@@ -498,9 +498,11 @@ export default function LandingPage() {
               Asistencia guiada para ayudar a la fauna silvestre de forma
               segura y responsable.
             </Text>
-            <Text style={styles.footerNote}>
-              📱 Aplicación Android disponible próximamente en Google Play
-            </Text>
+            {Platform.OS === "web" ? (
+              <Text style={styles.footerNote}>
+                📱 Aplicación Android disponible próximamente en Google Play
+              </Text>
+            ) : null}
           </View>
 
           <View style={styles.footerLinks}>

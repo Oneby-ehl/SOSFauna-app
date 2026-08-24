@@ -1,5 +1,5 @@
 import * as Clipboard from "expo-clipboard";
-import { Alert, Platform } from "react-native";
+import { Alert, Platform, Share } from "react-native";
 
 type RescueShareMessageInput = {
   animalStateLabel: string;
@@ -112,8 +112,19 @@ export function buildSosFaunaShareMessage() {
 }
 
 export async function shareSosFaunaApp() {
+  if (Platform.OS !== "web") {
+    try {
+      await Share.share({
+        title: SOS_FAUNA_SHARE_TITLE,
+        message: buildSosFaunaShareMessage(),
+      });
+    } catch (error) {
+      console.warn("No se pudo abrir el diálogo nativo de compartir.", error);
+    }
+    return;
+  }
+
   if (
-    Platform.OS === "web" &&
     typeof navigator !== "undefined" &&
     navigator.share
   ) {
