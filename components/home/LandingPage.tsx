@@ -11,6 +11,7 @@ import { getHistory } from "@/services/rescueStorage";
 import { shareSosFaunaApp } from "@/utils/rescueShareMessage";
 import {
   Alert,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -43,6 +44,9 @@ type BeforeInstallPromptEvent = Event & {
 type LandingDataState = "checking" | "ready" | "failed";
 
 const LANDING_DATA_TIMEOUT_MS = 4000;
+const GOOGLE_PLAY_APP_URL =
+  "https://play.google.com/store/apps/details?id=com.onebyehl.sosfauna";
+const GOOGLE_PLAY_BADGE_SRC = "/google-play-badge-es.png";
 
 const homePageStructuredData = {
   "@context": "https://schema.org",
@@ -501,9 +505,18 @@ export default function LandingPage() {
               segura y responsable.
             </Text>
             {Platform.OS === "web" ? (
-              <Text style={styles.footerNote}>
-                📱 Aplicación Android disponible próximamente en Google Play
-              </Text>
+              <Link
+                href={GOOGLE_PLAY_APP_URL}
+                target="_blank"
+                accessibilityLabel="Disponible en Google Play"
+                style={styles.googlePlayBadgeLink}
+              >
+                <Image
+                  source={{ uri: GOOGLE_PLAY_BADGE_SRC }}
+                  resizeMode="contain"
+                  style={styles.googlePlayBadge}
+                />
+              </Link>
             ) : null}
           </View>
 
@@ -1048,11 +1061,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
   },
-  footerNote: {
-    color: "#aec8b5",
-    fontSize: 13,
-    lineHeight: 20,
+  googlePlayBadgeLink: {
+    alignSelf: "flex-start",
     marginTop: 12,
+  },
+  googlePlayBadge: {
+    width: 155,
+    height: 60,
   },
   footerLinks: {
     gap: 10,
