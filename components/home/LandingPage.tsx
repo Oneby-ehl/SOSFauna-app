@@ -49,6 +49,8 @@ const homePageStructuredData = {
   "@type": "WebPage",
   name: "SOS Fauna España",
   url: "https://sosfauna.es/",
+  primaryImageOfPage: "https://sosfauna.es/search-preview.png",
+  image: "https://sosfauna.es/search-preview.png",
   inLanguage: "es",
   isPartOf: {
     "@type": "WebSite",
