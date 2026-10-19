@@ -697,7 +697,7 @@ function getTrappedAdvice(animalType: AnimalType) {
   "🪤 REPTIL O ANFIBIO ATRAPADO\n\n" +
   "🚨 ACTÚA CON CALMA\n" +
   "• Un reptil o un anfibio atrapado puede sufrir lesiones si intentas liberarlo de forma brusca.\n" +
-  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
+  "• Observa cómo está atrapado desde una distancia prudente. No intentes coger, capturar, manipular ni trasladar serpientes, culebras o víboras, aunque creas haber identificado la especie. No intentes liberarlas. Si no puedes descartar que sea una serpiente, culebra o víbora, mantén la distancia y no intentes cogerla, capturarla, manipularla, liberarla ni trasladarla. Si se trata de una serpiente, culebra o víbora, mantén la distancia y contacta con un centro especializado cuando necesite ayuda o exista peligro. No intentes moverla.\n\n" +
   "❌ QUÉ NO HACER\n" +
   "• No tires del animal para liberarlo.\n" +
   "• No lo sujetes con fuerza ni manipules partes del cuerpo que puedan lesionarse.\n" +
@@ -705,9 +705,9 @@ function getTrappedAdvice(animalType: AnimalType) {
   "• No le des comida ni agua sin indicación.\n\n" +
   "✅ QUÉ HACER\n" +
   "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo, intenta reducir su estrés mientras valoras la situación.\n" +
-  "• Si consigues liberarlo sin causarle lesiones, colócalo en una caja o recipiente ventilado y bien cerrado.\n" +
-  "• Mantén el recipiente en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
+  "• Reduce los ruidos y mantén la distancia mientras valoras la situación.\n" +
+  "• Solo para otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras: valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal. Si consigues liberarlo sin causarle lesiones, colócalo en una caja o recipiente ventilado y bien cerrado.\n" +
+  "• Solo en esos otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras, mantén el recipiente en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
   "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
   commonEnd
 );
@@ -911,12 +911,12 @@ return (
   "❌ QUÉ NO HACER\n" +
   "• No la manipules sin necesidad.\n" +
   "• No la traslades a grandes distancias.\n" +
-  "• No manipules serpientes o culebras con las manos si no puedes identificarlas con seguridad.\n" +
+  "• No intentes coger, capturar, manipular ni trasladar serpientes, culebras o víboras, aunque creas haber identificado la especie. Si no puedes descartar que sea una serpiente, culebra o víbora, mantén la distancia y no intentes cogerla, capturarla, manipularla, liberarla ni trasladarla.\n" +
   "• No le des comida ni agua sin indicación.\n\n" +
   "✅ QUÉ HACER\n" +
-  "• Si se trata de una serpiente o culebra y existe riesgo de mordedura, mantén la distancia y solicita ayuda especializada.\n" +
-  "• Si necesitas moverla por seguridad, utiliza un recipiente seguro y ventilado.\n" +
-  "• Déjala en una zona adecuada, lo más cercana posible al lugar donde fue encontrada.\n" +
+  "• Si se trata de una serpiente, culebra o víbora, mantén la distancia y contacta con un centro especializado cuando necesite ayuda o exista peligro. No intentes moverla. No intentes liberarla si está atrapada. Si está dentro de una vivienda, solicita orientación especializada sin intentar capturarla.\n" +
+  "• Solo para crías de otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras: si necesitas moverla por seguridad, utiliza un recipiente seguro y ventilado.\n" +
+  "• Solo en esas crías de otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras, déjala en una zona adecuada, lo más cercana posible al lugar donde fue encontrada.\n" +
   "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
   "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
   "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
@@ -1352,20 +1352,20 @@ const commonEnd =
     "⚠️ ANTES DE INTERVENIR\n" +
     "• Observa la situación desde una distancia prudente antes de intervenir y evita el contacto directo si no puedes identificar el animal con seguridad.\n" +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar ayuda o ser apartado de un peligro inmediato.\n\n"
+      ? "• Las señales seleccionadas indican que puede necesitar ayuda. Las indicaciones para apartarlo de un peligro inmediato se refieren solo a otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras.\n\n"
       : "• Si se desplaza con normalidad y no existe un peligro inmediato, evita manipularlo o trasladarlo.\n\n") +
     (needsHelp
       ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags) + "\n\n"
       : "") +
     "❌ QUÉ NO HACER\n" +
     "• No lo manipules sin necesidad.\n" +
-    "• No manipules serpientes o culebras directamente con las manos si no puedes identificarlas con seguridad.\n" +
+    "• No intentes coger, capturar, manipular ni trasladar serpientes, culebras o víboras, aunque creas haber identificado la especie. Si no puedes descartar que sea una serpiente, culebra o víbora, mantén la distancia y no intentes cogerla, capturarla, manipularla, liberarla ni trasladarla.\n" +
     "• No lo traslades a grandes distancias.\n" +
     "• No le des comida ni agua sin indicación.\n\n" +
     "✅ QUÉ HACER\n" +
     "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
-    "• Si debes moverlo por seguridad y puedes hacerlo sin riesgo, utiliza un recipiente seguro y ventilado.\n" +
-    "• Déjalo en una zona adecuada, lo más cercana posible al lugar donde fue encontrado.\n" +
+    "• Si se trata de una serpiente, culebra o víbora, mantén la distancia y contacta con un centro especializado cuando necesite ayuda o exista peligro. No intentes moverla. Si está dentro de una vivienda, solicita orientación especializada sin intentar capturarla.\n• Solo para otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras: si debes moverlo por seguridad y puedes hacerlo sin riesgo, utiliza un recipiente seguro y ventilado.\n" +
+    "• Solo en esos otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras, déjalo en una zona adecuada, lo más cercana posible al lugar donde fue encontrado.\n" +
     "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
     "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
   commonEnd

@@ -523,16 +523,16 @@ export default function FaqPage() {
         ¿Tienes dudas sobre este caso?
       </Text>
       <Text style={styles.createNoticeText}>
-        Crea un aviso en SOS Fauna España y el asistente te ayudará a valorar
+        La Guía de ayuda asistida de SOS Fauna España te ayudará a valorar
         la situación paso a paso.
       </Text>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Comenzar aviso"
+        accessibilityLabel="Guía de ayuda asistida"
         style={styles.createNoticeButton}
         onPress={startNotice}
       >
-        <Text style={styles.createNoticeButtonText}>Comenzar aviso</Text>
+        <Text style={styles.createNoticeButtonText}>Guía de ayuda asistida</Text>
       </Pressable>
     </View>
   );
@@ -592,7 +592,7 @@ export default function FaqPage() {
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text style={styles.title}>Preguntas frecuentes</Text>
+          <Text accessibilityRole="header" aria-level={1} style={styles.title}>Preguntas frecuentes</Text>
           <Text style={styles.intro}>
             ¿Tienes alguna duda? Aquí encontrarás respuestas a las preguntas más
             habituales sobre la ayuda responsable a la fauna silvestre y el
@@ -690,7 +690,7 @@ export default function FaqPage() {
                     event.nativeEvent.layout.y;
                 }}
               >
-                <Text style={styles.categoryTitle}>{group.category}</Text>
+                <Text accessibilityRole="header" aria-level={2} style={styles.categoryTitle}>{group.category}</Text>
 
                 <View style={styles.questionList}>
                   {group.items.map((item) => {
@@ -706,7 +706,7 @@ export default function FaqPage() {
                           onPress={() => toggleItem(item.id)}
                           style={styles.questionButton}
                         >
-                          <Text style={styles.questionText}>
+                          <Text accessibilityRole="header" aria-level={3} style={styles.questionText}>
                             {item.question}
                           </Text>
                           <Text style={styles.questionIndicator}>
@@ -748,6 +748,20 @@ export default function FaqPage() {
             </Text>
           </View>
         )}
+
+        <View style={styles.specializedSection}>
+          <Text accessibilityRole="header" aria-level={2} style={styles.specializedTitle}>
+            Información especializada
+          </Text>
+          <View style={styles.specializedLinks}>
+            <Link href="/faq/vencejos" style={styles.specializedLink}>
+              Preguntas sobre vencejos
+            </Link>
+            <Link href="/faq/murcielagos" style={styles.specializedLink}>
+              Preguntas sobre murciélagos
+            </Link>
+          </View>
+        </View>
 
         <Link href="/" asChild>
           <Pressable style={styles.backButton}>
@@ -1004,6 +1018,42 @@ const styles = StyleSheet.create({
     color: "#4b5563",
     fontSize: 16,
     lineHeight: 25,
+  },
+  specializedSection: {
+    borderTopWidth: 1,
+    borderTopColor: "#dbe7dd",
+    paddingTop: 18,
+    gap: 10,
+  },
+  specializedTitle: {
+    color: "#4b5563",
+    fontSize: 15,
+    fontWeight: "700",
+    lineHeight: 22,
+  },
+  specializedLinks: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  specializedLink: {
+    alignSelf: "flex-start",
+    flexShrink: 1,
+    maxWidth: "100%",
+    minHeight: 44,
+    backgroundColor: "#e7f5ea",
+    borderWidth: 1,
+    borderColor: "#cfe8d4",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    color: "#166534",
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 22,
+    textAlign: "center",
+    textDecorationLine: "none",
   },
   backButton: {
     alignSelf: "flex-start",

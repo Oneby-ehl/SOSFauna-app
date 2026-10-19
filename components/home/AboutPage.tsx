@@ -45,7 +45,7 @@ export default function AboutPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>¿Por qué nace este proyecto?</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>¿Por qué nace este proyecto?</Text>
 
           <Text style={styles.paragraph}>
             SOS Fauna España nace de una idea sencilla: muchas personas quieren ayudar cuando encuentran un animal silvestre herido, atrapado o aparentemente abandonado, pero no siempre saben cuál es la mejor forma de hacerlo.
@@ -61,7 +61,7 @@ export default function AboutPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Nuestra forma de entender la ayuda</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Nuestra forma de entender la ayuda</Text>
 
           <Text style={styles.paragraph}>
             Ayudar a la fauna silvestre no siempre significa recoger o manipular al animal.
@@ -85,7 +85,7 @@ export default function AboutPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Información y criterios técnicos</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}><Link href="/sources">Información y criterios técnicos</Link></Text>
 
           <Text style={styles.paragraph}>
             El contenido del proyecto se elabora a partir de recursos oficiales, criterios técnicos, documentación especializada y formación en recuperación de fauna silvestre. Para fauna marina, se apoya también en documentación técnica, redes de varamientos, entidades especializadas y servicios competentes.
@@ -97,7 +97,7 @@ export default function AboutPage() {
         </View>
 
         <View style={styles.disclaimer}>
-          <Text style={styles.disclaimerTitle}>Límites del servicio</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.disclaimerTitle}>Límites del servicio</Text>
 
           <Text style={styles.disclaimerText}>
             SOS Fauna España ofrece orientación básica y ayuda a recopilar información sobre una incidencia.
@@ -117,7 +117,7 @@ export default function AboutPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Agradecimiento</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Agradecimiento</Text>
 
           <Text style={styles.paragraph}>
             Gracias a todas las personas, profesionales, administraciones y organizaciones que trabajan cada día por la conservación, protección y recuperación de la fauna silvestre.

@@ -146,7 +146,7 @@ export default function SourcesPage() {
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text style={styles.title}>Recursos de información</Text>
+          <Text accessibilityRole="header" aria-level={1} style={styles.title}>Recursos de información</Text>
 
           <Text style={styles.intro}>
             La información y los teléfonos incluidos en SOS Fauna España se han
@@ -157,11 +157,11 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recursos de información</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Recursos de información</Text>
 
           {institutionalSources.map((source) => (
             <View key={source.name} style={styles.card}>
-              <Text style={styles.cardTitle}>{source.name}</Text>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
 
               <Text style={styles.cardText}>{source.description}</Text>
 
@@ -177,7 +177,7 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>
+          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}>
             Contacto fuera de la Comunidad de Madrid
           </Text>
         
@@ -196,7 +196,7 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>Contactos de ayuda</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}><Link href="/centros">Contactos de ayuda</Link></Text>
 
           <Text style={styles.noticeText}>
             La aplicación también facilita teléfonos nacionales y contactos de
@@ -212,7 +212,7 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🍃 Fauna terrestre y aves</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>🍃 Fauna terrestre y aves</Text>
 
           <Text style={styles.sectionIntro}>
             Estas fuentes recogen algunos de los criterios utilizados para
@@ -222,7 +222,7 @@ export default function SourcesPage() {
 
           {terrestrialSources.map((source) => (
             <View key={source.name} style={styles.card}>
-              <Text style={styles.cardTitle}>{source.name}</Text>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
 
               <Text style={styles.cardText}>{source.description}</Text>
 
@@ -238,11 +238,11 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🌊 Fauna marina</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>🌊 Fauna marina</Text>
 
           {marineSources.map((source) => (
             <View key={source.name} style={styles.card}>
-              <Text style={styles.cardTitle}>{source.name}</Text>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
 
               <Text style={styles.cardText}>{source.description}</Text>
 
@@ -260,7 +260,7 @@ export default function SourcesPage() {
         <View style={styles.section}>
           <View style={styles.sectionHeadingRow}>
             <Text style={styles.sectionIcon}>⚖️</Text>
-            <Text style={styles.sectionTitle}>
+            <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>
               Normativa básica sobre fauna silvestre
             </Text>
           </View>
@@ -275,7 +275,7 @@ export default function SourcesPage() {
 
           {legalSources.map((source) => (
             <View key={source.name} style={styles.card}>
-              <Text style={styles.cardTitle}>{source.name}</Text>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
 
               <Text style={styles.cardText}>{source.description}</Text>
 

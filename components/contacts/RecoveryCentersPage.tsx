@@ -1,7 +1,8 @@
 import { Link } from "expo-router";
 import * as Linking from "expo-linking";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type PropsWithChildren } from "react";
 import {
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,6 +10,8 @@ import {
   TextInput,
   View,
 } from "react-native";
+
+import PublicRecoveryCenters from "./PublicRecoveryCenters";
 
 import { SectionCard } from "@/components/SectionCard";
 import {
@@ -29,6 +32,7 @@ type RecoveryCentersContentProps = {
   showHelpSources: boolean;
   showProvinceList: boolean;
   showInternalBackButtons?: boolean;
+  publicHeadings?: boolean;
   onProvinceSearchChange: (value: string) => void;
   onSelectedProvinceChange: (province: string | null) => void;
   onShowHelpSourcesChange: (value: boolean) => void;
@@ -46,7 +50,7 @@ const callNumber = async (phoneNumber: string) => {
   await Linking.openURL(`tel:${phoneNumber}`);
 };
 
-type ProvinceHelpGroup = {
+export type ProvinceHelpGroup = {
   province: string;
   terrestrialContacts: ProvinceContactItem[];
   marineContacts: MarineHelpContactItem[];
@@ -73,7 +77,7 @@ const getVisibleContactCount = (item: ProvinceHelpGroup) =>
   item.terrestrialContacts.length +
   item.marineContacts.filter((contact) => Boolean(contact.phone)).length;
 
-const getProvinceHelpGroups = (): ProvinceHelpGroup[] => {
+export const getProvinceHelpGroups = (): ProvinceHelpGroup[] => {
   const provinceMap = new Map<string, ProvinceHelpGroup>();
 
   getRecoveryCenterProvinceContacts().forEach((item) => {
@@ -104,17 +108,29 @@ const getProvinceHelpGroups = (): ProvinceHelpGroup[] => {
   );
 };
 
+// Preserve the shared assistant cards; only the public page opts into headings.
+function PublicContactSection({ title, children }: PropsWithChildren<{ title: string }>) {
+  return (
+    <View style={publicSectionStyles.card}>
+      <Text accessibilityRole="header" aria-level={2} style={publicSectionStyles.title}>{title}</Text>
+      <View style={publicSectionStyles.content}>{children}</View>
+    </View>
+  );
+}
+
 export function RecoveryCentersContent({
   provinceSearch,
   selectedProvince,
   showHelpSources,
   showProvinceList,
   showInternalBackButtons = false,
+  publicHeadings = false,
   onProvinceSearchChange,
   onSelectedProvinceChange,
   onShowHelpSourcesChange,
   onShowProvinceListChange,
 }: RecoveryCentersContentProps) {
+  const ContactSection = publicHeadings ? PublicContactSection : SectionCard;
   const provinceGroups = useMemo(getProvinceHelpGroups, []);
   const filteredProvinceContacts = useMemo(() => {
     const normalizedSearch = normalizeProvinceSearch(provinceSearch);
@@ -196,7 +212,7 @@ export function RecoveryCentersContent({
 
   if (province) {
     return (
-      <SectionCard title={province.province}>
+      <ContactSection title={province.province}>
         <View style={styles.sectionContent}>
           {showInternalBackButtons ? (
             <Pressable
@@ -213,7 +229,7 @@ export function RecoveryCentersContent({
 
           {province.terrestrialContacts.length ? (
             <View style={[styles.contactGroup, styles.contactGroupTerrestrial]}>
-              <Text
+              <Text accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined}
                 style={[
                   styles.contactGroupLabel,
                   styles.contactGroupLabelTerrestrial,
@@ -228,7 +244,7 @@ export function RecoveryCentersContent({
           {province.marineContacts.length ? (
             <View style={[styles.contactGroup, styles.contactGroupMarine]}>
               <Text
-                style={[styles.contactGroupLabel, styles.contactGroupLabelMarine]}
+                accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={[styles.contactGroupLabel, styles.contactGroupLabelMarine]}
               >
                 🌊 Fauna marina
               </Text>
@@ -240,13 +256,13 @@ export function RecoveryCentersContent({
             </View>
           ) : null}
         </View>
-      </SectionCard>
+      </ContactSection>
     );
   }
 
   if (showProvinceList) {
     return (
-      <SectionCard title="Teléfonos por provincias">
+      <ContactSection title="Teléfonos por provincias">
         <View style={styles.sectionContent}>
           {showInternalBackButtons ? (
             <Pressable
@@ -295,15 +311,15 @@ export function RecoveryCentersContent({
             </View>
           )}
         </View>
-      </SectionCard>
+      </ContactSection>
     );
   }
 
   return (
-    <SectionCard title="Teléfonos de ayuda">
+    <ContactSection title="Teléfonos de ayuda">
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          Elige el servicio adecuado según la urgencia y la ubicación del animal.
+          {publicHeadings ? (<>Elige el <Link href="/faq">servicio adecuado</Link> según la urgencia y la ubicación del animal.</>) : ("Elige el servicio adecuado según la urgencia y la ubicación del animal.")}
         </Text>
 
         <Text style={styles.sectionDescription}>
@@ -316,7 +332,7 @@ export function RecoveryCentersContent({
           servicios correspondientes en muchos territorios.
         </Text>
 
-        <Text style={styles.subheading}>Ayuda inmediata</Text>
+        <Text accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={styles.subheading}>Ayuda inmediata</Text>
 
         {NATIONAL_HELP_CONTACTS.map((contact) => (
           <Pressable
@@ -339,7 +355,7 @@ export function RecoveryCentersContent({
           </Pressable>
         ))}
 
-        <Text style={styles.subheading}>Ayuda por provincias</Text>
+        <Text accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={styles.subheading}>Ayuda por provincias</Text>
 
         <Pressable style={styles.primaryButton} onPress={openProvinceList}>
           <Text style={styles.primaryButtonText}>
@@ -360,11 +376,12 @@ export function RecoveryCentersContent({
           </View>
         ) : null}
       </View>
-    </SectionCard>
+    </ContactSection>
   );
 }
 
 export default function RecoveryCentersPage() {
+  const publicProvinceGroups = useMemo(getProvinceHelpGroups, []);
   const [showHelpSources, setShowHelpSources] = useState(false);
   const [showProvinceList, setShowProvinceList] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
@@ -374,7 +391,7 @@ export default function RecoveryCentersPage() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-        <Text style={styles.title}>
+        <Text accessibilityRole="header" aria-level={1} style={styles.title}>
           Centros de Recuperación y teléfonos de ayuda
         </Text>
         <Text style={styles.intro}>
@@ -383,17 +400,27 @@ export default function RecoveryCentersPage() {
         </Text>
       </View>
 
+      {Platform.OS === "web" ? (
+        <PublicRecoveryCenters
+          groups={publicProvinceGroups}
+          normalizeSearch={normalizeProvinceSearch}
+          nationalContactLabel={getNationalContactLabel}
+          marineResourceLabel={getMarineResourceTypeLabel}
+        />
+      ) : (
       <RecoveryCentersContent
         provinceSearch={provinceSearch}
         selectedProvince={selectedProvince}
         showHelpSources={showHelpSources}
         showProvinceList={showProvinceList}
         showInternalBackButtons
+        publicHeadings
         onProvinceSearchChange={setProvinceSearch}
         onSelectedProvinceChange={setSelectedProvince}
         onShowHelpSourcesChange={setShowHelpSources}
         onShowProvinceListChange={setShowProvinceList}
       />
+      )}
 
       <Link href="/" asChild>
         <Pressable style={styles.backButton}>
@@ -403,6 +430,19 @@ export default function RecoveryCentersPage() {
     </ScrollView>
   );
 }
+
+const publicSectionStyles = StyleSheet.create({
+  card: {
+    backgroundColor: "#f8fafc",
+    borderRadius: 18,
+    padding: 16,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  title: { fontSize: 18, fontWeight: "700", color: "#111827" },
+  content: { gap: 10 },
+});
 
 const styles = StyleSheet.create({
   screen: {

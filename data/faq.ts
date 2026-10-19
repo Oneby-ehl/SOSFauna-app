@@ -968,7 +968,7 @@ export const faqItems: FaqItem[] = [
     category: "Crías y animales jóvenes",
     question: "¿Debo alejar una cría de sus padres?",
     answer:
-      "Solo si existe un peligro inmediato, como tráfico, depredadores domésticos o una zona insegura. Siempre que sea posible, mantenla cerca del lugar donde fue encontrada para no romper el vínculo con los adultos. Si no sabes si debes moverla, pide orientación antes de actuar.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: Solo si existe un peligro inmediato, como tráfico, depredadores domésticos o una zona insegura. Siempre que sea posible, mantenla cerca del lugar donde fue encontrada para no romper el vínculo con los adultos. Si no sabes si debes moverla, pide orientación antes de actuar.",
     keywords: mergeFaqSearchKeywords(
       animals.birds,
       animals.mammals,
@@ -1047,7 +1047,7 @@ export const faqItems: FaqItem[] = [
     category: "Animales heridos o atrapados",
     question: "¿Qué hago si el animal está herido?",
     answer:
-      "Evita manipularlo salvo que sea necesario para apartarlo de un peligro inmediato. Mantén alejadas a personas y mascotas, reduce el ruido y no le des comida ni agua. Contacta con un centro de recuperación, Agentes Forestales o Emergencias según la situación.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: Evita manipularlo salvo que sea necesario para apartarlo de un peligro inmediato. Mantén alejadas a personas y mascotas, reduce el ruido y no le des comida ni agua. Contacta con un centro de recuperación, Agentes Forestales o Emergencias según la situación.",
     keywords: mergeFaqSearchKeywords(
       ...allWildlifeSearchGroups,
       situations.injured,
@@ -1062,7 +1062,7 @@ export const faqItems: FaqItem[] = [
     category: "Animales heridos o atrapados",
     question: "¿Qué hago si está atrapado?",
     answer:
-      "No tires del animal ni fuerces alas, patas, cuello o cola. Observa el tipo de atrapamiento, valora tu seguridad y pide ayuda especializada. Si puedes aportar fotos o vídeos sin molestar, pueden ayudar a valorar la intervención.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: No tires del animal ni fuerces alas, patas, cuello o cola. Observa el tipo de atrapamiento, valora tu seguridad y pide ayuda especializada. Si puedes aportar fotos o vídeos sin molestar, pueden ayudar a valorar la intervención.",
     keywords: mergeFaqSearchKeywords(
       animals.birds,
       animals.mammals,
@@ -1329,7 +1329,7 @@ export const faqItems: FaqItem[] = [
     category: "Manipulación y cuidados",
     question: "¿Debo tocarlo o cogerlo?",
     answer:
-      "Solo si te lo indican los especialistas o si es imprescindible para apartarlo de un peligro inmediato y puedes hacerlo sin riesgo. Utiliza guantes o una tela cuando sea necesario, evita el contacto directo y manipúlalo lo mínimo posible. Algunas especies pueden morder, arañar o sufrir más estrés al ser sujetadas.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: Solo si te lo indican los especialistas o si es imprescindible para apartarlo de un peligro inmediato y puedes hacerlo sin riesgo. Utiliza guantes o una tela cuando sea necesario, evita el contacto directo y manipúlalo lo mínimo posible. Algunas especies pueden morder, arañar o sufrir más estrés al ser sujetadas.",
     keywords: mergeFaqSearchKeywords(
       ...allWildlifeSearchGroups,
       situations.injured,
@@ -1357,7 +1357,7 @@ export const faqItems: FaqItem[] = [
     category: "Manipulación y cuidados",
     question: "¿Cómo debo transportarlo?",
     answer:
-      "Si te indican trasladarlo, sigue las instrucciones recibidas, porque el recipiente y la forma de transporte dependen de la especie, el tamaño y su estado. Para muchas aves y pequeños animales puede utilizarse una caja de cartón ventilada y bien cerrada, pero no es adecuada para todos los casos. No intentes transportar por tus medios animales grandes, peligrosos o que no puedas contener con seguridad.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: Si te indican trasladarlo, sigue las instrucciones recibidas, porque el recipiente y la forma de transporte dependen de la especie, el tamaño y su estado. Para muchas aves y pequeños animales puede utilizarse una caja de cartón ventilada y bien cerrada, pero no es adecuada para todos los casos. No intentes transportar por tus medios animales grandes, peligrosos o que no puedas contener con seguridad.",
     keywords: mergeFaqSearchKeywords(
       ...allWildlifeSearchGroups,
       situations.transport,
@@ -1385,7 +1385,7 @@ export const faqItems: FaqItem[] = [
     category: "Manipulación y cuidados",
     question: "¿Es mejor una caja de cartón o una jaula?",
     answer:
-      "Para un traslado provisional suele ser preferible una caja de cartón resistente, ventilada, cerrada y adaptada al tamaño del animal. Una jaula puede favorecer golpes, enganches o intentos continuos de escapar. Dependerá de la especie y de las indicaciones recibidas.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: Para un traslado provisional suele ser preferible una caja de cartón resistente, ventilada, cerrada y adaptada al tamaño del animal. Una jaula puede favorecer golpes, enganches o intentos continuos de escapar. Dependerá de la especie y de las indicaciones recibidas.",
     keywords: mergeFaqSearchKeywords(
       ...transportableSmallWildlifeSearchGroups,
       smallMammalTransportSearchTerms,
@@ -1399,7 +1399,7 @@ export const faqItems: FaqItem[] = [
     category: "Manipulación y cuidados",
     question: "¿Qué tamaño debe tener la caja?",
     answer:
-      "Debe permitir que el animal permanezca en una postura natural y pueda acomodarse, pero no ser tan grande como para que se desplace o se golpee durante el traslado. Debe estar bien ventilada y cerrada con seguridad.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: Debe permitir que el animal permanezca en una postura natural y pueda acomodarse, pero no ser tan grande como para que se desplace o se golpee durante el traslado. Debe estar bien ventilada y cerrada con seguridad.",
     keywords: mergeFaqSearchKeywords(
       ...transportableSmallWildlifeSearchGroups,
       smallMammalTransportSearchTerms,
@@ -1420,7 +1420,7 @@ export const faqItems: FaqItem[] = [
     category: "Manipulación y cuidados",
     question: "¿Cómo puedo reducir el estrés de un animal silvestre?",
     answer:
-      "Conviene reducir ruido, luz, manipulación, personas alrededor y contacto con mascotas. Mantén al animal en un lugar tranquilo, seguro, oscuro o con poca luz y con temperatura moderada mientras sigues las indicaciones recibidas. Si un profesional te indica cubrir parcialmente al animal, utiliza una tela ligera y asegúrate de no dificultar su respiración ni aumentar su temperatura. No lo intentes con animales grandes, peligrosos o que no puedas manipular con seguridad.",
+      "Las indicaciones siguientes sobre manipulación, liberación, recipientes y traslado excluyen a serpientes, culebras y víboras, también cuando no puedas descartar que lo sean. En esos casos, no intentes cogerlas, capturarlas, manipularlas, liberarlas ni trasladarlas, aunque creas haber identificado la especie; mantén la distancia y contacta con un centro especializado si necesitan ayuda o existe peligro. Para los demás animales: Conviene reducir ruido, luz, manipulación, personas alrededor y contacto con mascotas. Mantén al animal en un lugar tranquilo, seguro, oscuro o con poca luz y con temperatura moderada mientras sigues las indicaciones recibidas. Si un profesional te indica cubrir parcialmente al animal, utiliza una tela ligera y asegúrate de no dificultar su respiración ni aumentar su temperatura. No lo intentes con animales grandes, peligrosos o que no puedas manipular con seguridad.",
     keywords: mergeFaqSearchKeywords(
       animals.birds,
       animals.mammals,

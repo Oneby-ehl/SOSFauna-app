@@ -166,7 +166,7 @@ export default function LandingPage() {
     }
 
     const message =
-      "Hay un aviso sin finalizar.\n\n¿Deseas eliminarlo y comenzar uno nuevo?";
+      "Hay un aviso sin finalizar.\n\n¿Deseas eliminarlo e iniciar una nueva guía de ayuda?";
 
     if (Platform.OS === "web") {
       if (window.confirm(message)) void openNewCase();
@@ -176,7 +176,7 @@ export default function LandingPage() {
     Alert.alert("Aviso sin finalizar", message, [
       { text: "Cancelar", style: "cancel" },
       {
-        text: "Eliminar y comenzar",
+        text: "Eliminar e iniciar guía",
         style: "destructive",
         onPress: () => void openNewCase(),
       },
@@ -238,7 +238,7 @@ export default function LandingPage() {
             onPress={handleStartNewCase}
             disabled={checkingCase}
           >
-            <Text style={styles.headerButtonText}>Comenzar aviso</Text>
+            <Text style={styles.headerButtonText}>Guía de ayuda asistida</Text>
           </Pressable>
         </View>
       </View>
@@ -306,7 +306,7 @@ export default function LandingPage() {
                     isCompact && styles.caseButtonTextCompact,
                   ]}
                 >
-                  {checkingCase ? "Comprobando…" : "Comenzar nuevo aviso"}
+                  {checkingCase ? "Comprobando…" : "Guía de ayuda asistida"}
                 </Text>
               </Pressable>
 
@@ -431,7 +431,7 @@ export default function LandingPage() {
 
         <View style={[styles.section, styles.processSection]}>
           <View style={styles.processIntro}>
-            <Text style={[styles.sectionTitle, styles.processTitle]}>
+            <Text accessibilityRole="header" aria-level={2} style={[styles.sectionTitle, styles.processTitle]}>
               Ayudar también significa no intervenir cuando no es necesario
             </Text>
 
@@ -460,7 +460,7 @@ export default function LandingPage() {
         </View>
 
         <View style={[styles.section, styles.animalScopeSection]}>
-          <Text style={[styles.sectionTitle, styles.animalScopeTitle]}>
+          <Text accessibilityRole="header" aria-level={2} style={[styles.sectionTitle, styles.animalScopeTitle]}>
             ¿Qué animales incluye SOS Fauna España?
           </Text>
 
@@ -601,6 +601,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
   headerButton: {
+    flexShrink: 1,
     backgroundColor: "#14532d",
     borderRadius: 12,
     paddingHorizontal: 18,
