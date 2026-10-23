@@ -1,10 +1,14 @@
 import { Stack } from 'expo-router';
 import AppVersionGate from "@/components/AppVersionGate";
 import { TopicFaqBackButton, TopicFaqHeaderTitle } from "@/components/faq/TopicFaqHeader";
+import { I18nProvider } from "@/i18n/I18nProvider";
+import { LanguagePreviewBar } from "@/components/i18n/LanguagePreviewBar";
 
 export default function RootLayout() {
   return (
+    <I18nProvider>
     <AppVersionGate>
+      <LanguagePreviewBar />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: '#f5f7f8' },
@@ -66,5 +70,6 @@ export default function RootLayout() {
         />
       </Stack>
     </AppVersionGate>
+    </I18nProvider>
   );
 }

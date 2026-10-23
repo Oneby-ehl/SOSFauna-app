@@ -1,5 +1,13 @@
+import { getEffectiveCatalog } from "@/i18n/translate";
 import * as Clipboard from "expo-clipboard";
 import { Alert, Platform, Share } from "react-native";
+import { createTranslator } from "@/i18n/translate";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
+
+// Keep the public sharing API and callbacks unchanged during Spanish-only extraction.
+const generalTexts = getEffectiveCatalog();
+
+const t = createTranslator(DEFAULT_LOCALE);
 
 type RescueShareMessageInput = {
   animalStateLabel: string;
@@ -14,9 +22,9 @@ type RescueShareMessageInput = {
   dateLine?: string;
 };
 
-function lowercaseFirst(value: string) {
+function lowercaseFirst(value: string, locale: Locale = DEFAULT_LOCALE) {
   if (!value) return value;
-  return value.charAt(0).toLocaleLowerCase("es-ES") + value.slice(1);
+  return value.charAt(0).toLocaleLowerCase(locale === "en" ? "en-GB" : "es-ES") + value.slice(1);
 }
 
 function normalizeLine(value: string | null | undefined) {
@@ -39,7 +47,9 @@ export function buildRescueShareMessage({
   hasPhoto = false,
   hasVideo = false,
   dateLine,
-}: RescueShareMessageInput) {
+}: RescueShareMessageInput, locale: Locale = DEFAULT_LOCALE) {
+  const generalTexts = getEffectiveCatalog(locale);
+  const lowercaseLabel = (value: string) => lowercaseFirst(value, locale);
   const normalizedAnimalPositionLabel = normalizeLine(animalPositionLabel);
   const normalizedAnimalEnvironmentLabel = normalizeLine(
     animalEnvironmentLabel,
@@ -47,22 +57,22 @@ export function buildRescueShareMessage({
   const normalizedAnimalPlaceLabel = normalizeLine(animalPlaceLabel);
   const normalizedDateLine = normalizeLine(dateLine);
   const situationLines = [
-    `• Estado: ${lowercaseFirst(animalStateLabel)}`,
-    `• Tipo: ${lowercaseFirst(animalTypeLabel)}`,
+    `${generalTexts.rescueMessage.statePrefix}${lowercaseLabel(animalStateLabel)}`,
+    `${generalTexts.rescueMessage.animalTypePrefix}${lowercaseLabel(animalTypeLabel)}`,
     normalizedAnimalPositionLabel
-      ? `• Dónde está: ${lowercaseFirst(normalizedAnimalPositionLabel)}`
+      ? `${generalTexts.rescueMessage.positionPrefix}${lowercaseLabel(normalizedAnimalPositionLabel)}`
       : null,
     normalizedAnimalEnvironmentLabel
-      ? `• Entorno: ${lowercaseFirst(normalizedAnimalEnvironmentLabel)}`
+      ? `${generalTexts.rescueMessage.environmentPrefix}${lowercaseLabel(normalizedAnimalEnvironmentLabel)}`
       : null,
     !normalizedAnimalPositionLabel &&
     !normalizedAnimalEnvironmentLabel &&
     normalizedAnimalPlaceLabel
-      ? `• Dónde está el animal: ${lowercaseFirst(normalizedAnimalPlaceLabel)}`
+      ? `${generalTexts.rescueMessage.legacyPlacePrefix}${lowercaseLabel(normalizedAnimalPlaceLabel)}`
       : null,
     observedSigns.length > 0
-      ? `• Señales observadas: ${observedSigns
-          .map(lowercaseFirst)
+      ? `${generalTexts.rescueMessage.observedSignsPrefix}${observedSigns
+          .map(lowercaseLabel)
           .join(", ")}`
       : null,
   ].filter(Boolean);
@@ -71,37 +81,36 @@ export function buildRescueShareMessage({
     .map(normalizeLine)
     .filter((line): line is string => Boolean(line));
   const mediaLines = [
-    hasPhoto ? "• Foto disponible" : null,
-    hasVideo ? "• Vídeo disponible" : null,
+    hasPhoto ? generalTexts.rescueMessage.photoAvailable : null,
+    hasVideo ? generalTexts.rescueMessage.videoAvailable : null,
   ].filter(Boolean);
   const detailLines = [...usefulLocationLines, ...mediaLines];
 
   return [
-    "AVISO DE RESCATE DE FAUNA",
+    generalTexts.rescueMessage.title,
     "",
-    `He encontrado un animal ${lowercaseFirst(
+    `${generalTexts.rescueMessage.introductionPrefix}${lowercaseLabel(
       animalStateLabel,
-    )} que puede necesitar ayuda.`,
+    )}${generalTexts.rescueMessage.introductionSuffix}`,
     "",
-    "Situación",
+    generalTexts.rescueMessage.situationHeading,
     ...situationLines,
     detailLines.length > 0 ? "" : null,
-    detailLines.length > 0 ? "Información adicional" : null,
+    detailLines.length > 0 ? generalTexts.rescueMessage.additionalHeading : null,
     ...detailLines,
     normalizedDateLine ? "" : null,
     normalizedDateLine,
     "",
-    "Información recopilada con SOS Fauna España",
+    generalTexts.rescueMessage.attribution,
     "https://sosfauna.es",
   ]
     .filter(keepMessageLine)
     .join("\n");
 }
 
-export const SOS_FAUNA_SHARE_TITLE = "SOS Fauna España";
+export const SOS_FAUNA_SHARE_TITLE = t("common", "brand");
 export const SOS_FAUNA_SHARE_URL = "https://sosfauna.es";
-export const SOS_FAUNA_SHARE_TEXT =
-  "Ayuda y orientación si encuentras un animal silvestre herido, atrapado o en peligro.";
+export const SOS_FAUNA_SHARE_TEXT = t("appSharing", "description");
 
 export function buildSosFaunaShareMessage() {
   return [
@@ -145,12 +154,12 @@ export async function shareSosFaunaApp() {
   await Clipboard.setStringAsync(buildSosFaunaShareMessage());
 
   if (Platform.OS === "web") {
-    window.alert("Mensaje copiado al portapapeles.");
+    window.alert(t("appSharing", "copiedAlert"));
     return;
   }
 
   Alert.alert(
-    "Mensaje copiado",
-    "El mensaje de SOS Fauna España se ha copiado al portapapeles.",
+    t("appSharing", "copiedTitle"),
+    t("appSharing", "copiedMessage"),
   );
 }

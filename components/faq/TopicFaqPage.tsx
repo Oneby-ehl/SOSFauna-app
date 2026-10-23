@@ -2,16 +2,22 @@ import { Link, Stack } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { SeoHead } from "@/components/seo/SeoHead";
-import { faqTopics, type FaqTopicId } from "@/data/faqTopics";
-import { searchFaqItems } from "@/utils/faqSearch";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+import { TopicFaqBackButton, TopicFaqHeaderTitle } from "./TopicFaqHeader";
+import { getFaqTopicsForLocale, type FaqTopicId } from "@/data/faqTopics";
+import { getFaqSearchEngine } from "@/utils/faqSearch";
 import TopicFaqAccordion, { TopicFaqAccordionStyles } from "./TopicFaqAccordion";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
+  const faqTopics = getFaqTopicsForLocale(locale);
+  const { searchFaqItems } = getFaqSearchEngine(locale);
   const topic = faqTopics[topicId];
   const [query, setQuery] = useState("");
   const inputRef = useRef<TextInput>(null);
-  const results = useMemo(() => searchFaqItems(topic.items, query), [topic.items, query]);
+  const results = useMemo(() => searchFaqItems(topic.items, query), [topic.items, query, searchFaqItems]);
   const structuredData = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -30,11 +36,14 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
   return (
     <>
       <SeoHead title={topic.title} description={topic.description} path={topic.path} structuredData={query.trim() ? undefined : structuredData} />
-      <Stack.Screen options={{ headerShown: true, title: topic.heading }} />
+      <Stack.Screen options={{ headerShown: true, title: topic.heading, ...(locale === "en" ? {
+        headerTitle: TopicFaqHeaderTitle,
+        headerLeft: ({ tintColor }: { tintColor?: string }) => <TopicFaqBackButton tintColor={tintColor} />,
+      } : {}) }} />
       <TopicFaqAccordionStyles />
       <ScrollView role="main" style={styles.screen} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" stickyHeaderIndices={[1]}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
+          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
           <Text accessibilityRole="header" aria-level={1} style={styles.title}>{topic.heading}</Text>
           <Text style={styles.intro}>{topic.intro}</Text>
         </View>
@@ -43,14 +52,14 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
             <TextInput
               ref={inputRef}
               accessibilityLabel={topic.searchLabel}
-              placeholder="Buscar una pregunta…"
+              placeholder={t("faqUi", "searchPlaceholder")}
               value={query}
               onChangeText={setQuery}
               returnKeyType="search"
               style={[styles.input, query.length > 0 && styles.inputWithClear]}
             />
             {query.length > 0 ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="Limpiar búsqueda" hitSlop={8} onPress={clearSearch} style={styles.clear}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t("faqUi", "clearSearch")} hitSlop={8} onPress={clearSearch} style={styles.clear}>
                 <Text style={styles.clearText}>✕</Text>
               </Pressable>
             ) : null}
@@ -63,22 +72,22 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
                 <View style={styles.answerLinks}>
                   {item.showCreateNotice ? (
                     <View style={styles.createNoticeBox}>
-                      <Text style={styles.helpTitle}>¿Tienes dudas sobre este caso?</Text>
-                      <Text style={styles.helpText}>La Guía de ayuda asistida de SOS Fauna España te ayudará a valorar la situación paso a paso.</Text>
-                      <Link href="/" asChild>
-                        <Pressable accessibilityRole="button" accessibilityLabel="Guía de ayuda asistida" style={styles.helpButton}>
-                          <Text style={styles.helpButtonText}>Guía de ayuda asistida</Text>
+                      <Text style={styles.helpTitle}>{t("faqUi", "caseDoubtTitle")}</Text>
+                      <Text style={styles.helpText}>{t("faqUi", "caseDoubtText")}</Text>
+                      <Link href={pagePath("home")} asChild>
+                        <Pressable accessibilityRole="button" accessibilityLabel={t("navigation", "guide")} style={styles.helpButton}>
+                          <Text style={styles.helpButtonText}>{t("navigation", "guide")}</Text>
                         </Pressable>
                       </Link>
                     </View>
                   ) : null}
                   {item.showRecoveryCenters ? (
                     <View style={styles.recoveryCentersBox}>
-                      <Text style={styles.helpTitle}>¿Necesitas localizar un centro?</Text>
-                      <Text style={styles.helpText}>Consulta los centros de recuperación y teléfonos de ayuda disponibles en tu provincia.</Text>
-                      <Link href="/centros" asChild>
+                      <Text style={styles.helpTitle}>{t("faqUi", "centersPromptTitle")}</Text>
+                      <Text style={styles.helpText}>{t("faqUi", "centersPromptText")}</Text>
+                      <Link href={pagePath("centers")} asChild>
                         <Pressable accessibilityRole="button" style={styles.helpButton}>
-                          <Text style={styles.helpButtonText}>Centros de Recuperación y teléfonos de ayuda</Text>
+                          <Text style={styles.helpButtonText}>{t("navigation", "centers")}</Text>
                         </Pressable>
                       </Link>
                     </View>
@@ -87,12 +96,12 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
               ) : null}
             </TopicFaqAccordion>
           ))}
-          {results.length === 0 ? <Text style={styles.intro}>No hemos encontrado preguntas que coincidan con tu búsqueda en este tema.</Text> : null}
+          {results.length === 0 ? <Text style={styles.intro}>{t("faqUi", "topicNoResults")}</Text> : null}
         </View>
         <View style={styles.navigation}>
-          <Link href="/" asChild>
+          <Link href={pagePath("home")} asChild>
             <Pressable style={styles.backButton}>
-              <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
+              <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
             </Pressable>
           </Link>
         </View>

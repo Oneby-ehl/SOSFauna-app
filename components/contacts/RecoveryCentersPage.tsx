@@ -12,11 +12,13 @@ import {
 } from "react-native";
 
 import PublicRecoveryCenters from "./PublicRecoveryCenters";
+import { matchesProvinceHelpGroup } from "./contactSearch";
+import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 
 import { SectionCard } from "@/components/SectionCard";
 import {
   getRecoveryCenterProvinceContacts,
-  HELP_CONTACTS_LEGAL_NOTICE,
+  getHelpContactsLegalNotice,
   NATIONAL_HELP_CONTACTS,
 } from "@/data/helpContacts";
 import {
@@ -25,6 +27,11 @@ import {
   type MarineHelpResourceType,
 } from "@/data/marineHelpContacts";
 import type { ProvinceContactItem } from "@/lib/provinceContacts";
+import { useI18n } from "@/i18n/I18nProvider";
+import { getEffectiveCatalog } from "@/i18n/translate";
+import { getHelpContactName, getHelpContactNote } from "@/data/helpContactText";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
+
 
 type RecoveryCentersContentProps = {
   provinceSearch: string;
@@ -56,21 +63,23 @@ export type ProvinceHelpGroup = {
   marineContacts: MarineHelpContactItem[];
 };
 
-const getNationalContactLabel = (phone: string) => {
-  if (phone === "112") return "🚨 Emergencias";
-  if (phone === "062") return "🌿 SEPRONA";
-  if (phone === "092") return "🚓 Policía Municipal / Local";
+const getNationalContactLabel = (phone: string, locale: Locale = DEFAULT_LOCALE) => {
+  const labels = getEffectiveCatalog(locale).centers;
+  if (phone === "112") return labels.nationalEmergency;
+  if (phone === "062") return labels.nationalSeprona;
+  if (phone === "092") return labels.nationalLocalPolice;
 
-  return "👮 Policía Nacional";
+  return labels.nationalPolice;
 };
 
-const getMarineResourceTypeLabel = (type: MarineHelpResourceType) => {
-  if (type === "emergency") return "Emergencias";
-  if (type === "strandingNetwork") return "Red de varamientos";
-  if (type === "recoveryCenter") return "Centro especializado";
-  if (type === "specializedEntity") return "Entidad especializada";
+const getMarineResourceTypeLabel = (type: MarineHelpResourceType, locale: Locale = DEFAULT_LOCALE) => {
+  const labels = getEffectiveCatalog(locale).centers;
+  if (type === "emergency") return labels.emergencyType;
+  if (type === "strandingNetwork") return labels.strandingNetworkType;
+  if (type === "recoveryCenter") return labels.recoveryCenterType;
+  if (type === "specializedEntity") return labels.specializedEntityType;
 
-  return "Contacto adicional";
+  return labels.additionalContactType;
 };
 
 const getVisibleContactCount = (item: ProvinceHelpGroup) =>
@@ -130,6 +139,8 @@ export function RecoveryCentersContent({
   onShowHelpSourcesChange,
   onShowProvinceListChange,
 }: RecoveryCentersContentProps) {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
   const ContactSection = publicHeadings ? PublicContactSection : SectionCard;
   const provinceGroups = useMemo(getProvinceHelpGroups, []);
   const filteredProvinceContacts = useMemo(() => {
@@ -138,9 +149,9 @@ export function RecoveryCentersContent({
     if (!normalizedSearch) return provinceGroups;
 
     return provinceGroups.filter((item) =>
-      normalizeProvinceSearch(item.province).includes(normalizedSearch),
+      matchesProvinceHelpGroup(item, normalizedSearch, normalizeProvinceSearch, locale),
     );
-  }, [provinceGroups, provinceSearch]);
+  }, [provinceGroups, provinceSearch, locale]);
   const province = provinceGroups.find(
     (item) => item.province === selectedProvince,
   );
@@ -153,7 +164,7 @@ export function RecoveryCentersContent({
     >
       <View style={styles.contactTextBlock}>
         <Text style={styles.contactName}>{contact.name}</Text>
-        <Text style={styles.contactNote}>{contact.note}</Text>
+        <Text style={styles.contactNote}>{getHelpContactNote("terrestrial", contact, locale)}</Text>
       </View>
       <Text style={styles.contactPhone}>{contact.phone}</Text>
     </Pressable>
@@ -163,16 +174,16 @@ export function RecoveryCentersContent({
     const content = (
       <>
         <View style={styles.contactTextBlock}>
-          <Text style={styles.contactName}>{contact.name}</Text>
+          <Text style={styles.contactName}>{getHelpContactName("marine", contact, locale)}</Text>
           <Text style={styles.contactType}>
-            {getMarineResourceTypeLabel(contact.type)}
+            {getMarineResourceTypeLabel(contact.type, locale)}
           </Text>
-          <Text style={styles.contactNote}>{contact.note}</Text>
+          <Text style={styles.contactNote}>{getHelpContactNote("marine", contact, locale)}</Text>
         </View>
         {contact.phone ? (
           <Text style={styles.contactPhone}>{contact.phone}</Text>
         ) : (
-          <Text style={styles.infoOnlyLabel}>Info</Text>
+          <Text style={styles.infoOnlyLabel}>{t("centers", "info")}</Text>
         )}
       </>
     );
@@ -219,12 +230,12 @@ export function RecoveryCentersContent({
               style={styles.secondaryButton}
               onPress={() => onSelectedProvinceChange(null)}
             >
-              <Text style={styles.secondaryButtonText}>Volver a provincias</Text>
+              <Text style={styles.secondaryButtonText}>{t("centers", "backToProvinces")}</Text>
             </Pressable>
           ) : null}
 
           <Text style={styles.sectionDescription}>
-            Estos son los contactos disponibles para esta provincia.
+            {t("centers", "provinceContactsIntro")}
           </Text>
 
           {province.terrestrialContacts.length ? (
@@ -235,7 +246,7 @@ export function RecoveryCentersContent({
                   styles.contactGroupLabelTerrestrial,
                 ]}
               >
-                🍃 Fauna terrestre y aves
+                {t("centers", "terrestrialHeading")}
               </Text>
               {province.terrestrialContacts.map(renderTerrestrialContact)}
             </View>
@@ -246,11 +257,10 @@ export function RecoveryCentersContent({
               <Text
                 accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={[styles.contactGroupLabel, styles.contactGroupLabelMarine]}
               >
-                🌊 Fauna marina
+                {t("centers", "marineHeading")}
               </Text>
               <Text style={styles.contactGroupDescription}>
-                Cetáceos, tortugas marinas, focas, tiburones/rayas y otros
-                animales marinos varados o en problemas.
+                {t("centers", "marineIntro")}
               </Text>
               {province.marineContacts.map(renderMarineContact)}
             </View>
@@ -262,23 +272,23 @@ export function RecoveryCentersContent({
 
   if (showProvinceList) {
     return (
-      <ContactSection title="Teléfonos por provincias">
+      <ContactSection title={t("centers", "provincePhonesTitle")}>
         <View style={styles.sectionContent}>
           {showInternalBackButtons ? (
             <Pressable
               style={styles.secondaryButton}
               onPress={() => onShowProvinceListChange(false)}
             >
-              <Text style={styles.secondaryButtonText}>Volver a teléfonos</Text>
+              <Text style={styles.secondaryButtonText}>{t("centers", "backToPhones")}</Text>
             </Pressable>
           ) : null}
 
           <Text style={styles.sectionDescription}>
-            Selecciona una provincia para ver los recursos disponibles.
+            {t("centers", "selectProvince")}
           </Text>
 
           <TextInput
-            placeholder="Buscar provincia"
+            placeholder={t("centers", "searchProvince")}
             value={provinceSearch}
             onChangeText={onProvinceSearchChange}
             style={styles.input}
@@ -295,18 +305,18 @@ export function RecoveryCentersContent({
                 <View style={styles.contactTextBlock}>
                   <Text style={styles.contactName}>{item.province}</Text>
                   <Text style={styles.contactNote}>
-                    {getVisibleContactCount(item)} contacto
-                    {getVisibleContactCount(item) === 1 ? "" : "s"} telefónico
-                    {getVisibleContactCount(item) === 1 ? "" : "s"}
+                    {getVisibleContactCount(item)}{t("centers", "contactCountNoun")}
+                    {getVisibleContactCount(item) === 1 ? "" : t("centers", "pluralSuffix")}{t("centers", "contactCountAdjective")}
+                    {getVisibleContactCount(item) === 1 ? "" : t("centers", "adjectivePluralSuffix")}
                   </Text>
                 </View>
-                <Text style={styles.contactPhone}>Ver</Text>
+                <Text style={styles.contactPhone}>{t("centers", "show")}</Text>
               </Pressable>
             ))
           ) : (
             <View style={styles.warningBox}>
               <Text style={styles.warningText}>
-                No se han encontrado provincias con ese nombre.
+                {t("centers", "noResults")}
               </Text>
             </View>
           )}
@@ -316,23 +326,21 @@ export function RecoveryCentersContent({
   }
 
   return (
-    <ContactSection title="Teléfonos de ayuda">
+    <ContactSection title={t("centers", "helpTitle")}>
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          {publicHeadings ? (<>Elige el <Link href="/faq">servicio adecuado</Link> según la urgencia y la ubicación del animal.</>) : ("Elige el servicio adecuado según la urgencia y la ubicación del animal.")}
+          {publicHeadings ? (<>{t("centers", "chooseServicePrefix")}<Link href={pagePath("faq")}>{t("centers", "appropriateService")}</Link>{t("centers", "chooseServiceSuffix")}</>) : (t("centers", "chooseService"))}
         </Text>
 
         <Text style={styles.sectionDescription}>
-          Llama al 112 si existe peligro inmediato para personas, tráfico o
-          seguridad. Para otros casos, contacta con el servicio más adecuado.
+          {t("centers", "emergencyGuidance")}
         </Text>
 
         <Text style={styles.sectionDescription}>
-          Ante fauna marina varada, herida o en problemas, el 112 activa los
-          servicios correspondientes en muchos territorios.
+          {t("centers", "marineGuidance")}
         </Text>
 
-        <Text accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={styles.subheading}>Ayuda inmediata</Text>
+        <Text accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={styles.subheading}>{t("centers", "immediateHelp")}</Text>
 
         {NATIONAL_HELP_CONTACTS.map((contact) => (
           <Pressable
@@ -345,9 +353,9 @@ export function RecoveryCentersContent({
           >
             <View style={styles.contactTextBlock}>
               <Text style={styles.contactName}>
-                {getNationalContactLabel(contact.phone)}
+                {getNationalContactLabel(contact.phone, locale)}
               </Text>
-              <Text style={styles.contactNote}>{contact.note}</Text>
+              <Text style={styles.contactNote}>{getHelpContactNote("national", contact, locale)}</Text>
             </View>
             <View style={styles.contactPhonePill}>
               <Text style={styles.contactPhonePillText}>{contact.phone}</Text>
@@ -355,11 +363,11 @@ export function RecoveryCentersContent({
           </Pressable>
         ))}
 
-        <Text accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={styles.subheading}>Ayuda por provincias</Text>
+        <Text accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={styles.subheading}>{t("centers", "provinceHelp")}</Text>
 
         <Pressable style={styles.primaryButton} onPress={openProvinceList}>
           <Text style={styles.primaryButtonText}>
-            📍 Buscar ayuda en mi provincia
+            {t("centers", "openProvinceDirectory")}
           </Text>
         </Pressable>
 
@@ -367,12 +375,12 @@ export function RecoveryCentersContent({
           style={styles.secondaryButton}
           onPress={() => onShowHelpSourcesChange(!showHelpSources)}
         >
-          <Text style={styles.secondaryButtonText}>Fuentes y aviso legal</Text>
+          <Text style={styles.secondaryButtonText}>{t("centers", "sourcesAndLegal")}</Text>
         </Pressable>
 
         {showHelpSources ? (
           <View style={styles.infoBox}>
-            <Text style={styles.infoText}>{HELP_CONTACTS_LEGAL_NOTICE}</Text>
+            <Text style={styles.infoText}>{getHelpContactsLegalNotice(locale)}</Text>
           </View>
         ) : null}
       </View>
@@ -381,6 +389,8 @@ export function RecoveryCentersContent({
 }
 
 export default function RecoveryCentersPage() {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
   const publicProvinceGroups = useMemo(getProvinceHelpGroups, []);
   const [showHelpSources, setShowHelpSources] = useState(false);
   const [showProvinceList, setShowProvinceList] = useState(false);
@@ -390,13 +400,12 @@ export default function RecoveryCentersPage() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
+        <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
         <Text accessibilityRole="header" aria-level={1} style={styles.title}>
-          Centros de Recuperación y teléfonos de ayuda
+          {t("navigation", "centers")}
         </Text>
         <Text style={styles.intro}>
-          Consulta teléfonos de ayuda inmediata, centros de recuperación, redes
-          y recursos especializados por provincia.
+          {t("centers", "intro")}
         </Text>
       </View>
 
@@ -404,8 +413,8 @@ export default function RecoveryCentersPage() {
         <PublicRecoveryCenters
           groups={publicProvinceGroups}
           normalizeSearch={normalizeProvinceSearch}
-          nationalContactLabel={getNationalContactLabel}
-          marineResourceLabel={getMarineResourceTypeLabel}
+          nationalContactLabel={(phone) => getNationalContactLabel(phone, locale)}
+          marineResourceLabel={(type) => getMarineResourceTypeLabel(type, locale)}
         />
       ) : (
       <RecoveryCentersContent
@@ -422,9 +431,9 @@ export default function RecoveryCentersPage() {
       />
       )}
 
-      <Link href="/" asChild>
+      <Link href={pagePath("home")} asChild>
         <Pressable style={styles.backButton}>
-          <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
+          <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
         </Pressable>
       </Link>
     </ScrollView>

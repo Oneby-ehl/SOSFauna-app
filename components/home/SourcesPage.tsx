@@ -2,133 +2,136 @@ import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ExternalLink } from "@/components/external-link";
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const institutionalSources = [
   {
-    name: "Emergencias 112",
-    description:
-      "Servicio de emergencias disponible en toda España. Puede derivar el aviso al organismo competente de cada comunidad autónoma.",
+    nameKey: "institutional1Name",
+    descriptionKey:
+      "institutional1Description",
     url: "https://www.proteccioncivil.es/catalogo/info112/",
-    displayUrl: "Protección Civil — Información 112",
+    displayUrlKey: "institutional1DisplayUrl",
   },
   {
-    name: "Guardia Civil — SEPRONA",
-    description:
-      "Servicio de Protección de la Naturaleza de la Guardia Civil.",
+    nameKey: "institutional2Name",
+    descriptionKey:
+      "institutional2Description",
     url: "https://www.guardiacivil.es",
-    displayUrl: "www.guardiacivil.es",
+    displayUrlKey: "institutional2DisplayUrl",
   },
   {
-    name: "Policía Nacional",
-    description:
-      "Información y canales oficiales de atención de la Policía Nacional.",
+    nameKey: "institutional3Name",
+    descriptionKey:
+      "institutional3Description",
     url: "https://www.policia.es",
-    displayUrl: "www.policia.es",
+    displayUrlKey: "institutional3DisplayUrl",
   },
   {
-    name: "Agentes Forestales de la Comunidad de Madrid",
-    description:
-      "Servicio competente en materia de fauna silvestre y medio natural dentro de la Comunidad de Madrid.",
+    nameKey: "institutional4Name",
+    descriptionKey:
+      "institutional4Description",
     url: "https://www.comunidad.madrid/centros/emisora-cuerpo-agentes-forestales",
-    displayUrl: "Emisora del Cuerpo de Agentes Forestales",
+    displayUrlKey: "institutional4DisplayUrl",
   },
-];
+] as const;
 
 const legalSources = [
   {
-    name: "Ley 42/2007, de 13 de diciembre, del Patrimonio Natural y de la Biodiversidad",
-    description:
-      "Es la norma básica estatal para la conservación del patrimonio natural y la biodiversidad. Entre otras cuestiones, establece medidas de protección para las especies silvestres.",
+    nameKey: "legal1Name",
+    descriptionKey:
+      "legal1Description",
     url: "https://www.boe.es/buscar/act.php?id=BOE-A-2007-21490",
-    displayUrl: "texto consolidado del BOE",
+    displayUrlKey: "legal1DisplayUrl",
   },
   {
-    name: "Real Decreto 139/2011: especies en régimen de protección especial y especies amenazadas",
-    description:
-      "Desarrolla el Listado de Especies Silvestres en Régimen de Protección Especial y el Catálogo Español de Especies Amenazadas.",
+    nameKey: "legal2Name",
+    descriptionKey:
+      "legal2Description",
     url: "https://www.boe.es/buscar/act.php?id=BOE-A-2011-3582",
-    displayUrl: "texto consolidado del BOE",
+    displayUrlKey: "legal2DisplayUrl",
   },
   {
-    name: "Normativa de las especies silvestres — MITECO",
-    description:
-      "Página oficial del Ministerio para la Transición Ecológica y el Reto Demográfico con el marco normativo estatal, europeo e internacional sobre conservación de especies silvestres.",
+    nameKey: "legal3Name",
+    descriptionKey:
+      "legal3Description",
     url: "https://www.miteco.gob.es/es/biodiversidad/temas/conservacion-de-especies/especies-silvestres/ce-silvestres-conservacion-normativa.html",
-    displayUrl: "MITECO",
+    displayUrlKey: "legal3DisplayUrl",
   },
-];
+] as const;
 
 const terrestrialSources = [
   {
-    name: "SEO/BirdLife",
-    description:
-      "Organización de conservación de referencia para aves. Aporta información sobre aves silvestres, aves jóvenes, vencejos y orientación general útil para decidir cuándo observar y cuándo pedir ayuda especializada.",
+    nameKey: "terrestrial1Name",
+    descriptionKey:
+      "terrestrial1Description",
     url: "https://seo.org/",
-    displayUrl: "SEO/BirdLife",
+    displayUrlKey: "terrestrial1DisplayUrl",
   },
   {
-    name: "GREFA",
-    description:
-      "Centro especializado y referencia práctica en recuperación de fauna silvestre. Sus recursos ayudan a contextualizar la atención inicial prudente ante animales heridos o debilitados.",
+    nameKey: "terrestrial2Name",
+    descriptionKey:
+      "terrestrial2Description",
     url: "https://grefa.org/",
-    displayUrl: "GREFA",
+    displayUrlKey: "terrestrial2DisplayUrl",
   },
   {
-    name: "Falciot Negre",
-    description:
-      "Recurso especializado en vencejos. Respalda criterios prácticos sobre cuidados iniciales, comportamiento, biología y liberación segura sin lanzar al animal al aire.",
+    nameKey: "terrestrial3Name",
+    descriptionKey:
+      "terrestrial3Description",
     url: "http://www.falciotnegre.com/",
-    displayUrl: "Falciot Negre",
+    displayUrlKey: "terrestrial3DisplayUrl",
   },
   {
-    name: "SECEMU",
-    description:
-      "Entidad técnica dedicada al estudio y conservación de los murciélagos. Aporta orientación sobre identificación de crías y adultos, manipulación segura y contacto con centros o especialistas.",
+    nameKey: "terrestrial4Name",
+    descriptionKey:
+      "terrestrial4Description",
     url: "https://secemu.org/recomendaciones/que-hacer-si-te-encuentras-un-murcielago/",
-    displayUrl: "SECEMU",
+    displayUrlKey: "terrestrial4DisplayUrl",
   },
-];
+] as const;
 
 const marineSources = [
   {
-    name: "Fundación Oceanogràfic — animales marinos en problemas",
-    description:
-      "Centro especializado de referencia en la Comunitat Valenciana. Resume criterios ciudadanos generales ante cetáceos, tortugas y tiburones: avisar al 112, mantener distancia, no manipular ni alimentar, no retirar residuos enganchados y registrar información útil.",
+    nameKey: "marine1Name",
+    descriptionKey:
+      "marine1Description",
     url: "https://fundacionoceanografic.org/sumate/que-hacer-si-encuentras-un-animalmarino-en-problemas/",
-    displayUrl: "Fundación Oceanogràfic",
+    displayUrlKey: "marine1DisplayUrl",
   },
   {
-    name: "Fundación Palma Aquarium — tortugas marinas",
-    description:
-      "Centro de rescate de referencia en Baleares. Aporta pautas específicas para tortugas marinas vivas, como avisar al 112, no retirar redes o sedales, evitar molestias y esperar indicaciones de especialistas.",
+    nameKey: "marine2Name",
+    descriptionKey:
+      "marine2Description",
     url: "https://palmaaquarium.com/tortugas-del-centro-de-rescate",
-    displayUrl: "Palma Aquarium",
+    displayUrlKey: "marine2DisplayUrl",
   },
   {
-    name: "Junta de Andalucía — varamientos de mamíferos y tortugas marinas",
-    description:
-      "Página oficial sobre la atención de emergencias frente a varamientos en Andalucía. Respalda la comunicación a través del 112 y la intervención de equipos técnicos ante animales vivos o muertos.",
+    nameKey: "marine3Name",
+    descriptionKey:
+      "marine3Description",
     url: "https://www.juntadeandalucia.es/medioambiente/portal/areas-tematicas/biodiversidad-y-vegetacion/ecosistemas-y-capital-natural/medio-marino/atencion-de-emergencias-frente-a-varamientos-de-mamiferos-y-tortugas-marinas",
-    displayUrl: "Junta de Andalucía",
+    displayUrlKey: "marine3DisplayUrl",
   },
   {
-    name: "Gobierno de Canarias — protocolo de tortugas marinas",
-    description:
-      "Documentación oficial canaria sobre varamientos de tortugas marinas. Sirve como referencia técnica sobre respuesta, toma de datos, recuperación, gestión de animales muertos y liberación de ejemplares recuperados.",
+    nameKey: "marine4Name",
+    descriptionKey:
+      "marine4Description",
     url: "https://www.gobiernodecanarias.org/medioambiente/publicaciones/material-publicado/libros/varamiento-cetaceos-tortugas/index.html",
-    displayUrl: "Gobierno de Canarias",
+    displayUrlKey: "marine4DisplayUrl",
   },
   {
-    name: "MITECO y Gobierno de Canarias — buenas prácticas en ZEC marinas",
-    description:
-      "Guía institucional de buenas prácticas para Zonas Especiales de Conservación marinas de Canarias. Aporta contexto de conservación, reducción de molestias y prevención de impactos sobre cetáceos y tortugas marinas.",
+    nameKey: "marine5Name",
+    descriptionKey:
+      "marine5Description",
     url: "https://www.gobiernodecanarias.org/medioambiente/descargas/Biodiversidad/documentos-interes/buenas-practicas/2012_09_18_Guia_BPRCT_REDNATURA_web_tcm7-229984.pdf",
-    displayUrl: "guía en PDF",
+    displayUrlKey: "marine5DisplayUrl",
   },
-];
+] as const;
 
 export default function SourcesPage() {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
   return (
     <>
       <SeoHead
@@ -137,7 +140,7 @@ export default function SourcesPage() {
         path="/sources"
       />
       <Stack.Screen
-        options={{ title: "Recursos de información | SOS Fauna España" }}
+        options={{ title: locale === "en" ? `${t("navigation", "sources")} | SOS Fauna España` : "Recursos de información | SOS Fauna España" }}
       />
 
       <ScrollView
@@ -145,30 +148,27 @@ export default function SourcesPage() {
         contentContainerStyle={styles.container}
       >
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text accessibilityRole="header" aria-level={1} style={styles.title}>Recursos de información</Text>
+          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole="header" aria-level={1} style={styles.title}>{t("navigation", "sources")}</Text>
 
           <Text style={styles.intro}>
-            La información y los teléfonos incluidos en SOS Fauna España se han
-            preparado utilizando referencias institucionales y recursos
-            públicos relacionados con emergencias, seguridad y protección de la
-            fauna silvestre.
+            {t("sources", "intro1")}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Recursos de información</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("navigation", "sources")}</Text>
 
           {institutionalSources.map((source) => (
-            <View key={source.name} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
+            <View key={source.nameKey} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{source.description}</Text>
+              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
                 <Pressable style={styles.linkButton}>
                   <Text style={styles.linkButtonText}>
-                    Visitar {source.displayUrl}
+                    {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
               </ExternalLink>
@@ -178,58 +178,47 @@ export default function SourcesPage() {
 
         <View style={styles.notice}>
           <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}>
-            Contacto fuera de la Comunidad de Madrid
+            {t("sources", "noticeTitle1")}
           </Text>
         
           <Text style={styles.noticeText}>
-            Los organismos responsables de la fauna silvestre dependen de cada
-            comunidad autónoma y pueden recibir distintas denominaciones, como agentes
-            forestales, agentes medioambientales o agentes rurales.
+            {t("sources", "noticeText1")}
           </Text>
         
           <Text style={styles.noticeText}>
-            No existe un directorio nacional único y suficientemente claro que reúna
-            todos estos servicios. Si la incidencia se produce fuera de la Comunidad
-            de Madrid y no conoces el organismo competente, contacta con el 112 para
-            que el aviso sea derivado al servicio correspondiente.
+            {t("sources", "noticeText2")}
           </Text>
         </View>
 
         <View style={styles.notice}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}><Link href="/centros">Contactos de ayuda</Link></Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}><Link href="/centros">{t("sources", "text1")}</Link></Text>
 
           <Text style={styles.noticeText}>
-            La aplicación también facilita teléfonos nacionales y contactos de
-            centros de recuperación, agentes medioambientales y otros recursos
-            organizados por provincias.
+            {t("sources", "noticeText3")}
           </Text>
 
           <Text style={styles.noticeText}>
-            Los datos de contacto pueden cambiar. Antes de realizar un
-            desplazamiento, conviene confirmar que el teléfono o el centro
-            continúan operativos.
+            {t("sources", "noticeText4")}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>🍃 Fauna terrestre y aves</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("sources", "sectionTitle1")}</Text>
 
           <Text style={styles.sectionIntro}>
-            Estas fuentes recogen algunos de los criterios utilizados para
-            orientar la actuación ante aves, vencejos, murciélagos y otros
-            animales silvestres terrestres que puedan necesitar ayuda.
+            {t("sources", "sectionIntro1")}
           </Text>
 
           {terrestrialSources.map((source) => (
-            <View key={source.name} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
+            <View key={source.nameKey} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{source.description}</Text>
+              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
                 <Pressable style={styles.linkButton}>
                   <Text style={styles.linkButtonText}>
-                    Visitar {source.displayUrl}
+                    {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
               </ExternalLink>
@@ -238,18 +227,18 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>🌊 Fauna marina</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("sources", "sectionTitle2")}</Text>
 
           {marineSources.map((source) => (
-            <View key={source.name} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
+            <View key={source.nameKey} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{source.description}</Text>
+              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
                 <Pressable style={styles.linkButton}>
                   <Text style={styles.linkButtonText}>
-                    Visitar {source.displayUrl}
+                    {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
               </ExternalLink>
@@ -261,28 +250,24 @@ export default function SourcesPage() {
           <View style={styles.sectionHeadingRow}>
             <Text style={styles.sectionIcon}>⚖️</Text>
             <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>
-              Normativa básica sobre fauna silvestre
+              {t("sources", "sectionTitle3")}
             </Text>
           </View>
 
           <Text style={styles.sectionIntro}>
-            La normativa española protege la fauna silvestre y regula
-            determinadas actuaciones sobre los animales y las especies
-            protegidas. En caso de duda, se recomienda contactar con los
-            servicios competentes antes de capturar, retener, trasladar o
-            manipular un animal silvestre.
+            {t("sources", "sectionIntro2")}
           </Text>
 
           {legalSources.map((source) => (
-            <View key={source.name} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{source.name}</Text>
+            <View key={source.nameKey} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{source.description}</Text>
+              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
                 <Pressable style={styles.linkButton}>
                   <Text style={styles.linkButtonText}>
-                    Visitar {source.displayUrl}
+                    {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
               </ExternalLink>
@@ -290,15 +275,13 @@ export default function SourcesPage() {
           ))}
 
           <Text style={styles.orientationNote}>
-            Esta información tiene carácter orientativo. La gestión de la fauna
-            silvestre corresponde en gran medida a las comunidades autónomas y
-            puede variar según el territorio y la especie.
+            {t("sources", "orientationNote1")}
           </Text>
         </View>
 
-        <Link href="/" asChild>
+        <Link href={pagePath("home")} asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
+            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
         </Link>
       </ScrollView>

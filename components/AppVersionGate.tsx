@@ -1,3 +1,5 @@
+import { getEffectiveCatalog } from "@/i18n/translate";
+import { useI18n } from "@/i18n/I18nProvider";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -23,6 +25,8 @@ function canCheckForUpdates(now: number): boolean {
 }
 
 export default function AppVersionGate({ children }: { children: ReactNode }) {
+  const { locale } = useI18n();
+  const generalTexts = getEffectiveCatalog(locale);
   const [availableVersion, setAvailableVersion] = useState<string | null>(null);
 
   const checkForUpdates = useCallback(async () => {
@@ -110,19 +114,16 @@ export default function AppVersionGate({ children }: { children: ReactNode }) {
       {availableVersion ? (
         <View style={styles.overlay}>
           <View style={styles.dialog}>
-            <Text style={styles.title}>Nueva versión disponible</Text>
-            <Text style={styles.message}>
-              Se ha publicado una nueva versión de SOS Fauna España con mejoras
-              y correcciones.
-            </Text>
+            <Text style={styles.title}>{generalTexts.versionGateUi.title}</Text>
+            <Text style={styles.message}>{generalTexts.versionGateUi.message}</Text>
 
             <View style={styles.actions}>
               <Pressable style={styles.primaryButton} onPress={handleReload}>
-                <Text style={styles.primaryButtonText}>Actualizar ahora</Text>
+                <Text style={styles.primaryButtonText}>{generalTexts.versionGateUi.update}</Text>
               </Pressable>
 
               <Pressable style={styles.secondaryButton} onPress={handleDismiss}>
-                <Text style={styles.secondaryButtonText}>Más tarde</Text>
+                <Text style={styles.secondaryButtonText}>{generalTexts.versionGateUi.later}</Text>
               </Pressable>
             </View>
           </View>

@@ -1,3 +1,10 @@
+import { getEffectiveCatalog } from "@/i18n/translate";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
+import { getFaqSearchVocabulary } from "@/data/faqSearchVocabulary";
+import { getFaqItemsForLocale, type FaqItem } from "@/data/faq";
+import { getFaqCategoryId, getFaqCategoryLabel } from "@/data/faqCategories";
+import { getFaqSearchEngine } from "@/utils/faqSearch";
+import { getAnimalSearchEngine } from "@/data/animalSearchCatalog";
 import {
   type AnimalCatalogSearchState,
   type AnimalSearchItem,
@@ -7,9 +14,8 @@ import {
 import { faqCategories, faqItems, swiftFaqPriorityIds } from "@/data/faq";
 import {
   type AnimalType,
-  COMMON_END,
   createInitialFlags,
-  getAdvice,
+  getAdvicePartsForLocale,
 } from "@/components/sos/SosAssistant";
 import { Link, Stack, useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
@@ -23,37 +29,30 @@ import {
   View,
 } from "react-native";
 
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 import { normalizeSearchText, searchFaqItems } from "@/utils/faqSearch";
+import { useI18n } from "@/i18n/I18nProvider";
 
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function removeAssistantNextStepParagraph(advice: string) {
-  return advice
-    .replace(new RegExp(`\\n*${escapeRegExp(COMMON_END)}$`), "")
-    .trim();
-}
+import { formatAdvice } from "@/utils/adviceComposition";
 
 const swiftFaqPriority = new Map<string, number>(
   swiftFaqPriorityIds.map((itemId, index) => [itemId, index]),
 );
 
 const speciesOverviewCategoryOrder = [
-  "Antes de actuar",
-  "Animales heridos o atrapados",
-  "Crías y animales jóvenes",
-  "Manipulación y cuidados",
-  "Contacto y emergencias",
-  "Conocer al vencejo",
-  "La aplicación",
+  "beforeActing",
+  "injuredOrTrapped",
+  "youngAnimals",
+  "handlingAndCare",
+  "contactAndEmergencies",
+  "swiftKnowledge",
+  "application",
 ] as const;
 
 function getSpeciesOverviewCategoryIndex(category: string) {
-  const normalizedCategory = normalizeSearchText(category);
+  const normalizedCategory = getFaqCategoryId(category as (typeof faqCategories)[number]);
   const categoryIndex = speciesOverviewCategoryOrder.findIndex(
-    (orderedCategory) => normalizeSearchText(orderedCategory) === normalizedCategory,
+    (orderedCategory) => orderedCategory === normalizedCategory,
   );
 
   return categoryIndex === -1
@@ -86,15 +85,7 @@ function prioritizeSelectedAnimalIntroItem(items: typeof faqItems) {
   });
 }
 
-const GENERAL_SWIFT_QUERIES = new Set(["vencejo", "vencejos", "apus apus"]);
-const BAT_FLIGHT_OR_GROUND_TERMS = [
-  "no vuela",
-  "no puede volar",
-  "que no vuela",
-  "en el suelo",
-  "suelo",
-];
-
+// Intent vocabulary is selected per language without changing Spanish priorities.
 const marineAnimalCategories = new Set<AnimalType>([
   "dolphin",
   "largeCetacean",
@@ -104,8 +95,8 @@ const marineAnimalCategories = new Set<AnimalType>([
   "otherMarine",
 ]);
 
-function isGeneralSwiftQuery(query: string) {
-  return GENERAL_SWIFT_QUERIES.has(normalizeSearchText(query));
+function isGeneralSwiftQuery(query: string, locale: Locale = DEFAULT_LOCALE) {
+  return getFaqSearchVocabulary(locale).generalSwiftQueries.has(normalizeSearchText(query));
 }
 
 function isMarineAnimal(animal: AnimalSearchItem | null) {
@@ -114,61 +105,63 @@ function isMarineAnimal(animal: AnimalSearchItem | null) {
   );
 }
 
-function getMarineAnimalFaqAnswer(animal: AnimalSearchItem) {
+function getMarineAnimalFaqAnswer(animal: AnimalSearchItem, locale: Locale = DEFAULT_LOCALE) {
+  const texts = getEffectiveCatalog(locale);
   const isFeminine = animal.grammaticalGender === "feminine";
   const marineFaqAnimalName =
     animal.faqDisplayNameWithArticle ?? animal.displayNameWithArticle;
   const usesMixedPluralAgreement = animal.category === "sharkRay";
   const injured = usesMixedPluralAgreement
-    ? "heridos"
+    ? texts.dynamicFaqGrammar.injuredPlural
     : isFeminine
-      ? "herida"
-      : "herido";
+      ? texts.dynamicFaqGrammar.injuredFemale
+      : texts.dynamicFaqGrammar.injuredMale;
   const stranded = usesMixedPluralAgreement
-    ? "varados"
+    ? texts.dynamicFaqGrammar.strandedPlural
     : isFeminine
-      ? "varada"
-      : "varado";
+      ? texts.dynamicFaqGrammar.strandedFemale
+      : texts.dynamicFaqGrammar.strandedMale;
   const entangled = usesMixedPluralAgreement
-    ? "enredados"
+    ? texts.dynamicFaqGrammar.entangledPlural
     : isFeminine
-      ? "enredada"
-      : "enredado";
-  const weak = usesMixedPluralAgreement ? "débiles" : "débil";
+      ? texts.dynamicFaqGrammar.entangledFemale
+      : texts.dynamicFaqGrammar.entangledMale;
+  const weak = usesMixedPluralAgreement ? texts.dynamicFaqGrammar.weakPlural : texts.dynamicFaqGrammar.weakSingular;
 
   if (animal.category === "seal") {
-    return "Una foca en tierra puede estar simplemente descansando. Si parece herida, muy débil, enredada o hay alguna situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.";
+    return texts.dynamicFaqCopy.sealResting;
   }
 
   if (animal.category === "otherMarine") {
-    return "Si has encontrado un animal marino herido, varado, enredado, débil o en una situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.";
+    return texts.dynamicFaqCopy.otherMarine;
   }
 
-  return `Si has encontrado ${marineFaqAnimalName} ${injured}, ${stranded}, ${entangled}, ${weak} o en una situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.`;
+  return `${texts.dynamicFaqCopy.marinePrefix}${marineFaqAnimalName} ${injured}, ${stranded}, ${entangled}, ${weak}${texts.dynamicFaqCopy.marineSuffix}`;
 }
 
-function getSwiftAnimalFaqAnswer() {
+function getSwiftAnimalFaqAnswer(locale: Locale = DEFAULT_LOCALE) {
+  const texts = getEffectiveCatalog(locale);
   return (
-    "🐦 AVE PEQUEÑA\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Si parece un vencejo, estar en el suelo no es normal: protégelo en una caja de cartón ventilada y consulta cuanto antes.\n\n" +
-    "❌ QUÉ NO HACER\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• No lo manipules para comprobar si está sano.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Recógelo con cuidado y con la mínima manipulación posible.\n" +
-    "• Mantenlo en una caja de cartón ventilada y bien cerrada, en un lugar tranquilo y protegido del frío o del calor extremo.\n" +
-    "• Contacta cuanto antes con un centro especializado, Agentes Forestales o Medioambientales."
+    texts.rescueHeadings.smallBirdParagraph +
+    texts.rescueHeadings.beforeInterveningLine +
+    texts.rescueInstructions.swiftOnGroundParagraph +
+    texts.rescueHeadings.doNotLine +
+    texts.rescueInstructions.swiftNoFoodOrWaterLine +
+    texts.rescueInstructions.doNotTestHealthMaleParagraph +
+    texts.rescueHeadings.actionsLine +
+    texts.rescueInstructions.swiftCollectWithMinimalHandlingLine +
+    texts.rescueInstructions.swiftClosedVentilatedBoxLine +
+    texts.rescueInstructions.swiftContactSpecialists
   );
 }
 
 function isBatFlightOrGroundQuery(
   query: string,
-  selectedAnimal: AnimalSearchItem | null,
+  selectedAnimal: AnimalSearchItem | null, locale: Locale = DEFAULT_LOCALE,
 ) {
   return (
     selectedAnimal?.id.startsWith("murcielago") &&
-    BAT_FLIGHT_OR_GROUND_TERMS.some((term) =>
+    getFaqSearchVocabulary(locale).batFlightOrGroundTerms.some((term) =>
       normalizeSearchText(query).includes(term),
     )
   );
@@ -185,31 +178,29 @@ function prioritizeBatIntroItem(items: typeof faqItems) {
 
 function isSelectedAnimalIntroQuery(
   query: string,
-  selectedAnimal: AnimalSearchItem | null,
+  selectedAnimal: AnimalSearchItem | null, locale: Locale = DEFAULT_LOCALE,
 ) {
   if (!selectedAnimal) return false;
 
   const normalizedQuery = normalizeSearchText(query);
 
   return (
-    getAnimalSearchTerms(selectedAnimal).some(
+    getAnimalSearchEngine(locale).getAnimalSearchTerms(selectedAnimal).some(
       (term) => normalizedQuery === term,
     ) ||
-    normalizedQuery.includes("encontr") ||
-    normalizedQuery.includes("que hago") ||
-    normalizedQuery.includes("qué hago")
+    getFaqSearchVocabulary(locale).selectedAnimalIntroTerms.some(term => normalizedQuery.includes(term))
   );
 }
 
 function isSelectedAnimalNameOnlyQuery(
   query: string,
-  selectedAnimal: AnimalSearchItem | null,
+  selectedAnimal: AnimalSearchItem | null, locale: Locale = DEFAULT_LOCALE,
 ) {
   if (!selectedAnimal) return false;
 
   const normalizedQuery = normalizeSearchText(query);
 
-  return getAnimalSearchTerms(selectedAnimal).some(
+  return getAnimalSearchEngine(locale).getAnimalSearchTerms(selectedAnimal).some(
     (term) => normalizedQuery === term,
   );
 }
@@ -272,7 +263,7 @@ function filterFaqItemsBySelectedAnimal(
 function getVisibleFaqCategories(selectedAnimal: AnimalSearchItem | null) {
   return faqCategories.filter(
     (category) =>
-      category !== "Conocer al vencejo" || selectedAnimal?.id === "vencejo",
+      getFaqCategoryId(category) !== "swiftKnowledge" || selectedAnimal?.id === "vencejo",
   );
 }
 
@@ -300,6 +291,13 @@ const emptyAnimalCatalogSearchState: AnimalCatalogSearchState = {
 };
 
 export default function FaqPage() {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
+  const texts = getEffectiveCatalog(locale);
+  const faqItems: FaqItem[] = getFaqItemsForLocale(locale);
+  const { searchFaqItems } = getFaqSearchEngine(locale);
+  const { getAnimalCatalogSearchState } = getAnimalSearchEngine(locale);
+  const categoryLabel = (category: (typeof faqCategories)[number]) => getFaqCategoryLabel(getFaqCategoryId(category), locale);
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [animalCatalogSearchState, setAnimalCatalogSearchState] =
@@ -319,21 +317,23 @@ export default function FaqPage() {
     if (!selectedAnimal?.category) return null;
 
     if (isMarineAnimal(selectedAnimal)) {
-      return getMarineAnimalFaqAnswer(selectedAnimal);
+      return getMarineAnimalFaqAnswer(selectedAnimal, locale);
     }
 
     if (selectedAnimal.id === "vencejo") {
-      return getSwiftAnimalFaqAnswer();
+      return getSwiftAnimalFaqAnswer(locale);
     }
 
-    return removeAssistantNextStepParagraph(
-      getAdvice(
+    return formatAdvice(
+      getAdvicePartsForLocale(
+        locale,
         "alive",
         selectedAnimal.category as AnimalType,
         createInitialFlags(),
       ),
-    );
-  }, [selectedAnimal]);
+      false,
+    ).trim();
+  }, [selectedAnimal, locale, faqItems]);
 
   const displayedFaqItems = useMemo(() => {
     if (!selectedAnimal || !selectedAnimalAdvice) {
@@ -345,13 +345,13 @@ export default function FaqPage() {
 
       return {
         ...item,
-        question: `¿Qué debo hacer si encuentro ${selectedAnimal.displayNameWithArticle}?`,
+        question: `${texts.dynamicFaqCopy.animalQuestionPrefix}${selectedAnimal.displayNameWithArticle}${texts.dynamicFaqCopy.animalQuestionSuffix}`,
         answer: selectedAnimalAdvice,
       };
     });
 
     return filterFaqItemsBySelectedAnimal(animalSpecificItems, selectedAnimal);
-  }, [selectedAnimal, selectedAnimalAdvice]);
+  }, [selectedAnimal, selectedAnimalAdvice, faqItems, locale]);
 
   const visibleFaqCategories = useMemo(
     () => getVisibleFaqCategories(selectedAnimal),
@@ -370,20 +370,20 @@ export default function FaqPage() {
       const searchResults = searchFaqItems(searchSourceItems, searchQuery);
       const rankedResults = isSelectedAnimalIntroQuery(
         searchQuery,
-        selectedAnimal,
+        selectedAnimal, locale,
       )
         ? prioritizeSelectedAnimalIntroItem(searchResults)
-        : isBatFlightOrGroundQuery(searchQuery, queryAnimal)
+        : isBatFlightOrGroundQuery(searchQuery, queryAnimal, locale)
           ? prioritizeBatIntroItem(searchResults)
-        : selectedAnimal?.id === "vencejo" && isGeneralSwiftQuery(searchQuery)
+        : selectedAnimal?.id === "vencejo" && isGeneralSwiftQuery(searchQuery, locale)
           ? prioritizeSwiftFaqItems(searchResults)
           : searchResults;
       const isSearching = searchQuery.trim().length > 0;
       const shouldUseEditorialCategoryOrder = isSelectedAnimalNameOnlyQuery(
         searchQuery,
-        selectedAnimal,
+        selectedAnimal, locale,
       );
-      const visibleCategorySet = new Set(visibleFaqCategories);
+      const visibleCategorySet = new Set(visibleFaqCategories.map(getFaqCategoryId));
       const groupsByCategory = new Map<
         string,
         {
@@ -394,16 +394,16 @@ export default function FaqPage() {
       >();
 
       rankedResults.forEach((item, index) => {
-        if (!visibleCategorySet.has(item.category)) return;
+        if (!visibleCategorySet.has(getFaqCategoryId(item.category))) return;
 
-        const existingGroup = groupsByCategory.get(item.category);
+        const existingGroup = groupsByCategory.get(getFaqCategoryId(item.category));
 
         if (existingGroup) {
           existingGroup.items.push(item);
           return;
         }
 
-        groupsByCategory.set(item.category, {
+        groupsByCategory.set(getFaqCategoryId(item.category), {
           category: item.category,
           items: [item],
           firstRank: index,
@@ -436,6 +436,8 @@ export default function FaqPage() {
       searchQuery,
       selectedAnimal,
       visibleFaqCategories,
+      locale,
+      searchFaqItems,
     ],
   );
 
@@ -448,7 +450,7 @@ export default function FaqPage() {
 
   const scrollToCategory = (category: string) => {
     const categoryAbsolutePosition =
-      contentOffsetRef.current + (categoryOffsetsRef.current[category] ?? 0);
+      contentOffsetRef.current + (categoryOffsetsRef.current[getFaqCategoryId(category as (typeof faqCategories)[number])] ?? 0);
     const visualMargin = 18;
 
     scrollViewRef.current?.scrollTo({
@@ -488,7 +490,7 @@ export default function FaqPage() {
 
   const startNotice = () => {
     router.push({
-      pathname: "/aviso",
+      pathname: pagePath("guide"),
       params: {
         mode: "new",
         animalType: selectedAnimal?.category,
@@ -520,19 +522,18 @@ export default function FaqPage() {
   const renderCreateNoticePrompt = () => (
     <View style={styles.createNoticeBox}>
       <Text style={styles.createNoticeTitle}>
-        ¿Tienes dudas sobre este caso?
+        {t("faqUi", "caseDoubtTitle")}
       </Text>
       <Text style={styles.createNoticeText}>
-        La Guía de ayuda asistida de SOS Fauna España te ayudará a valorar
-        la situación paso a paso.
+        {t("faqUi", "caseDoubtText")}
       </Text>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Guía de ayuda asistida"
+        accessibilityLabel={t("navigation", "guide")}
         style={styles.createNoticeButton}
         onPress={startNotice}
       >
-        <Text style={styles.createNoticeButtonText}>Guía de ayuda asistida</Text>
+        <Text style={styles.createNoticeButtonText}>{t("navigation", "guide")}</Text>
       </Pressable>
     </View>
   );
@@ -540,20 +541,19 @@ export default function FaqPage() {
   const renderRecoveryCentersPrompt = () => (
     <View style={styles.recoveryCentersBox}>
       <Text style={styles.recoveryCentersTitle}>
-        ¿Necesitas localizar un centro?
+        {t("faqUi", "centersPromptTitle")}
       </Text>
       <Text style={styles.recoveryCentersText}>
-        Consulta los centros de recuperación y teléfonos de ayuda disponibles en
-        tu provincia.
+        {t("faqUi", "centersPromptText")}
       </Text>
-      <Link href="/centros" asChild>
+      <Link href={pagePath("centers")} asChild>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Centros de Recuperación y teléfonos de ayuda"
+          accessibilityLabel={t("navigation", "centers")}
           style={styles.recoveryCentersButton}
         >
           <Text style={styles.recoveryCentersButtonText}>
-            Centros de Recuperación y teléfonos de ayuda
+            {t("navigation", "centers")}
           </Text>
         </Pressable>
       </Link>
@@ -570,7 +570,7 @@ export default function FaqPage() {
       />
       <Stack.Screen
         options={{
-          title: "Preguntas frecuentes sobre fauna silvestre | SOS Fauna España",
+          title: locale === "en" ? `${t("navigation", "faq")} | SOS Fauna España` : "Preguntas frecuentes sobre fauna silvestre | SOS Fauna España",
         }}
       />
 
@@ -591,12 +591,10 @@ export default function FaqPage() {
         stickyHeaderIndices={[1]}
       >
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text accessibilityRole="header" aria-level={1} style={styles.title}>Preguntas frecuentes</Text>
+          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole="header" aria-level={1} style={styles.title}>{t("navigation", "faq")}</Text>
           <Text style={styles.intro}>
-            ¿Tienes alguna duda? Aquí encontrarás respuestas a las preguntas más
-            habituales sobre la ayuda responsable a la fauna silvestre y el
-            funcionamiento de SOS Fauna España.
+            {t("faqUi", "intro")}
           </Text>
         </View>
 
@@ -609,8 +607,8 @@ export default function FaqPage() {
           <View style={styles.searchInputWrap}>
           <TextInput
             ref={searchInputRef}
-            accessibilityLabel="Buscar una pregunta frecuente"
-            placeholder="Buscar una pregunta…"
+            accessibilityLabel={t("faqUi", "searchLabel")}
+            placeholder={t("faqUi", "searchPlaceholder")}
             value={searchQuery}
             onChangeText={handleSearchQueryChange}
             style={[
@@ -622,7 +620,7 @@ export default function FaqPage() {
             {searchQuery.length > 0 ? (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Limpiar búsqueda"
+                accessibilityLabel={t("faqUi", "clearSearch")}
                 hitSlop={8}
                 style={styles.clearSearchButton}
                 onPress={clearSearch}
@@ -638,7 +636,7 @@ export default function FaqPage() {
                 <Pressable
                   key={animal.id}
                   accessibilityRole="button"
-                  accessibilityLabel={`Seleccionar ${animal.name}`}
+                  accessibilityLabel={`${t("faqUi", "selectPrefix")}${animal.name}`}
                   onPress={() => selectAnimalSearchResult(animal)}
                   style={({ pressed }) => [
                     styles.categoryPill,
@@ -655,19 +653,19 @@ export default function FaqPage() {
             <View style={styles.categoryList}>
               {visibleFaqCategories.map((category) => (
                 <Pressable
-                  key={category}
+                  key={getFaqCategoryId(category)}
                   accessibilityRole="button"
-                  accessibilityLabel={`Ir a la categoría ${category}`}
+                  accessibilityLabel={`${t("faqUi", "categoryPrefix")}${categoryLabel(category)}`}
                   onPress={() => handleCategoryPress(category)}
-                  onFocus={() => setFocusedCategory(category)}
+                  onFocus={() => setFocusedCategory(getFaqCategoryId(category as (typeof faqCategories)[number]))}
                   onBlur={() => setFocusedCategory(null)}
                   style={({ pressed }) => [
                     styles.categoryPill,
                     pressed && styles.categoryPillPressed,
-                    focusedCategory === category && styles.categoryPillFocused,
+                    focusedCategory === getFaqCategoryId(category) && styles.categoryPillFocused,
                   ]}
                 >
-                  <Text style={styles.categoryPillText}>{category}</Text>
+                  <Text style={styles.categoryPillText}>{categoryLabel(category)}</Text>
                 </Pressable>
               ))}
             </View>
@@ -683,14 +681,14 @@ export default function FaqPage() {
           >
             {groupedItems.map((group) => (
               <View
-                key={group.category}
+                key={getFaqCategoryId(group.category)}
                 style={styles.categorySection}
                 onLayout={(event) => {
-                  categoryOffsetsRef.current[group.category] =
+                  categoryOffsetsRef.current[getFaqCategoryId(group.category)] =
                     event.nativeEvent.layout.y;
                 }}
               >
-                <Text accessibilityRole="header" aria-level={2} style={styles.categoryTitle}>{group.category}</Text>
+                <Text accessibilityRole="header" aria-level={2} style={styles.categoryTitle}>{categoryLabel(group.category)}</Text>
 
                 <View style={styles.questionList}>
                   {group.items.map((item) => {
@@ -701,7 +699,7 @@ export default function FaqPage() {
                       <View key={item.id} style={styles.faqCard}>
                         <Pressable
                           accessibilityRole="button"
-                          accessibilityLabel={`${isOpen ? "Cerrar" : "Abrir"} pregunta: ${item.question}`}
+                          accessibilityLabel={`${isOpen ? t("faqUi", "closeQuestion") : t("faqUi", "openQuestion")}${t("faqUi", "questionLabelSeparator")}${item.question}`}
                           accessibilityState={{ expanded: isOpen }}
                           onPress={() => toggleItem(item.id)}
                           style={styles.questionButton}
@@ -744,28 +742,28 @@ export default function FaqPage() {
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>
-              No hemos encontrado preguntas que coincidan con tu búsqueda.
+              {t("faqUi", "noResults")}
             </Text>
           </View>
         )}
 
         <View style={styles.specializedSection}>
           <Text accessibilityRole="header" aria-level={2} style={styles.specializedTitle}>
-            Información especializada
+            {t("faqUi", "specializedTitle")}
           </Text>
           <View style={styles.specializedLinks}>
-            <Link href="/faq/vencejos" style={styles.specializedLink}>
-              Preguntas sobre vencejos
+            <Link href={pagePath("swifts")} style={styles.specializedLink}>
+              {t("faqUi", "swiftsLinkLabel")}
             </Link>
-            <Link href="/faq/murcielagos" style={styles.specializedLink}>
-              Preguntas sobre murciélagos
+            <Link href={pagePath("bats")} style={styles.specializedLink}>
+              {t("faqUi", "batsLinkLabel")}
             </Link>
           </View>
         </View>
 
-        <Link href="/" asChild>
+        <Link href={pagePath("home")} asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
+            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
         </Link>
       </ScrollView>

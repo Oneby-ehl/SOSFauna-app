@@ -1,3 +1,6 @@
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
+import { getFaqSearchVocabulary } from "./faqSearchVocabulary";
+import { getEffectiveCatalog } from "@/i18n/translate";
 import type { RescueAnimalType } from "@/types/rescueCase";
 
 export type AnimalSearchItem = {
@@ -803,6 +806,28 @@ export function normalizeAnimalSearchText(value: string) {
     .replace(/\s+/g, " ");
 }
 
+
+const animalCatalogs: Partial<Record<Locale, AnimalSearchItem[]>> = { es: animalSearchCatalog };
+export function getAnimalCatalogForLocale(requested: Locale = DEFAULT_LOCALE): AnimalSearchItem[] {
+  const locale = getFaqSearchVocabulary(requested).locale;
+  if (locale === DEFAULT_LOCALE) return animalSearchCatalog;
+  const cached = animalCatalogs[locale];
+  if (cached) return cached;
+  const texts = getEffectiveCatalog(locale);
+  const items = animalSearchCatalog.map(item => {
+    const id = item.id as keyof typeof texts.faqAnimalNames;
+    return { ...item,
+      name: texts.faqAnimalNames[id] ?? item.name,
+      displayNameWithArticle: texts.faqAnimalArticles[id] ?? item.displayNameWithArticle,
+      faqDisplayNameWithArticle: texts.faqAnimalSpecialNames[id] ?? item.faqDisplayNameWithArticle,
+      aliases: texts.faqAnimalAliases[id]?.split("|").filter(Boolean) ?? item.aliases,
+    };
+  });
+  animalCatalogs[locale] = items;
+  return items;
+}
+function createAnimalSearchEngine(locale: Locale) {
+const animalSearchCatalog = getAnimalCatalogForLocale(locale);
 function normalizeAnimalSearchTerms(item: AnimalSearchItem) {
   return [item.name, item.id, ...(item.aliases ?? [])].map(
     normalizeAnimalSearchText,
@@ -840,7 +865,7 @@ const indexedAnimalSearchCatalog: IndexedAnimalSearchItem[] =
     };
   });
 
-export function getAnimalSearchTerms(item: AnimalSearchItem) {
+function getAnimalSearchTerms(item: AnimalSearchItem) {
   return (
     indexedAnimalSearchCatalog.find(
       (indexedItem) => indexedItem.item === item,
@@ -910,7 +935,7 @@ function getExactAnimalCatalogMatchFromNormalizedQuery(
   return exactMatches.length === 1 ? exactMatches[0].item : null;
 }
 
-export function getAnimalCatalogSearchState(
+function getAnimalCatalogSearchState(
   query: string,
 ): AnimalCatalogSearchState {
   const normalizedQuery = normalizeAnimalSearchText(query);
@@ -951,11 +976,11 @@ export function getAnimalCatalogSearchState(
   };
 }
 
-export function searchAnimalCatalog(query: string): AnimalSearchItem[] {
+function searchAnimalCatalog(query: string): AnimalSearchItem[] {
   return getAnimalCatalogSearchState(query).results;
 }
 
-export function findExactAnimalCatalogMatch(
+function findExactAnimalCatalogMatch(
   query: string,
 ): AnimalSearchItem | null {
   return getExactAnimalCatalogMatchFromNormalizedQuery(
@@ -963,8 +988,30 @@ export function findExactAnimalCatalogMatch(
   );
 }
 
-export function findAnimalCatalogTextMatch(
+function findAnimalCatalogTextMatch(
   query: string,
 ): AnimalSearchItem | null {
   return getAnimalCatalogSearchState(query).textMatch;
 }
+
+return { getAnimalSearchTerms, getAnimalCatalogSearchState, searchAnimalCatalog, findExactAnimalCatalogMatch, findAnimalCatalogTextMatch };
+}
+
+const animalEngines = new Map<Locale, ReturnType<typeof createAnimalSearchEngine>>();
+export function getAnimalSearchEngine(requested: Locale = DEFAULT_LOCALE) {
+  const locale = getFaqSearchVocabulary(requested).locale;
+  let engine = animalEngines.get(locale);
+  if (!engine) { engine = createAnimalSearchEngine(locale); animalEngines.set(locale, engine); }
+  return engine;
+}
+export function getAnimalSearchTerms(item: AnimalSearchItem) { return getAnimalSearchEngine().getAnimalSearchTerms(item); }
+export function getAnimalCatalogSearchState(
+  query: string,
+): AnimalCatalogSearchState { return getAnimalSearchEngine().getAnimalCatalogSearchState(query); }
+export function searchAnimalCatalog(query: string): AnimalSearchItem[] { return getAnimalSearchEngine().searchAnimalCatalog(query); }
+export function findExactAnimalCatalogMatch(
+  query: string,
+): AnimalSearchItem | null { return getAnimalSearchEngine().findExactAnimalCatalogMatch(query); }
+export function findAnimalCatalogTextMatch(
+  query: string,
+): AnimalSearchItem | null { return getAnimalSearchEngine().findAnimalCatalogTextMatch(query); }

@@ -1,10 +1,11 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+import { useI18n } from "@/i18n/I18nProvider";
 import { shareSosFaunaApp } from "@/utils/rescueShareMessage";
 
-const principles = ["Calma", "Claridad", "Prudencia", "Acción"];
+const principles = ["principleCalm", "principleClarity", "principleCaution", "principleAction"] as const;
 
 const aboutPageStructuredData = {
   "@context": "https://schema.org",
@@ -17,6 +18,8 @@ const aboutPageStructuredData = {
 };
 
 export default function AboutPage() {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
   return (
     <>
       <SeoHead
@@ -25,118 +28,118 @@ export default function AboutPage() {
         path="/about"
         structuredData={aboutPageStructuredData}
       />
-      <Stack.Screen options={{ title: "Sobre SOS Fauna España" }} />
+      <Stack.Screen options={{ title: locale === "en" ? t("navigation", "about") : "Sobre SOS Fauna España" }} />
 
       <ScrollView
         style={styles.screen}
         contentContainerStyle={styles.container}
       >
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text style={styles.title}>Sobre SOS Fauna España</Text>
+          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text style={styles.title}>{t("navigation", "about")}</Text>
 
           <Text style={styles.intro}>
-            SOS Fauna España es un proyecto independiente de orientación para incidencias con fauna silvestre.
+            {t("about", "intro1")}
           </Text>
 
           <Text style={styles.intro}>
-            Su objetivo es ayudarte a valorar la situación con calma, recopilar la información necesaria y facilitar el contacto con los recursos adecuados.
+            {t("about", "intro2")}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>¿Por qué nace este proyecto?</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("about", "sectionTitle1")}</Text>
 
           <Text style={styles.paragraph}>
-            SOS Fauna España nace de una idea sencilla: muchas personas quieren ayudar cuando encuentran un animal silvestre herido, atrapado o aparentemente abandonado, pero no siempre saben cuál es la mejor forma de hacerlo.
+            {t("about", "paragraph1")}
           </Text>
 
           <Text style={styles.paragraph}>
-            En algunas situaciones, actuar con rapidez puede marcar la diferencia. En otras, la mejor ayuda consiste en mantener la distancia, observar y evitar una intervención innecesaria.
+            {t("about", "paragraph2")}
           </Text>
 
           <Text style={styles.paragraph}>
-            El proyecto pretende ofrecer una orientación clara y prudente para facilitar una primera valoración del caso y ayudar a localizar los recursos adecuados.
+            {t("about", "paragraph3")}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Nuestra forma de entender la ayuda</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("about", "sectionTitle2")}</Text>
 
           <Text style={styles.paragraph}>
-            Ayudar a la fauna silvestre no siempre significa recoger o manipular al animal.
+            {t("about", "paragraph4")}
           </Text>
 
           <Text style={styles.paragraph}>
-            También significa respetar su espacio, evitar alimentarlo sin indicación profesional, proteger su hábitat y contactar con personas especializadas cuando exista una duda o un riesgo real.
+            {t("about", "paragraph5")}
           </Text>
 
           <Text style={styles.paragraph}>
-            SOS Fauna España se basa en cuatro principios:
+            {t("about", "paragraph6")}
           </Text>
 
           <View style={styles.principles}>
             {principles.map((principle) => (
               <View key={principle} style={styles.principle}>
-                <Text style={styles.principleText}>{principle}</Text>
+                <Text style={styles.principleText}>{t("about", principle)}</Text>
               </View>
             ))}
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}><Link href="/sources">Información y criterios técnicos</Link></Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}><Link href={pagePath("sources")}>{t("about", "text1")}</Link></Text>
 
           <Text style={styles.paragraph}>
-            El contenido del proyecto se elabora a partir de recursos oficiales, criterios técnicos, documentación especializada y formación en recuperación de fauna silvestre. Para fauna marina, se apoya también en documentación técnica, redes de varamientos, entidades especializadas y servicios competentes.
+            {t("about", "paragraph7")}
           </Text>
 
           <Text style={styles.paragraph}>
-            SOS Fauna España es un proyecto desarrollado por una persona formada en recuperación de fauna silvestre en la Facultad de Veterinaria de la Universidad Complutense de Madrid y GREFA.
+            {t("about", "paragraph8")}
           </Text>
         </View>
 
         <View style={styles.disclaimer}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.disclaimerTitle}>Límites del servicio</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.disclaimerTitle}>{t("about", "disclaimerTitle1")}</Text>
 
           <Text style={styles.disclaimerText}>
-            SOS Fauna España ofrece orientación básica y ayuda a recopilar información sobre una incidencia.
+            {t("about", "disclaimerText1")}
           </Text>
 
           <Text style={styles.disclaimerText}>
-            No pertenece a ninguna administración pública, centro de recuperación ni servicio de emergencias.
+            {t("about", "disclaimerText2")}
           </Text>
 
           <Text style={styles.disclaimerText}>
-            No sustituye la valoración de veterinarios, centros de recuperación de fauna, redes de varamientos, entidades especializadas, agentes medioambientales, fuerzas de seguridad o servicios de emergencia.
+            {t("about", "disclaimerText3")}
           </Text>
 
           <Text style={styles.disclaimerText}>
-            Cuando exista peligro para personas o animales, debe contactarse directamente con el 112 o con los servicios competentes.
+            {t("about", "disclaimerText4")}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>Agradecimiento</Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("about", "sectionTitle3")}</Text>
 
           <Text style={styles.paragraph}>
-            Gracias a todas las personas, profesionales, administraciones y organizaciones que trabajan cada día por la conservación, protección y recuperación de la fauna silvestre.
+            {t("about", "paragraph9")}
           </Text>
         </View>
 
         <View style={styles.quote}>
           <Text style={styles.quoteText}>
-            La forma en que tratamos a los animales refleja el tipo de sociedad que estamos construyendo.
+            {t("about", "quoteText1")}
           </Text>
         </View>
 
         <Pressable style={styles.shareButton} onPress={shareSosFaunaApp}>
-          <Text style={styles.shareButtonText}>Compartir SOS Fauna España</Text>
+          <Text style={styles.shareButtonText}>{t("navigation", "shareApp")}</Text>
         </Pressable>
 
-        <Link href="/" asChild>
+        <Link href={pagePath("home")} asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
+            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
         </Link>
       </ScrollView>

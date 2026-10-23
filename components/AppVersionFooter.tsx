@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import { Platform, StyleSheet, Text } from "react-native";
+import { useI18n } from "@/i18n/I18nProvider";
 
 function getPlatformName(): string {
   return Platform.select({
@@ -15,12 +16,13 @@ export function getAppVersion(): string {
 }
 
 export default function AppVersionFooter() {
+  const { t } = useI18n();
   return (
     <>
       <Text style={styles.text}>
-        {getPlatformName()} · Versión {getAppVersion()}
+        {getPlatformName()}{t("versionFooter", "versionSeparator")}{getAppVersion()}
       </Text>
-      <Text style={styles.text}>© 2026 SOS Fauna España</Text>
+      <Text style={styles.text}>{t("versionFooter", "copyright")}</Text>
     </>
   );
 }

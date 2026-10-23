@@ -6,9 +6,11 @@ import {
   recoverCurrentCase,
 } from "@/services/rescueCaseService";
 import AppVersionFooter from "@/components/AppVersionFooter";
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { getHistory } from "@/services/rescueStorage";
 import { shareSosFaunaApp } from "@/utils/rescueShareMessage";
+import { useI18n } from "@/i18n/I18nProvider";
 import {
   Alert,
   Image,
@@ -77,6 +79,8 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
 }
 
 export default function LandingPage() {
+  const { t, locale, languageControlsEnabled } = useI18n();
+  const pagePath = useInformationPagePath();
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [hydrated, setHydrated] = useState(false);
@@ -147,11 +151,11 @@ export default function LandingPage() {
   const openNewCase = async () => {
     await discardCurrentCase();
     setPendingCase(null);
-    router.push({ pathname: "/aviso", params: { mode: "new" } });
+    router.push({ pathname: pagePath("guide"), params: { mode: "new" } });
   };
 
   const openNewCaseWithoutDiscardingStoredCase = () => {
-    router.push({ pathname: "/aviso", params: { mode: "new" } });
+    router.push({ pathname: pagePath("guide"), params: { mode: "new" } });
   };
 
   const handleStartNewCase = () => {
@@ -165,18 +169,17 @@ export default function LandingPage() {
       return;
     }
 
-    const message =
-      "Hay un aviso sin finalizar.\n\n¿Deseas eliminarlo e iniciar una nueva guía de ayuda?";
+    const message = t("home", "pendingCaseConfirmation");
 
     if (Platform.OS === "web") {
       if (window.confirm(message)) void openNewCase();
       return;
     }
 
-    Alert.alert("Aviso sin finalizar", message, [
-      { text: "Cancelar", style: "cancel" },
+    Alert.alert(t("home", "pendingCaseTitle"), message, [
+      { text: t("common", "cancel"), style: "cancel" },
       {
-        text: "Eliminar e iniciar guía",
+        text: t("home", "discardAndStart"),
         style: "destructive",
         onPress: () => void openNewCase(),
       },
@@ -184,7 +187,7 @@ export default function LandingPage() {
   };
 
   const handleContinueCase = () => {
-    router.push({ pathname: "/aviso", params: { mode: "continue" } });
+    router.push({ pathname: pagePath("guide"), params: { mode: "continue" } });
   };
 
   const handleOpenHistory = () => {
@@ -192,11 +195,11 @@ export default function LandingPage() {
   };
 
   const handleOpenFaq = () => {
-    router.push("/faq");
+    router.push(pagePath("faq"));
   };
 
   const handleOpenRecoveryCenters = () => {
-    router.push("/centros");
+    router.push(pagePath("centers"));
   };
 
   const handleInstallApp = async () => {
@@ -223,52 +226,48 @@ export default function LandingPage() {
         <Stack.Screen
           options={{
             title:
-              "SOS Fauna España | Qué hacer ante fauna silvestre herida o varada",
+              locale === "en" ? t("common", "brand") : "SOS Fauna España | Qué hacer ante fauna silvestre herida o varada",
           }}
         />
 
       <View style={styles.header}>
         <View style={styles.headerInner}>
-          <Link href="/">
-            <Text style={styles.brand}>SOS Fauna España</Text>
+          <Link href={pagePath("home")}>
+            <Text style={styles.brand}>{t("common", "brand")}</Text>
           </Link>
 
-          <Pressable
+          {languageControlsEnabled ? <LanguageSelector /> : <Pressable
             style={styles.headerButton}
             onPress={handleStartNewCase}
             disabled={checkingCase}
           >
-            <Text style={styles.headerButtonText}>Guía de ayuda asistida</Text>
-          </Pressable>
+            <Text style={styles.headerButtonText}>{t("navigation", "guide")}</Text>
+          </Pressable>}
         </View>
       </View>
 
       <View style={[styles.main, isCompact && styles.mainCompact]}>
         <View style={[styles.hero, isCompact && styles.heroCompact]}>
           <View style={[styles.heroContent, isCompact && styles.heroContentCompact]}>
-            <Text style={styles.badge}>Ayuda a la fauna silvestre</Text>
+            <Text style={styles.badge}>{t("home", "badge")}</Text>
 
             <Text
               accessibilityRole="header"
               aria-level={1}
               style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}
             >
-              ¿Has encontrado un animal silvestre herido, atrapado o en peligro?
+              {t("home", "heroTitle")}
             </Text>
 
             <Text style={styles.heroDescription}>
-              SOS Fauna España te ayuda paso a paso a valorar la situación con
-              calma, recopilar la información necesaria y contactar con los
-              recursos adecuados.
+              {t("home", "heroDescription")}
             </Text>
 
             {!isCompact ? (
             <View style={styles.heroGuidance}>
-              <Text style={styles.heroGuidanceTitle}>Actúa con calma</Text>
+              <Text style={styles.heroGuidanceTitle}>{t("home", "calmTitle")}</Text>
               <Text style={styles.heroGuidanceText}>
-                Evita manipular al animal salvo que exista un riesgo inmediato.
-                Mantén una distancia prudente y observa la situación antes de intervenir.
-                Sigue las recomendaciones del asistente para valorar si realmente es necesario actuar.
+                {t("home", "calmDesktop")}
               </Text>
             </View>
             ) : null}
@@ -306,14 +305,14 @@ export default function LandingPage() {
                     isCompact && styles.caseButtonTextCompact,
                   ]}
                 >
-                  {checkingCase ? "Comprobando…" : "Guía de ayuda asistida"}
+                  {checkingCase ? t("home", "checking") : t("navigation", "guide")}
                 </Text>
               </Pressable>
 
               {pendingCase ? (
                 <View style={styles.pendingBlock}>
                   <Text style={styles.pendingNote}>
-                    Tienes un aviso sin finalizar guardado en este dispositivo.
+                    {t("home", "pendingCaseNote")}
                   </Text>
 
                   <Pressable
@@ -330,7 +329,7 @@ export default function LandingPage() {
                         isCompact && styles.caseButtonTextCompact,
                       ]}
                     >
-                      Continuar aviso anterior
+                      {t("navigation", "continueCase")}
                     </Text>
                   </Pressable>
                 </View>
@@ -352,11 +351,11 @@ export default function LandingPage() {
                         isCompact && styles.caseButtonTextCompact,
                       ]}
                     >
-                      Ver avisos recientes
+                      {t("navigation", "history")}
                     </Text>
                   </Pressable>
                   <Text style={styles.historyNote}>
-                    Se guardan los últimos 30 avisos en este dispositivo.
+                    {t("home", "historyNote")}
                   </Text>
                 </View>
               ) : null}
@@ -370,8 +369,8 @@ export default function LandingPage() {
               ]}
             >
               <Text style={styles.heroNote}>
-                Gratuito · Sin registro{"\n"}
-                Diseñado para incidencias en España
+                {t("home", "freeAndNoRegistration")}{"\n"}
+                {t("home", "territory")}
               </Text>
 
               <View style={styles.quickAccessBlock}>
@@ -391,7 +390,7 @@ export default function LandingPage() {
                       isCompact && styles.caseButtonTextCompact,
                     ]}
                   >
-                    ❓ Preguntas frecuentes
+                    {t("home", "quickFaq")}
                   </Text>
                 </Pressable>
 
@@ -411,7 +410,7 @@ export default function LandingPage() {
                       isCompact && styles.caseButtonTextCompact,
                     ]}
                   >
-                    📞 Centros de Recuperación y teléfonos de ayuda
+                    {t("home", "quickCenters")}
                   </Text>
                 </Pressable>
               </View>
@@ -420,10 +419,9 @@ export default function LandingPage() {
 
           {isCompact ? (
             <View style={[styles.heroGuidance, styles.heroGuidanceCompact]}>
-              <Text style={styles.heroGuidanceTitle}>Actúa con calma</Text>
+              <Text style={styles.heroGuidanceTitle}>{t("home", "calmTitle")}</Text>
               <Text style={styles.heroGuidanceText}>
-                Evita manipular al animal salvo que exista un riesgo inmediato.
-                Mantén la distancia y sigue las recomendaciones del asistente.
+                {t("home", "calmMobile")}
               </Text>
             </View>
           ) : null}
@@ -432,15 +430,15 @@ export default function LandingPage() {
         <View style={[styles.section, styles.processSection]}>
           <View style={styles.processIntro}>
             <Text accessibilityRole="header" aria-level={2} style={[styles.sectionTitle, styles.processTitle]}>
-              Ayudar también significa no intervenir cuando no es necesario
+              {t("home", "processTitle")}
             </Text>
 
             <Text style={[styles.sectionDescription, styles.processDescription]}>
-              Muchas crías de aves, mamíferos y otros animales no están abandonadas, aunque parezcan solas.
+              {t("home", "processDescription")}
             </Text>
 
             <Text style={[styles.sectionDescription, styles.processDescription]}>
-              Intervenir innecesariamente puede separarlas de sus padres o reducir sus posibilidades de supervivencia.
+              {t("home", "processWarning")}
             </Text>
 
             <Text
@@ -454,41 +452,41 @@ export default function LandingPage() {
                 },
               ]}
             >
-              Por eso SOS Fauna te ayuda primero a valorar la situación para decidir si realmente es necesario intervenir.
+              {t("home", "processConclusion")}
             </Text>
           </View>
         </View>
 
         <View style={[styles.section, styles.animalScopeSection]}>
           <Text accessibilityRole="header" aria-level={2} style={[styles.sectionTitle, styles.animalScopeTitle]}>
-            ¿Qué animales incluye SOS Fauna España?
+            {t("home", "scopeTitle")}
           </Text>
 
           <Text style={[styles.sectionDescription, styles.animalScopeText]}>
-            SOS Fauna España se centra en cubrir las incidencias más habituales de fauna silvestre, incluyendo fauna terrestre, aves y fauna marina.
+            {t("home", "scopeDescription")}
           </Text>
 
           <View style={styles.animalScopeGrid}>
-            <AnimalScopeGroup icon="🦉" label="Aves" />
-            <AnimalScopeGroup icon="🦊" label="Mamíferos" />
-            <AnimalScopeGroup icon="🦎" label="Reptiles y anfibios" />
-            <AnimalScopeGroup icon="🌊" label="Fauna marina" />
+            <AnimalScopeGroup icon="🦉" label={t("home", "birds")} />
+            <AnimalScopeGroup icon="🦊" label={t("home", "mammals")} />
+            <AnimalScopeGroup icon="🦎" label={t("home", "reptiles")} />
+            <AnimalScopeGroup icon="🌊" label={t("home", "marine")} />
           </View>
         </View>
 
         {installPrompt ? (
           <View style={styles.installSection}>
             <Text style={styles.installTitle}>
-              ¿Quieres tener SOS Fauna siempre a mano?
+              {t("home", "installTitle")}
             </Text>
             <Text style={styles.installText}>
-              Instálala en tu dispositivo para acceder más rápidamente cuando la necesites.
+              {t("home", "installText")}
             </Text>
             <Pressable style={styles.installButton} onPress={handleInstallApp}>
-              <Text style={styles.installButtonText}>Instalar aplicación</Text>
+              <Text style={styles.installButtonText}>{t("home", "installAction")}</Text>
             </Pressable>
             <Text style={styles.installNote}>
-              Ten la aplicación siempre a mano para acceder rápidamente cuando encuentres un animal silvestre.
+              {t("home", "installNote")}
             </Text>
           </View>
         ) : null}
@@ -497,66 +495,65 @@ export default function LandingPage() {
       <View style={styles.footer}>
         <View style={styles.footerInner}>
           <View>
-            <Link href="/">
-              <Text style={styles.footerBrand}>SOS Fauna España</Text>
+            <Link href={pagePath("home")}>
+              <Text style={styles.footerBrand}>{t("common", "brand")}</Text>
             </Link>
             <Text style={styles.footerText}>
-              Asistencia guiada para ayudar a la fauna silvestre de forma
-              segura y responsable.
+              {t("home", "footerDescription")}
             </Text>
             {Platform.OS === "web" ? (
               <Link
                 href={GOOGLE_PLAY_APP_URL}
                 target="_blank"
-                accessibilityLabel="Disponible en Google Play"
+                accessibilityLabel={t("home", "googlePlayAccessibility")}
                 style={styles.googlePlayBadgeLink}
               >
-                <Image
+                {locale === "en" ? <Text style={styles.footerLink}>{t("home", "googlePlayAccessibility")}</Text> : <Image
                   source={{ uri: GOOGLE_PLAY_BADGE_SRC }}
                   resizeMode="contain"
                   style={styles.googlePlayBadge}
-                />
+                />}
               </Link>
             ) : null}
           </View>
 
           <View style={styles.footerLinks}>
-             <Link href="/about">
-               <Text style={styles.footerLink}>Sobre SOS Fauna España</Text>
+             <Link href={pagePath("about")}>
+               <Text style={styles.footerLink}>{t("navigation", "about")}</Text>
              </Link>
 
-             <Link href="/faq">
-               <Text style={styles.footerLink}>Preguntas frecuentes</Text>
+             <Link href={pagePath("faq")}>
+               <Text style={styles.footerLink}>{t("navigation", "faq")}</Text>
              </Link>
 
-             <Link href="/centros">
+             <Link href={pagePath("centers")}>
                <Text style={styles.footerLink}>
-                 Centros de Recuperación y teléfonos de ayuda
+                 {t("navigation", "centers")}
                </Text>
              </Link>
 
-             <Link href="/sources">
-               <Text style={styles.footerLink}>Recursos de información</Text>
+             <Link href={pagePath("sources")}>
+               <Text style={styles.footerLink}>{t("navigation", "sources")}</Text>
              </Link>
 
-             <Link href="/contact">
-               <Text style={styles.footerLink}>Contacto</Text>
+             <Link href={pagePath("contact")}>
+               <Text style={styles.footerLink}>{t("navigation", "contact")}</Text>
              </Link>
 
              <Pressable
                accessibilityRole="button"
                onPress={shareSosFaunaApp}
              >
-               <Text style={styles.footerLink}>Compartir SOS Fauna España</Text>
+               <Text style={styles.footerLink}>{t("navigation", "shareApp")}</Text>
              </Pressable>
 
              <View style={styles.footerLegalLinks}>
-               <Link href="/privacy">
-                 <Text style={styles.footerLink}>Política de privacidad</Text>
+               <Link href={pagePath("privacy")}>
+                 <Text style={styles.footerLink}>{t("navigation", "privacy")}</Text>
                </Link>
 
-               <Link href="/legal">
-                 <Text style={styles.footerLink}>Aviso legal</Text>
+               <Link href={pagePath("legal")}>
+                 <Text style={styles.footerLink}>{t("navigation", "legal")}</Text>
                </Link>
              </View>
            </View>

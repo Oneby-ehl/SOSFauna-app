@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:web": "node ./scripts/write-version-json.js && expo export --platform web && node ./scripts/generate-sitemap.js && npx workbox-cli generateSW workbox-config.js",
+    "build": "node ./scripts/build-web.cjs preview",
+    "build:web": "node ./scripts/build-web.cjs publication",
     "build:web:pwa": "npm run build:web",
     "lint": "expo lint"
   },

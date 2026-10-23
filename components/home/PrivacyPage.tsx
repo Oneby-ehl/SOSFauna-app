@@ -1,16 +1,19 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const storageUses = [
-  "recuperar un aviso no finalizado;",
-  "mantener un historial reciente de avisos;",
-  "recordar determinados datos facilitados por el usuario;",
-  "conservar temporalmente la información necesaria para preparar un aviso.",
-];
+  "storageRecover",
+  "storageHistory",
+  "storageRemember",
+  "storageTemporary",
+] as const;
 
 export default function PrivacyPage() {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
   return (
     <>
       <SeoHead
@@ -19,7 +22,7 @@ export default function PrivacyPage() {
         path="/privacy"
       />
       <Stack.Screen
-        options={{ title: "Política de privacidad | SOS Fauna España" }}
+        options={{ title: locale === "en" ? `${t("navigation", "privacy")} | SOS Fauna España` : "Política de privacidad | SOS Fauna España" }}
       />
 
       <ScrollView
@@ -27,169 +30,135 @@ export default function PrivacyPage() {
         contentContainerStyle={styles.container}
       >
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text style={styles.title}>Política de privacidad</Text>
+          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text style={styles.title}>{t("navigation", "privacy")}</Text>
           <Text style={styles.updated}>
-            Última actualización: julio de 2026
+            {t("common", "informationUpdated")}
           </Text>
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.heading}>1. Información general</Text>
+          <Text style={styles.heading}>{t("privacy", "heading1")}</Text>
 
           <Text style={styles.paragraph}>
-            SOS Fauna España es un proyecto independiente creado para ofrecer
-            orientación ante incidencias con fauna silvestre.
+            {t("privacy", "paragraph1")}
           </Text>
 
           <Text style={styles.paragraph}>
-            Esta política de privacidad es aplicable a la versión web, a la
-            aplicación web instalada como PWA y a la aplicación para Android.
+            {t("privacy", "paragraph2")}
           </Text>
 
-          <Text style={styles.heading}>2. Datos personales</Text>
+          <Text style={styles.heading}>{t("privacy", "heading2")}</Text>
 
           <Text style={styles.paragraph}>
-            SOS Fauna España no recopila ni transmite datos personales a
-            servidores propios.
-          </Text>
-
-          <Text style={styles.paragraph}>
-            La información que el usuario introduce, como el nombre, el teléfono,
-            la ubicación, las fotografías o los vídeos, puede almacenarse
-            localmente en su propio dispositivo cuando resulta necesario para
-            preparar un aviso, recuperar un aviso no finalizado, mantener un
-            historial reciente o recordar determinados datos introducidos
-            previamente.
+            {t("privacy", "paragraph3")}
           </Text>
 
           <Text style={styles.paragraph}>
-            Esta información permanece bajo el control del usuario y no se envía
-            automáticamente a ningún servidor de SOS Fauna España.
-          </Text>
-
-          <Text style={styles.heading}>3. Permisos utilizados</Text>
-
-          <Text style={styles.paragraph}>
-            La aplicación puede solicitar acceso a la cámara, la ubicación y la
-            galería o almacenamiento del dispositivo para preparar la información
-            de un aviso.
+            {t("privacy", "paragraph4")}
           </Text>
 
           <Text style={styles.paragraph}>
-            En dispositivos Android, estos permisos se utilizan únicamente cuando
-            el usuario realiza una acción que los requiere, como obtener su
-            ubicación, tomar una fotografía, grabar o seleccionar un archivo
-            multimedia.
+            {t("privacy", "paragraph5")}
+          </Text>
+
+          <Text style={styles.heading}>{t("privacy", "heading3")}</Text>
+
+          <Text style={styles.paragraph}>
+            {t("privacy", "paragraph6")}
           </Text>
 
           <Text style={styles.paragraph}>
-            El usuario puede aceptar o denegar estos permisos desde la
-            configuración del navegador o del dispositivo.
-          </Text>
-
-          <Text style={styles.heading}>4. Almacenamiento local</Text>
-
-          <Text style={styles.paragraph}>
-            SOS Fauna España utiliza el almacenamiento local del navegador o del
-            dispositivo para mejorar la experiencia de uso.
+            {t("privacy", "paragraph7")}
           </Text>
 
           <Text style={styles.paragraph}>
-            Este almacenamiento puede utilizarse para:
+            {t("privacy", "paragraph8")}
+          </Text>
+
+          <Text style={styles.heading}>{t("privacy", "heading4")}</Text>
+
+          <Text style={styles.paragraph}>
+            {t("privacy", "paragraph9")}
+          </Text>
+
+          <Text style={styles.paragraph}>
+            {t("privacy", "paragraph10")}
           </Text>
 
           <View style={styles.list}>
             {storageUses.map((item) => (
               <View key={item} style={styles.listItem}>
                 <Text style={styles.bullet}>•</Text>
-                <Text style={styles.listText}>{item}</Text>
+                <Text style={styles.listText}>{t("privacy", item)}</Text>
               </View>
             ))}
           </View>
 
           <Text style={styles.paragraph}>
-            Esta información permanece exclusivamente en el dispositivo del
-            usuario y no se sincroniza con servidores propios de SOS Fauna
-            España.
+            {t("privacy", "paragraph11")}
           </Text>
 
           <Text style={styles.heading}>
-            5. Compartición voluntaria de información
+            {t("privacy", "heading5")}
           </Text>
 
           <Text style={styles.paragraph}>
-            SOS Fauna España no envía automáticamente la información preparada
-            por el usuario.
+            {t("privacy", "paragraph12")}
           </Text>
 
           <Text style={styles.paragraph}>
-            Cuando el usuario decide compartir un aviso mediante aplicaciones de
-            mensajería, correo electrónico, llamadas, mapas u otros servicios
-            externos, la información seleccionada se transmite al servicio
-            elegido por el propio usuario.
+            {t("privacy", "paragraph13")}
           </Text>
 
           <Text style={styles.paragraph}>
-            A partir de ese momento pueden aplicarse las condiciones y políticas
-            de privacidad del servicio externo utilizado.
+            {t("privacy", "paragraph14")}
           </Text>
 
-          <Text style={styles.heading}>6. Servicios externos</Text>
+          <Text style={styles.heading}>{t("privacy", "heading6")}</Text>
 
           <Text style={styles.paragraph}>
-            Al abrir enlaces, mapas, aplicaciones de mensajería o realizar
-            llamadas o utilizar otros servicios externos, pueden aplicarse sus
-            propias políticas de privacidad y condiciones de uso.
+            {t("privacy", "paragraph15")}
           </Text>
 
           <Text style={styles.paragraph}>
-            SOS Fauna España no controla el tratamiento de datos realizado por
-            esos servicios externos.
+            {t("privacy", "paragraph16")}
           </Text>
 
-          <Text style={styles.heading}>7. Eliminación de la información</Text>
+          <Text style={styles.heading}>{t("privacy", "heading7")}</Text>
 
           <Text style={styles.paragraph}>
-            Toda la información almacenada localmente puede eliminarse en
-            cualquier momento.
-          </Text>
-
-          <Text style={styles.paragraph}>
-            En la versión web o PWA, puede eliminarse borrando los datos del
-            sitio desde la configuración del navegador o desinstalando la PWA.
+            {t("privacy", "paragraph17")}
           </Text>
 
           <Text style={styles.paragraph}>
-            En Android, puede eliminarse borrando los datos de la aplicación
-            desde los ajustes del dispositivo o desinstalando la aplicación.
+            {t("privacy", "paragraph18")}
           </Text>
 
           <Text style={styles.paragraph}>
-            La aplicación también puede ofrecer funciones propias para finalizar
-            o eliminar avisos guardados, cuando estén disponibles.
+            {t("privacy", "paragraph19")}
           </Text>
 
-          <Text style={styles.heading}>8. Proyecto independiente</Text>
-
           <Text style={styles.paragraph}>
-            SOS Fauna España no está afiliada ni representa a ninguna
-            administración pública, servicio de emergencias, cuerpo policial o
-            centro de recuperación de fauna.
+            {t("privacy", "paragraph20")}
           </Text>
 
-          <Text style={styles.heading}>9. Contacto</Text>
+          <Text style={styles.heading}>{t("privacy", "heading8")}</Text>
 
           <Text style={styles.paragraph}>
-            Para consultas relacionadas con esta política de privacidad, puede
-            utilizarse el correo electrónico de contacto indicado en el sitio web
-            y en la aplicación.
+            {t("privacy", "paragraph21")}
+          </Text>
+
+          <Text style={styles.heading}>{t("privacy", "heading9")}</Text>
+
+          <Text style={styles.paragraph}>
+            {t("privacy", "paragraph22")}
           </Text>
         </View>
 
-        <Link href="/" asChild>
+        <Link href={pagePath("home")} asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver al inicio</Text>
+            <Text style={styles.backButtonText}>{t("navigation", "backHome")}</Text>
           </Pressable>
         </Link>
       </ScrollView>

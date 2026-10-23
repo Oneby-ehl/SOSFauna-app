@@ -1,85 +1,88 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const sections = [
   {
-    title: "1. Identificación y finalidad",
-    paragraphs: [
-      "SOS Fauna España es una herramienta independiente de orientación y apoyo ciudadano ante incidencias relacionadas con fauna silvestre en España.",
-      "Su finalidad es ayudar a valorar situaciones habituales, facilitar recomendaciones básicas y preparar la información necesaria para contactar con los servicios o centros competentes.",
-      "SOS Fauna España no representa ni forma parte de ninguna administración pública, servicio de emergencias, cuerpo de agentes, centro de recuperación o entidad citada en la aplicación.",
+    titleKey: "identificationTitle",
+    paragraphKeys: [
+      "identificationParagraph1",
+      "identificationParagraph2",
+      "identificationParagraph3",
     ],
   },
   {
-    title: "2. Carácter orientativo de la información",
-    paragraphs: [
-      "La información ofrecida por SOS Fauna España tiene carácter general y orientativo. No sustituye la valoración de profesionales especializados, los servicios veterinarios ni las instrucciones de las autoridades y servicios competentes.",
-      "Cada situación puede requerir una actuación diferente. Cuando exista un riesgo inmediato para personas o animales, el usuario deberá contactar con los servicios de emergencia o con el organismo competente.",
+    titleKey: "guidanceTitle",
+    paragraphKeys: [
+      "guidanceParagraph1",
+      "guidanceParagraph2",
     ],
   },
   {
-    title: "3. Ámbito de la aplicación",
-    paragraphs: [
-      "SOS Fauna España se centra actualmente en cubrir las incidencias más habituales relacionadas con fauna silvestre, incluyendo fauna terrestre, aves y fauna marina.",
-      "El contenido y los grupos de fauna incluidos podrán ampliarse o modificarse en futuras actualizaciones.",
+    titleKey: "scopeTitle",
+    paragraphKeys: [
+      "scopeParagraph1",
+      "scopeParagraph2",
     ],
   },
   {
-    title: "4. Responsabilidad del usuario",
-    paragraphs: [
-      "El usuario es responsable de valorar las circunstancias concretas antes de actuar y de seguir las indicaciones proporcionadas por los servicios competentes.",
-      "La manipulación de fauna silvestre puede implicar riesgos para el animal y para las personas. No debe capturarse, trasladarse o manipularse un animal salvo que sea necesario y pueda hacerse con seguridad.",
+    titleKey: "userResponsibilityTitle",
+    paragraphKeys: [
+      "userResponsibilityParagraph1",
+      "userResponsibilityParagraph2",
     ],
   },
   {
-    title: "5. Limitación de responsabilidad",
-    paragraphs: [
-      "SOS Fauna España procura mantener sus contenidos actualizados y ofrecer información útil y comprensible. No obstante, no puede garantizar que toda la información, teléfonos, enlaces o recursos externos permanezcan disponibles o actualizados en todo momento.",
-      "La utilización de la aplicación y las decisiones adoptadas a partir de su contenido son responsabilidad del usuario.",
-      "SOS Fauna España no se responsabiliza de los contenidos, disponibilidad o actuaciones de los servicios, páginas web o entidades externas enlazadas o mencionadas.",
+    titleKey: "liabilityTitle",
+    paragraphKeys: [
+      "liabilityParagraph1",
+      "liabilityParagraph2",
+      "liabilityParagraph3",
     ],
   },
   {
-    title: "6. Propiedad intelectual",
-    paragraphs: [
-      "Los textos, el diseño, la estructura, el logotipo y los demás elementos propios de SOS Fauna España están protegidos por la normativa aplicable en materia de propiedad intelectual.",
-      "No se permite su reproducción, modificación o utilización con fines comerciales sin autorización, salvo en los casos permitidos por la ley.",
+    titleKey: "intellectualPropertyTitle",
+    paragraphKeys: [
+      "intellectualPropertyParagraph1",
+      "intellectualPropertyParagraph2",
     ],
   },
   {
-    title: "7. Enlaces externos",
-    paragraphs: [
-      "La aplicación puede incluir enlaces a organismos públicos, centros de recuperación, entidades especializadas y otros recursos de información.",
-      "Estos enlaces se facilitan únicamente para ayudar al usuario a localizar recursos adecuados. SOS Fauna España no controla ni se responsabiliza del contenido o funcionamiento de sitios externos.",
+    titleKey: "externalLinksTitle",
+    paragraphKeys: [
+      "externalLinksParagraph1",
+      "externalLinksParagraph2",
     ],
   },
   {
-    title: "8. Modificaciones",
-    paragraphs: [
-      "Este aviso legal podrá actualizarse cuando cambien las funcionalidades, los contenidos o las circunstancias del proyecto.",
-      "La fecha de la última actualización se mostrará al comienzo de esta página.",
+    titleKey: "updatesTitle",
+    paragraphKeys: [
+      "updatesParagraph1",
+      "updatesParagraph2",
     ],
   },
   {
-    title: "Antes de recoger un animal silvestre",
-    paragraphs: [
-      "No todos los animales encontrados necesitan ser rescatados. Manipularlos o trasladarlos sin necesidad puede perjudicarles y, en el caso de determinadas especies protegidas, estas actuaciones pueden estar reguladas por la normativa vigente.",
-      "Cuando exista duda, lo más adecuado es observar la situación, seguir las recomendaciones de SOS Fauna España y contactar con el centro de recuperación o servicio público competente antes de intervenir.",
+    titleKey: "beforeCollectingTitle",
+    paragraphKeys: [
+      "beforeCollectingParagraph1",
+      "beforeCollectingParagraph2",
     ],
-    highlightedParagraph:
-      "Ayudar también significa no intervenir cuando no es necesario.",
+    highlightedParagraphKey:
+      "beforeCollectingHighlight",
   },
   {
-    title: "9. Contacto",
-    paragraphs: [
-      "Para comunicar errores, proponer correcciones o realizar consultas relacionadas con SOS Fauna España, puede utilizarse el medio de contacto indicado en la aplicación.",
+    titleKey: "contactTitle",
+    paragraphKeys: [
+      "contactParagraph1",
     ],
   },
-];
+] as const;
 
 export default function LegalPage() {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
   return (
     <>
       <SeoHead
@@ -87,37 +90,37 @@ export default function LegalPage() {
         description="Información legal, condiciones de uso y límites de responsabilidad de SOS Fauna España."
         path="/legal"
       />
-      <Stack.Screen options={{ title: "Aviso legal | SOS Fauna España" }} />
+      <Stack.Screen options={{ title: locale === "en" ? `${t("navigation", "legal")} | SOS Fauna España` : "Aviso legal | SOS Fauna España" }} />
 
       <ScrollView
         style={styles.screen}
         contentContainerStyle={styles.container}
       >
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text style={styles.title}>Aviso legal</Text>
-          <Text style={styles.updated}>Última actualización: julio de 2026</Text>
+          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text style={styles.title}>{t("navigation", "legal")}</Text>
+          <Text style={styles.updated}>{t("common", "informationUpdated")}</Text>
         </View>
 
         {sections.map((section) => (
-          <View key={section.title} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            {section.paragraphs.map((paragraph) => (
+          <View key={section.titleKey} style={styles.section}>
+            <Text style={styles.sectionTitle}>{t("legal", section.titleKey)}</Text>
+            {section.paragraphKeys.map((paragraph) => (
               <Text key={paragraph} style={styles.paragraph}>
-                {paragraph}
+                {t("legal", paragraph)}
               </Text>
             ))}
-            {"highlightedParagraph" in section ? (
+            {"highlightedParagraphKey" in section ? (
               <Text style={styles.highlightedParagraph}>
-                {section.highlightedParagraph}
+                {t("legal", section.highlightedParagraphKey)}
               </Text>
             ) : null}
           </View>
         ))}
 
-        <Link href="/" asChild>
+        <Link href={pagePath("home")} asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver al inicio</Text>
+            <Text style={styles.backButtonText}>{t("navigation", "backHome")}</Text>
           </Pressable>
         </Link>
       </ScrollView>

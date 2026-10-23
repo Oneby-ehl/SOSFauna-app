@@ -1,3 +1,7 @@
+import { getEffectiveCatalog } from "@/i18n/translate";
+import { useI18n } from "@/i18n/I18nProvider";
+// General text catalogs resolve through the effective locale.
+import { readStoredLocationText } from "@/utils/rescueLocation";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import { useCallback, useState } from "react";
@@ -30,64 +34,66 @@ import type {
   RescueFlags,
 } from "@/types/rescueCase";
 
+const generalTexts = getEffectiveCatalog();
+
 const ANIMAL_TYPE_LABELS: Record<RescueAnimalType, string> = {
-  smallBird: "Ave pequeña",
-  largeBird: "Ave mediana / grande",
-  bat: "Murciélago",
-  smallMammal: "Mamífero pequeño",
-  largeMammal: "Mamífero grande",
-  reptileAmphibian: "Reptil o anfibio",
-  dolphin: "Delfín",
-  largeCetacean: "Ballena / cetáceo grande",
-  seal: "Foca",
-  seaTurtle: "Tortuga marina",
-  sharkRay: "Tiburón / raya",
-  otherMarine: "Otro animal marino",
-  unknown: "Animal sin identificar",
+  smallBird: generalTexts.historyAnimalLabels.smallBird,
+  largeBird: generalTexts.historyAnimalLabels.largeBird,
+  bat: generalTexts.historyAnimalLabels.bat,
+  smallMammal: generalTexts.historyAnimalLabels.smallMammal,
+  largeMammal: generalTexts.historyAnimalLabels.largeMammal,
+  reptileAmphibian: generalTexts.historyAnimalLabels.reptileAmphibian,
+  dolphin: generalTexts.historyAnimalLabels.dolphin,
+  largeCetacean: generalTexts.historyAnimalLabels.largeCetacean,
+  seal: generalTexts.historyAnimalLabels.seal,
+  seaTurtle: generalTexts.historyAnimalLabels.seaTurtle,
+  sharkRay: generalTexts.historyAnimalLabels.sharkRay,
+  otherMarine: generalTexts.historyAnimalLabels.otherMarine,
+  unknown: generalTexts.historyAnimalLabels.unknown,
 };
 
 const ANIMAL_STATE_LABELS: Record<RescueAnimalState, string> = {
-  alive: "Vivo",
-  dead: "Muerto",
+  alive: generalTexts.historyStateLabels.alive,
+  dead: generalTexts.historyStateLabels.dead,
 };
 
 const ANIMAL_PLACE_LABELS: Record<RescueAnimalPlace, string> = {
-  ground: "En el suelo",
-  treeOrBush: "En un árbol o arbusto",
-  buildingOrRoof: "En un edificio o tejado",
-  roadOrStreet: "En una carretera o calle",
-  parkOrGarden: "En un parque o jardín",
-  fieldOrNatural: "En el campo o entorno natural",
-  industrialArea: "En una zona industrial",
-  water: "En el agua",
-  otherPlace: "Otro lugar",
+  ground: generalTexts.historyPlaceLabels.ground,
+  treeOrBush: generalTexts.historyPlaceLabels.treeOrBush,
+  buildingOrRoof: generalTexts.historyPlaceLabels.buildingOrRoof,
+  roadOrStreet: generalTexts.historyPlaceLabels.roadOrStreet,
+  parkOrGarden: generalTexts.historyPlaceLabels.parkOrGarden,
+  fieldOrNatural: generalTexts.historyPlaceLabels.fieldOrNatural,
+  industrialArea: generalTexts.historyPlaceLabels.industrialArea,
+  water: generalTexts.historyPlaceLabels.water,
+  otherPlace: generalTexts.historyPlaceLabels.otherPlace,
 };
 
 const ANIMAL_POSITION_LABELS: Record<RescueAnimalPosition, string> = {
-  ground: "En el suelo",
-  treeOrBush: "En un árbol o arbusto",
-  buildingOrRoof: "En un edificio o tejado",
-  water: "En el agua",
-  beachSand: "En arena / playa",
-  shoreShallowWater: "En la orilla / agua somera",
-  rocksBreakwater: "En rocas / espigón",
-  portDock: "En un puerto / muelle",
-  onBoat: "En una embarcación",
-  otherPlace: "Otro lugar",
+  ground: generalTexts.historyPositionLabels.ground,
+  treeOrBush: generalTexts.historyPositionLabels.treeOrBush,
+  buildingOrRoof: generalTexts.historyPositionLabels.buildingOrRoof,
+  water: generalTexts.historyPositionLabels.water,
+  beachSand: generalTexts.historyPositionLabels.beachSand,
+  shoreShallowWater: generalTexts.historyPositionLabels.shoreShallowWater,
+  rocksBreakwater: generalTexts.historyPositionLabels.rocksBreakwater,
+  portDock: generalTexts.historyPositionLabels.portDock,
+  onBoat: generalTexts.historyPositionLabels.onBoat,
+  otherPlace: generalTexts.historyPositionLabels.otherPlace,
 };
 
 const ANIMAL_ENVIRONMENT_LABELS: Record<RescueAnimalEnvironment, string> = {
-  roadOrStreet: "En una carretera o calle",
-  parkOrGarden: "En un parque o jardín",
-  fieldOrNatural: "En el campo o entorno natural",
-  industrialArea: "En una zona industrial",
-  urbanArea: "En una zona urbana",
-  coastBeach: "En costa / playa",
-  rockyCoastCliff: "Zona rocosa / acantilado",
-  portMarina: "En puerto / marina",
-  openSea: "En mar abierto",
-  estuaryMouth: "Desembocadura / estuario",
-  otherEnvironment: "Otro entorno",
+  roadOrStreet: generalTexts.historyEnvironmentLabels.roadOrStreet,
+  parkOrGarden: generalTexts.historyEnvironmentLabels.parkOrGarden,
+  fieldOrNatural: generalTexts.historyEnvironmentLabels.fieldOrNatural,
+  industrialArea: generalTexts.historyEnvironmentLabels.industrialArea,
+  urbanArea: generalTexts.historyEnvironmentLabels.urbanArea,
+  coastBeach: generalTexts.historyEnvironmentLabels.coastBeach,
+  rockyCoastCliff: generalTexts.historyEnvironmentLabels.rockyCoastCliff,
+  portMarina: generalTexts.historyEnvironmentLabels.portMarina,
+  openSea: generalTexts.historyEnvironmentLabels.openSea,
+  estuaryMouth: generalTexts.historyEnvironmentLabels.estuaryMouth,
+  otherEnvironment: generalTexts.historyEnvironmentLabels.otherEnvironment,
 };
 
 const ANIMAL_STATE_ICONS: Record<RescueAnimalState, string> = {
@@ -99,32 +105,32 @@ const FLAG_LABELS: {
   key: keyof RescueFlags;
   label: string;
 }[] = [
-  { key: "bleeding", label: "Herido" },
-  { key: "baby", label: "Es una cría" },
-  { key: "catDog", label: "Ha sido atacado por un gato o un perro" },
-  { key: "canNotMove", label: "No puede moverse" },
-  { key: "roadRisk", label: "Está cerca de una carretera" },
-  { key: "ringGps", label: "Lleva marca o dispositivo de seguimiento" },
-  { key: "trapped", label: "Está atrapado" },
-  { key: "cannotFly", label: "No puede volar" },
-  { key: "weakness", label: "Muestra debilidad" },
-  { key: "normalAppearance", label: "Presenta apariencia normal" },
-  { key: "breathing", label: "Tiene dificultad para respirar" },
-  { key: "stranded", label: "Está varado o fuera del agua" },
-  { key: "fishingLineHook", label: "Tiene sedal, anzuelo o aparejos" },
-  { key: "moreAnimals", label: "Hay más animales afectados" },
-  { key: "peopleDogsNearby", label: "Hay personas o perros cerca" },
-  { key: "restingOnLand", label: "Está descansando en tierra" },
-  { key: "other", label: "Presenta otra situación" },
+  { key: "bleeding", label: generalTexts.historyFlagLabels.bleeding },
+  { key: "baby", label: generalTexts.historyFlagLabels.baby },
+  { key: "catDog", label: generalTexts.historyFlagLabels.catDog },
+  { key: "canNotMove", label: generalTexts.historyFlagLabels.canNotMove },
+  { key: "roadRisk", label: generalTexts.historyFlagLabels.roadRisk },
+  { key: "ringGps", label: generalTexts.historyFlagLabels.ringGps },
+  { key: "trapped", label: generalTexts.historyFlagLabels.trapped },
+  { key: "cannotFly", label: generalTexts.historyFlagLabels.cannotFly },
+  { key: "weakness", label: generalTexts.historyFlagLabels.weakness },
+  { key: "normalAppearance", label: generalTexts.historyFlagLabels.normalAppearance },
+  { key: "breathing", label: generalTexts.historyFlagLabels.breathing },
+  { key: "stranded", label: generalTexts.historyFlagLabels.stranded },
+  { key: "fishingLineHook", label: generalTexts.historyFlagLabels.fishingLineHook },
+  { key: "moreAnimals", label: generalTexts.historyFlagLabels.moreAnimals },
+  { key: "peopleDogsNearby", label: generalTexts.historyFlagLabels.peopleDogsNearby },
+  { key: "restingOnLand", label: generalTexts.historyFlagLabels.restingOnLand },
+  { key: "other", label: generalTexts.historyFlagLabels.other },
 ];
 
 function formatDate(value: string | null): string {
-  if (!value) return "Fecha no disponible";
+  if (!value) return generalTexts.summaryHistory.dateUnavailable;
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "Fecha no disponible";
+    return generalTexts.summaryHistory.dateUnavailable;
   }
 
   return new Intl.DateTimeFormat("es-ES", {
@@ -142,7 +148,7 @@ function getActiveFlagLabels(flags: RescueFlags): string[] {
 function formatObservedSituation(flagLabels: string[]): string {
   return flagLabels.length > 0
     ? `${flagLabels.join(". ")}.`
-    : "Sin incidencias destacables.";
+    : generalTexts.summaryHistory.noIncidents;
 }
 
 function normalizeUsefulText(value: string | null | undefined): string | undefined {
@@ -173,13 +179,8 @@ function getAnimalEnvironmentLabel(rescueCase: RescueCase): string | null {
 }
 
 function getStoredLocationFallback(rescueCase: RescueCase) {
-  const locationText = normalizeUsefulText(rescueCase.locationText);
-
-  if (!locationText || locationText === "Ubicación no capturada todavía.") {
-    return undefined;
-  }
-
-  return locationText;
+  const location = readStoredLocationText(normalizeUsefulText(rescueCase.locationText));
+  return location.kind === "text" ? location.text : undefined;
 }
 
 function buildLocationSummaryLines(rescueCase: RescueCase): string[] {
@@ -187,19 +188,19 @@ function buildLocationSummaryLines(rescueCase: RescueCase): string[] {
   const lines: string[] = [];
 
   if (approximateLocation) {
-    lines.push(`Referencia del lugar: ${approximateLocation}`);
+    lines.push(`${generalTexts.summaryLocation.referencePrefix}${approximateLocation}`);
   }
 
   if (rescueCase.coords) {
     lines.push(
-      `Coordenadas: ${formatCoordinates(rescueCase.coords)}`,
-      `Mapa: https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
+      `${generalTexts.summaryLocation.coordinatesPrefix}${formatCoordinates(rescueCase.coords)}`,
+      `${generalTexts.summaryLocation.mapPrefix}https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
     );
   } else {
     const fallbackLocation = getStoredLocationFallback(rescueCase);
 
     if (fallbackLocation) {
-      lines.push(`Referencia del lugar: ${fallbackLocation}`);
+      lines.push(`${generalTexts.summaryLocation.referencePrefix}${fallbackLocation}`);
     }
   }
 
@@ -211,19 +212,19 @@ function getHistoryLocationFields(rescueCase: RescueCase) {
   const fields: string[] = [];
 
   if (approximateLocation) {
-    fields.push(`Referencia del lugar: ${approximateLocation}`);
+    fields.push(`${generalTexts.summaryLocation.referencePrefix}${approximateLocation}`);
   }
 
   if (rescueCase.coords) {
     fields.push(
-      `Coordenadas: ${formatCoordinates(rescueCase.coords)}`,
-      `Mapa: https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
+      `${generalTexts.summaryLocation.coordinatesPrefix}${formatCoordinates(rescueCase.coords)}`,
+      `${generalTexts.summaryLocation.mapPrefix}https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
     );
   } else {
     const fallbackLocation = getStoredLocationFallback(rescueCase);
 
     if (fallbackLocation) {
-      fields.push(`Referencia del lugar: ${fallbackLocation}`);
+      fields.push(`${generalTexts.summaryLocation.referencePrefix}${fallbackLocation}`);
     }
   }
 
@@ -247,7 +248,7 @@ function buildCaseSummary(rescueCase: RescueCase): string {
         : null,
     observedSigns: flagLabels,
     locationLines: buildLocationSummaryLines(rescueCase),
-    dateLine: `Fecha del aviso: ${formatDate(
+    dateLine: `${generalTexts.summaryHistory.datePrefix}${formatDate(
       rescueCase.completedAt ?? rescueCase.updatedAt,
     )}`,
   });
@@ -266,6 +267,8 @@ function HistoryCard({
   onCopy: () => void;
   onDelete: () => void;
 }) {
+  const { locale } = useI18n();
+  const generalTexts = getEffectiveCatalog(locale);
   const flagLabels = getActiveFlagLabels(rescueCase.flags);
   const observedSituation = formatObservedSituation(flagLabels);
   const locationFields = getHistoryLocationFields(rescueCase);
@@ -303,26 +306,26 @@ function HistoryCard({
 
         {animalPositionLabel ? (
           <>
-            <Text style={styles.summaryLabel}>Dónde está</Text>
+            <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.position}</Text>
             <Text style={styles.summaryValue}>{animalPositionLabel}</Text>
           </>
         ) : null}
 
         {animalEnvironmentLabel ? (
           <>
-            <Text style={styles.summaryLabel}>Entorno</Text>
+            <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.environment}</Text>
             <Text style={styles.summaryValue}>{animalEnvironmentLabel}</Text>
           </>
         ) : null}
 
         {!animalPositionLabel && !animalEnvironmentLabel && animalPlaceLabel ? (
           <>
-            <Text style={styles.summaryLabel}>Dónde está el animal</Text>
+            <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.legacyPlace}</Text>
             <Text style={styles.summaryValue}>{animalPlaceLabel}</Text>
           </>
         ) : null}
 
-        <Text style={styles.summaryLabel}>Situación</Text>
+        <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.situation}</Text>
         <Text style={styles.summaryValue}>{observedSituation}</Text>
       </View>
 
@@ -332,14 +335,14 @@ function HistoryCard({
             <Pressable style={styles.copyButton} onPress={onCopy}>
               <View style={styles.buttonContent}>
                 <IconSymbol name="doc.on.doc" size={16} color="#ffffff" />
-                <Text style={styles.copyButtonText}>Copiar resumen</Text>
+                <Text style={styles.copyButtonText}>{generalTexts.summaryHistory.copySummary}</Text>
               </View>
             </Pressable>
 
             <Pressable style={styles.deleteButton} onPress={onDelete}>
               <View style={styles.buttonContent}>
                 <IconSymbol name="trash" size={16} color="#9b1c1c" />
-                <Text style={styles.deleteButtonText}>Eliminar aviso</Text>
+                <Text style={styles.deleteButtonText}>{generalTexts.historyUi.deleteButton}</Text>
               </View>
             </Pressable>
           </View>
@@ -350,6 +353,8 @@ function HistoryCard({
 }
 
 export default function HistoryPage() {
+  const { locale } = useI18n();
+  const generalTexts = getEffectiveCatalog(locale);
   const router = useRouter();
   const [history, setHistory] = useState<RescueCase[]>([]);
   const [loading, setLoading] = useState(true);
@@ -384,7 +389,7 @@ export default function HistoryPage() {
     }
 
     Alert.alert(title, message, [
-      { text: "Cancelar", style: "cancel" },
+      { text: generalTexts.historyUi.cancel, style: "cancel" },
       {
         text: confirmText,
         style: "destructive",
@@ -397,18 +402,18 @@ export default function HistoryPage() {
     await Clipboard.setStringAsync(buildCaseSummary(rescueCase));
 
     if (Platform.OS === "web") {
-      window.alert("Resumen copiado al portapapeles.");
+      window.alert(generalTexts.summaryHistory.clipboardWeb);
       return;
     }
 
-    Alert.alert("Resumen copiado", "El resumen del aviso se ha copiado.");
+    Alert.alert(generalTexts.summaryHistory.clipboardTitle, generalTexts.summaryHistory.clipboardMessage);
   };
 
   const handleDeleteItem = (rescueCase: RescueCase) => {
     confirmAction(
-      "Eliminar aviso",
-      "Este aviso se eliminará del historial de este dispositivo.",
-      "Eliminar",
+      generalTexts.historyUi.deleteTitle,
+      generalTexts.historyUi.deleteMessage,
+      generalTexts.historyUi.deleteConfirm,
       async () => {
         await deleteHistoryItem(rescueCase.id);
         setHistory((currentHistory) =>
@@ -424,9 +429,9 @@ export default function HistoryPage() {
 
   const handleClearHistory = () => {
     confirmAction(
-      "Borrar todo el historial",
-      "Se eliminarán todos los avisos finalizados guardados en este dispositivo.",
-      "Borrar todo",
+      generalTexts.historyUi.clearTitle,
+      generalTexts.historyUi.clearMessage,
+      generalTexts.historyUi.clearConfirm,
       async () => {
         await clearHistory();
         setHistory([]);
@@ -442,20 +447,18 @@ export default function HistoryPage() {
       showsVerticalScrollIndicator
     >
       <NoIndexHead path="/history" title="Mis avisos | SOS Fauna España" />
-      <Stack.Screen options={{ title: "Mis avisos" }} />
+      <Stack.Screen options={{ title: generalTexts.historyUi.navigationTitle }} />
 
       <View style={styles.header}>
         <View style={styles.headerInner}>
           <View style={styles.headerText}>
             <Text style={styles.eyebrow}>SOS Fauna España</Text>
-            <Text style={styles.title}>Mis avisos</Text>
-            <Text style={styles.description}>
-              Historial de avisos finalizados y guardados en este dispositivo.
-            </Text>
+            <Text style={styles.title}>{generalTexts.historyUi.heading}</Text>
+            <Text style={styles.description}>{generalTexts.historyUi.description}</Text>
           </View>
 
           <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Volver</Text>
+            <Text style={styles.backButtonText}>{generalTexts.historyUi.back}</Text>
           </Pressable>
         </View>
       </View>
@@ -464,19 +467,16 @@ export default function HistoryPage() {
         {loading ? (
           <View style={styles.statusPanel}>
             <ActivityIndicator size="large" />
-            <Text style={styles.statusText}>Cargando avisos…</Text>
+            <Text style={styles.statusText}>{generalTexts.historyUi.loading}</Text>
           </View>
         ) : history.length === 0 ? (
           <View style={styles.emptyPanel}>
             <Text style={styles.emptyIcon}>🗂️</Text>
-            <Text style={styles.emptyTitle}>Todavía no hay avisos guardados</Text>
-            <Text style={styles.emptyText}>
-              Los avisos aparecerán aquí cuando finalices el proceso del
-              asistente.
-            </Text>
+            <Text style={styles.emptyTitle}>{generalTexts.historyUi.emptyTitle}</Text>
+            <Text style={styles.emptyText}>{generalTexts.historyUi.emptyDescription}</Text>
 
             <Pressable style={styles.primaryButton} onPress={() => router.back()}>
-              <Text style={styles.primaryButtonText}>Volver al inicio</Text>
+              <Text style={styles.primaryButtonText}>{generalTexts.historyUi.home}</Text>
             </Pressable>
           </View>
         ) : (
@@ -502,9 +502,7 @@ export default function HistoryPage() {
               style={styles.clearHistoryButton}
               onPress={handleClearHistory}
             >
-              <Text style={styles.clearHistoryButtonText}>
-                Borrar todo el historial
-              </Text>
+              <Text style={styles.clearHistoryButtonText}>{generalTexts.historyUi.clearButton}</Text>
             </Pressable>
           </>
         )}

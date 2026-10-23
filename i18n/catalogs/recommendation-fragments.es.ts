@@ -1,0 +1,76 @@
+// Exact Spanish protocol/FAQ fragments; identifiers and decisions remain in callers.
+export const recommendationFragmentsEs = {
+  "rescueHeadings": {
+    "actCalmlyLine": "🚨 ACTÚA CON CALMA\n",
+    "doNotLine": "❌ QUÉ NO HACER\n",
+    "actionsLine": "✅ QUÉ HACER\n",
+    "beforeInterveningLine": "⚠️ ANTES DE INTERVENIR\n",
+    "ifNeedsHelpParagraph": "🚨 SI NECESITA AYUDA\n\n",
+    "mayNeedHelpLine": "🚨 PUEDE NECESITAR AYUDA SI\n",
+    "observedSignsLine": "🚨 SEÑALES OBSERVADAS\n",
+    "doNotAfterParagraph": "\n\n❌ QUÉ NO HACER\n",
+    "beforeInterveningAfterParagraph": "\n\n⚠️ ANTES DE INTERVENIR\n",
+    "observedSignsAfterLine": "\n🚨 SEÑALES OBSERVADAS\n",
+    "unknownAnimalParagraph": "❓ NO ESTOY SEGURO\n\n",
+    "whatToObserveLine": "🔍 QUÉ OBSERVAR\n",
+    "smallBirdParagraph": "🐦 AVE PEQUEÑA\n\n"
+  },
+  "observedSigns": {
+    "bleeding": "• Presenta signos de lesión.",
+    "catDog": "• Ha sufrido un ataque de gato o perro.",
+    "canNotMove": "• No se mueve con normalidad.",
+    "cannotFly": "• No puede volar.",
+    "weakness": "• Presenta debilidad o decaimiento.",
+    "breathing": "• Presenta respiración agitada.",
+    "stranded": "• Está varado o fuera del agua.",
+    "fishingLineHook": "• Tiene sedal, anzuelo o aparejos.",
+    "moreAnimals": "• Hay más animales afectados.",
+    "peopleDogsNearby": "• Hay personas o perros cerca del animal.",
+    "restingOnLand": "• Está descansando en tierra.",
+    "roadRisk": "• Se encuentra en una zona con tráfico o peligro inmediato.",
+    "other": "• Se ha observado otra circunstancia que genera preocupación."
+  },
+  "rescueInstructions": {
+    "minimalHandlingFemaleLine": "• No la manipules más de lo necesario.\n",
+    "doNotCollectAutomaticallyLine": "• No la recojas automáticamente por estar en el suelo.\n",
+    "doNotTestHealthFemaleParagraph": "• No la manipules para comprobar si está sana.\n\n",
+    "returnToSignsParagraph": "• Si observas cualquiera de estas señales, vuelve al paso anterior y marca las opciones correspondientes.\n\n",
+    "keepFaceAndBareHandsAwayLine": "• No acerques la cara ni las manos desnudas.\n",
+    "doNotTestHealthFemaleLine": "• No la manipules para comprobar si está sana.\n",
+    "returnToSignsLine": "• Si observas cualquiera de estas señales, vuelve al paso anterior y marca las opciones correspondientes.\n",
+    "minimalHandlingMaleParagraph": "• No lo manipules más de lo necesario.\n\n",
+    "quietDarkProtectedBoxLine": "• Mantén la caja en un lugar tranquilo, oscuro y protegido del frío o del calor extremo.\n",
+    "minimalHandlingMaleLine": "• No lo manipules más de lo necesario.\n",
+    "followSpecialistsParagraph": "• Sigue siempre las indicaciones del personal especializado.\n\n",
+    "snakeNoHandlingOrTransferLine": "• No intentes coger, capturar, manipular ni trasladar serpientes, culebras o víboras, aunque creas haber identificado la especie. Si no puedes descartar que sea una serpiente, culebra o víbora, mantén la distancia y no intentes cogerla, capturarla, manipularla, liberarla ni trasladarla.\n",
+    "reduceNoisePeopleAndPetsLine": "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n",
+    "keepPeopleAndDogsAway": "• Mantén personas y perros alejados si puedes hacerlo sin riesgo.",
+    "swiftOnGroundParagraph": "• Si parece un vencejo, estar en el suelo no es normal: protégelo en una caja de cartón ventilada y consulta cuanto antes.\n\n",
+    "swiftNoFoodOrWaterLine": "• No le des comida ni agua sin indicación.\n",
+    "doNotTestHealthMaleParagraph": "• No lo manipules para comprobar si está sano.\n\n",
+    "swiftCollectWithMinimalHandlingLine": "• Recógelo con cuidado y con la mínima manipulación posible.\n",
+    "swiftClosedVentilatedBoxLine": "• Mantenlo en una caja de cartón ventilada y bien cerrada, en un lugar tranquilo y protegido del frío o del calor extremo.\n",
+    "swiftContactSpecialists": "• Contacta cuanto antes con un centro especializado, Agentes Forestales o Medioambientales."
+  },
+  "dynamicFaqGrammar": {
+    "injuredPlural": "heridos",
+    "injuredFemale": "herida",
+    "injuredMale": "herido",
+    "strandedPlural": "varados",
+    "strandedFemale": "varada",
+    "strandedMale": "varado",
+    "entangledPlural": "enredados",
+    "entangledFemale": "enredada",
+    "entangledMale": "enredado",
+    "weakPlural": "débiles",
+    "weakSingular": "débil"
+  },
+  "dynamicFaqCopy": {
+    "sealResting": "Una foca en tierra puede estar simplemente descansando. Si parece herida, muy débil, enredada o hay alguna situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.",
+    "otherMarine": "Si has encontrado un animal marino herido, varado, enredado, débil o en una situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.",
+    "marinePrefix": "Si has encontrado ",
+    "marineSuffix": " o en una situación que te preocupa, utiliza el asistente de SOS Fauna España. Te indicará qué observar y cómo actuar según la situación.",
+    "animalQuestionPrefix": "¿Qué debo hacer si encuentro ",
+    "animalQuestionSuffix": "?"
+  }
+} as const;

@@ -1,17 +1,21 @@
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
 import { Platform, Text } from "react-native";
+import { useI18n } from "@/i18n/I18nProvider";
+import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 
 export function TopicFaqBackButton({ tintColor }: { tintColor?: string }) {
+  const { t } = useI18n();
   const router = useRouter();
+  const pagePath = useInformationPagePath();
 
   return (
     <HeaderBackButton
-      href="/faq"
+      href={pagePath("faq")}
       tintColor={tintColor}
       displayMode="minimal"
-      accessibilityLabel="Volver a preguntas frecuentes"
-      onPress={() => router.navigate("/faq")}
+      accessibilityLabel={t("faqUi", "backToFaq")}
+      onPress={() => router.navigate(pagePath("faq"))}
     />
   );
 }

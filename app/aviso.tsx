@@ -1,11 +1,14 @@
+import { getEffectiveCatalog } from "@/i18n/translate";
+import { useI18n } from "@/i18n/I18nProvider";
+import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 import type { RescueAnimalType, RescueCase } from "@/types/rescueCase";
 import { recoverCurrentCase } from "@/services/rescueCaseService";
 import SosAssistant from "@/components/sos/SosAssistant";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { NoIndexHead } from "@/components/seo/SeoHead";
+import { NoIndexHead } from "@/components/i18n/InformationPageSupport";
 
 type GuidePreparation =
   | {
@@ -17,6 +20,12 @@ type GuidePreparation =
   | { requestKey: string; status: "error" };
 
 export default function AvisoRoute() {
+  const { locale } = useI18n();
+  const pagePath = useInformationPagePath();
+  const homePath = pagePath("home");
+  const homePathRef = useRef(homePath);
+  homePathRef.current = homePath;
+  const generalTexts = getEffectiveCatalog(locale);
   const router = useRouter();
   const { animalType, mode } = useLocalSearchParams<{
     animalType?: string | string[];
@@ -43,7 +52,7 @@ export default function AvisoRoute() {
 
         if (modeParam === "continue" && !initialCase) {
           // Keep the assistant unmounted while returning to the home page.
-          router.replace("/");
+          router.replace(homePathRef.current);
           return;
         }
 
@@ -69,15 +78,13 @@ export default function AvisoRoute() {
       {!currentPreparation ? (
         <View style={styles.loadingScreen}>
           <ActivityIndicator size="large" />
-          <Text style={styles.loadingText}>Preparando guía…</Text>
+          <Text style={styles.loadingText}>{generalTexts.guidePreparationUi.loading}</Text>
         </View>
       ) : currentPreparation.status === "error" ? (
         <View style={styles.loadingScreen}>
-          <Text style={styles.loadingText} accessibilityRole="alert">
-            No se ha podido preparar la guía. Vuelve al inicio e inténtalo de nuevo.
-          </Text>
-          <Pressable accessibilityRole="button" style={styles.backButton} onPress={() => router.replace("/")}>
-            <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
+          <Text style={styles.loadingText} accessibilityRole="alert">{generalTexts.guidePreparationUi.error}</Text>
+          <Pressable accessibilityRole="button" style={styles.backButton} onPress={() => router.replace(homePath)}>
+            <Text style={styles.backButtonText}>{generalTexts.guidePreparationUi.home}</Text>
           </Pressable>
         </View>
       ) : (

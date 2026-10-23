@@ -1,3 +1,5 @@
+import { getEffectiveCatalog } from "@/i18n/translate";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
 import {
   provinceContacts,
   type ProvinceContactGroup,
@@ -46,14 +48,17 @@ export const MADRID_PROVINCE_CONTACTS = [
   },
 ] as const;
 
-export const HELP_CONTACTS_LEGAL_NOTICE =
-  "Fuentes de información:\n\n" +
+export const getHelpContactsLegalNotice = (locale: Locale = DEFAULT_LOCALE): string =>
+  getEffectiveCatalog(locale).helpContactDescriptions.sourcesHeading +
   "• Emergencias 112: www.proteccioncivil.es/catalogo/info112/\n" +
   "• Guardia Civil (SEPRONA): www.guardiacivil.es\n" +
   "• Policía Nacional: www.policia.es\n" +
   "• Agentes Forestales de la Comunidad de Madrid:\n" +
   "  www.comunidad.madrid/centros/emisora-cuerpo-agentes-forestales\n\n" +
-  "SOS Fauna España es una aplicación independiente y no está afiliada ni representa a ninguna administración pública, servicio de emergencias o cuerpo policial.";
+  getEffectiveCatalog(locale).helpContactDescriptions.independenceNotice;
+
+// Compatible Spanish export for existing consumers.
+export const HELP_CONTACTS_LEGAL_NOTICE = getHelpContactsLegalNotice();
 
 export const getRecoveryCenterProvinceContacts = (): ProvinceContactGroup[] => {
   const madridEntry = {

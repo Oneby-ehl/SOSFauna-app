@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 
 import RecoveryCentersPage from "@/components/contacts/RecoveryCentersPage";
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead } from "@/components/i18n/InformationPageSupport";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function CentrosRoute() {
+  const { t, locale } = useI18n();
   return (
     <>
       <SeoHead
@@ -14,7 +16,7 @@ export default function CentrosRoute() {
       <Stack.Screen
         options={{
           title:
-            "Centros, redes y teléfonos de ayuda para fauna | SOS Fauna España",
+            locale === "en" ? `${t("navigation", "centers")} | SOS Fauna España` : "Centros, redes y teléfonos de ayuda para fauna | SOS Fauna España",
         }}
       />
 

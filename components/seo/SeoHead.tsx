@@ -55,6 +55,7 @@ type SeoHeadProps = {
   robots?: "index, follow" | "noindex, nofollow";
   structuredData?: Record<string, unknown>;
   includeGlobalStructuredData?: boolean;
+  alternates?: readonly { locale: string; path: string }[];
 };
 
 function absoluteUrl(path = "/") {
@@ -69,6 +70,7 @@ export function SeoHead({
   robots = "index, follow",
   structuredData,
   includeGlobalStructuredData = robots === "index, follow",
+  alternates,
 }: SeoHeadProps) {
   if (Platform.OS !== "web") return null;
 
@@ -87,6 +89,9 @@ export function SeoHead({
       <meta name="description" content={description} />
       <meta name="robots" content={robots} />
       <link rel="canonical" href={url} />
+      {alternates?.map((alternate) => (
+        <link key={alternate.locale} rel="alternate" hrefLang={alternate.locale} href={absoluteUrl(alternate.path)} />
+      ))}
 
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={SITE_NAME} />

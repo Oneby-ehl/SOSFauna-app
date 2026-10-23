@@ -1,11 +1,14 @@
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { ReactNode } from "react";
+import { initialLanguageScript } from "@/i18n/selection";
+import { languageFeatures } from "@/i18n/config";
 
 export default function Root({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <head>
         <meta charSet="utf-8" />
+        {languageFeatures.automaticRedirectEnabled ? <script dangerouslySetInnerHTML={{ __html: initialLanguageScript }} /> : null}
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta
           name="viewport"

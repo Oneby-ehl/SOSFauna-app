@@ -1,3 +1,4 @@
+/* global __dirname */
 // Local regression harness: executes original TypeScript expressions in memory.
 // No network, React Native runtime, source rewrites or alternate search algorithm.
 const fs = require("node:fs");
@@ -31,11 +32,11 @@ function evaluate(source, name, requireFn, globals = {}) {
     { filename: name })(exports, requireFn);
   return exports;
 }
-function createHarness() {
+function createHarness({ faqPageSource = read("components/faq/FaqPage.tsx"), moduleSources = {} } = {}) {
   const modules = new Map();
   const load = (name) => {
     if (modules.has(name)) return modules.get(name);
-    const value = evaluate(read(name), name, (specifier) => {
+    const value = evaluate(moduleSources[name] ?? read(name), name, (specifier) => {
       const base = specifier.startsWith("@/") ? specifier.slice(2)
         : path.posix.join(path.posix.dirname(name), specifier);
       return load(base + ".ts");
@@ -49,14 +50,19 @@ function createHarness() {
   // Select the existing pure declarations. Do not reimplement advice decisions.
   const assistant = parse("components/sos/SosAssistant.tsx");
   const endpoint = assistant.statements.find((n) =>
-    ts.isFunctionDeclaration(n) && n.name?.text === "getAdvice").end;
+    ts.isFunctionDeclaration(n) && n.name?.text === "getAdviceParts").end;
   const declarations = assistant.statements.filter((n) =>
     (ts.isFunctionDeclaration(n) && n.end <= endpoint) ||
     (ts.isVariableStatement(n) && n.declarationList.declarations.some((d) =>
       ["COMMON_END", "MARINE_ANIMAL_TYPES"].includes(d.name.getText(assistant)))));
-  const advice = evaluate(declarations.map((n) => n.getText(assistant)).join("\n"),
-    "advice.ts", () => { throw Error("Unexpected advice import"); });
-  const page = parse("components/faq/FaqPage.tsx");
+  const adviceCatalogImports = ["@/i18n/catalogs/small-bird.es", "@/i18n/catalogs/large-bird.es", "@/i18n/catalogs/bat.es", "@/i18n/catalogs/small-mammal.es", "@/i18n/catalogs/large-mammal.es", "@/i18n/catalogs/reptile-amphibian.es", "@/i18n/catalogs/unknown-animal.es", "@/i18n/catalogs/marine-animal.es", "@/i18n/catalogs/marine-flags.es", "@/i18n/catalogs/rescue-shared.es", "@/i18n/catalogs/baby.es", "@/i18n/catalogs/trapped.es", "@/i18n/catalogs/dead.es", "@/i18n/catalogs/supplemental.es", "@/utils/adviceComposition", "@/i18n/catalogs/recommendation-fragments.es", "@/i18n/translate", "@/i18n/types"];
+  const adviceImports = assistant.statements.filter((n) => ts.isImportDeclaration(n) && adviceCatalogImports.includes(n.moduleSpecifier.text));
+  const advice = evaluate([...adviceImports, ...declarations].map((n) => n.getText(assistant)).join("\n"),
+    "advice.ts", (specifier) => {
+      assert.ok(adviceCatalogImports.includes(specifier));
+      return load(specifier.slice(2) + ".ts");
+    });
+  const page = ts.createSourceFile("components/faq/FaqPage.tsx", faqPageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const component = page.statements.find((n) =>
     ts.isFunctionDeclaration(n) && n.name?.text === "FaqPage");
   const lastReturn = [...component.body.statements].reverse().find(ts.isReturnStatement);
@@ -66,7 +72,7 @@ function createHarness() {
     "handleSearchQueryChange", "selectAnimalSearchResult", "clearSearch", "toggleItem",
   ];
   // Replace ONLY the final JSX return in memory to observe the actual component state.
-  const original = read("components/faq/FaqPage.tsx");
+  const original = faqPageSource;
   const instrumented = original.slice(0, lastReturn.getStart(page)) +
     "return {" + fields.join(",") + "};" + original.slice(lastReturn.end);
   // Freeze all computation before JSX as an additional guard against refactoring.
@@ -90,16 +96,33 @@ function createHarness() {
     lastSearch = { input: items.map((x) => x.id), output: results.map((x) => x.id) };
     return results;
   }};
+  observedSearch.getFaqSearchEngine = (locale) => {
+    const engine = search.getFaqSearchEngine(locale);
+    return { ...engine, searchFaqItems: (items, query) => {
+      const results = engine.searchFaqItems(items, query);
+      lastSearch = { input: items.map((x) => x.id), output: results.map((x) => x.id) };
+      return results;
+    }};
+  };
   const runtime = evaluate(instrumented, "FaqPage.tsx", (specifier) => {
     if (specifier === "react") return react;
     if (specifier === "react/jsx-runtime") return {};
     if (specifier === "react-native") return { Platform: { OS: "web" }, StyleSheet: { create: (styles) => styles } };
     if (specifier === "expo-router") return { useRouter: () => ({ push() {} }) };
     if (specifier === "@/components/sos/SosAssistant") return advice;
+    if (specifier === "@/i18n/catalogs/recommendation-fragments.es") return load("i18n/catalogs/recommendation-fragments.es.ts");
+    if (specifier === "@/utils/adviceComposition") return load("utils/adviceComposition.ts");
     if (specifier === "@/components/seo/SeoHead") return {};
     if (specifier === "@/utils/faqSearch") return observedSearch;
     if (specifier === "@/data/faq") return data;
     if (specifier === "@/data/animalSearchCatalog") return catalog;
+    if (["@/i18n/translate", "@/i18n/types", "@/data/faqCategories", "@/data/faqSearchVocabulary"].includes(specifier)) {
+      return load(specifier.slice(2) + ".ts");
+    }
+    // Presentation-only i18n imports. Keep executing the original search/state code.
+    if (specifier === "@/i18n/I18nProvider") return {
+      useI18n: () => ({ locale: "es", t: load("i18n/translate.ts").createTranslator("es") }),
+    };
     throw Error("Unexpected page import " + specifier);
   }, { requestAnimationFrame: (fn) => fn() });
   const render = () => { cursor = 0; return runtime.default(); };
@@ -135,7 +158,7 @@ function createHarness() {
     }
     return snapshots;
   };
-  return { data, catalog, search, run, logicHash };
+  return { data, catalog, search, run, logicHash, topics: load("data/faqTopics.ts").faqTopics };
 }
 const queries = [
   "", "   ", "que la", "animal herido", "fauna comida", "caja", "caja.",

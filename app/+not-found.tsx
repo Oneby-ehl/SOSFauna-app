@@ -1,9 +1,20 @@
-import { Link, Stack } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { getEffectiveCatalog } from "@/i18n/translate";
+import { useI18n } from "@/i18n/I18nProvider";
+import { Link, Stack, usePathname } from "expo-router";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { getEnglishDevelopmentPage } from "@/i18n/developmentPreview";
 
 import { SeoHead } from "@/components/seo/SeoHead";
 
 export default function NotFoundPage() {
+  const { locale } = useI18n();
+  const pathname = usePathname();
+  if (__DEV__ && Platform.OS === "web" && getEnglishDevelopmentPage(pathname, "web")) {
+    // Keep the preview module behind Metro's development-only branch.
+    const EnglishDevelopmentPreview = require("@/components/i18n/EnglishDevelopmentPreview").default;
+    return <EnglishDevelopmentPreview />;
+  }
+  const generalTexts = getEffectiveCatalog(locale);
   return (
     <>
       <SeoHead
@@ -13,28 +24,24 @@ export default function NotFoundPage() {
         includeGlobalStructuredData={false}
       />
       <Stack.Screen
-        options={{ title: "Página no encontrada | SOS Fauna España" }}
+        options={{ title: generalTexts.notFoundUi.navigationTitle }}
       />
 
       <View style={styles.screen}>
         <View style={styles.card}>
           <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
           <Text style={styles.code}>404</Text>
-          <Text style={styles.title}>Página no encontrada</Text>
-          <Text style={styles.message}>
-            La dirección que has introducido no existe o ya no está disponible.
-          </Text>
-          <Text style={styles.secondary}>
-            Puedes volver a la página principal de SOS Fauna España.
-          </Text>
+          <Text style={styles.title}>{generalTexts.notFoundUi.title}</Text>
+          <Text style={styles.message}>{generalTexts.notFoundUi.message}</Text>
+          <Text style={styles.secondary}>{generalTexts.notFoundUi.secondary}</Text>
 
           <Link href="/" asChild>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Volver al inicio"
+              accessibilityLabel={generalTexts.notFoundUi.homeAccessibility}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>Volver al inicio</Text>
+              <Text style={styles.buttonText}>{generalTexts.notFoundUi.homeButton}</Text>
             </Pressable>
           </Link>
         </View>

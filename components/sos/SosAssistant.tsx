@@ -1,3 +1,28 @@
+import { localiseAssistantLabel } from "@/i18n/assistantLabels";
+import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+// Protocol catalog recommendationFragmentsEs resolves per invocation.
+import { getEffectiveCatalog, type Catalog } from "@/i18n/translate";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
+// General text catalogs resolve through the effective locale.
+import { type LocationSummaryLine, type StoredLocationValue, readStoredLocationText, writeStoredLocationText } from "@/utils/rescueLocation";
+import type { MarineAdviceRecommendation } from "@/utils/marineAdvice";
+import { type AdviceParts, formatAdvice, withCommonEnd, withAdviceSupplements } from "@/utils/adviceComposition";
+// Protocol catalog supplementalEs resolves per invocation.
+// Protocol catalog deadAnimalEs resolves per invocation.
+// Protocol catalog trappedEs resolves per invocation.
+// Protocol catalog babyEs resolves per invocation.
+// Protocol catalog sharedRescueEs resolves per invocation.
+// Protocol catalog marineFlagsEs resolves per invocation.
+// Protocol catalog marineAnimalEs resolves per invocation.
+// Protocol catalog unknownAnimalEs resolves per invocation.
+// Protocol catalog reptileAmphibianEs resolves per invocation.
+// Protocol catalog largeMammalEs resolves per invocation.
+// Protocol catalog smallMammalEs resolves per invocation.
+// Protocol catalog batEs resolves per invocation.
+// Protocol catalog largeBirdEs resolves per invocation.
+// Protocol catalog smallBirdEs resolves per invocation.
+import { assistantOptionsEs } from "@/i18n/catalogs/assistant-options.es";
+import { useI18n } from "@/i18n/I18nProvider";
 import type { RescueCase } from "@/types/rescueCase";
 import {
   persistCurrentCase,
@@ -34,6 +59,8 @@ import { Stack, useRouter } from "expo-router";
 import { RecoveryCentersContent } from "@/components/contacts/RecoveryCentersPage";
 import { SectionCard } from "@/components/SectionCard";
 import { buildRescueShareMessage } from "@/utils/rescueShareMessage";
+
+const generalTexts = getEffectiveCatalog();
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -83,7 +110,7 @@ type Step = 1 | 2 | 3 | 4;
 const GREFA_WHATSAPP = "34648539901";
 
 export const COMMON_END =
-  "En el siguiente paso podrás facilitar una foto y la ubicación del hallazgo. Contacta con un centro especializado, con los Agentes Forestales o con Emergencias y facilita la información recopilada por el medio que prefieras.";
+  getEffectiveCatalog().supplementalAdvice.commonEnd;
 
 type AnimalOption = { key: AnimalType; label: string };
 type FlagOption = { key: keyof FlagsState; label: string };
@@ -198,101 +225,101 @@ const VISIBLE_POSITION_OPTIONS_BY_ANIMAL_TYPE: Record<
   PositionOption[]
 > = {
   smallBird: [
-    { key: "ground", label: "En el suelo" },
-    { key: "treeOrBush", label: "En un árbol o arbusto" },
-    { key: "buildingOrRoof", label: "En un edificio o tejado" },
-    { key: "water", label: "En el agua" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "ground", label: assistantOptionsEs.assistantPositionOptions.ground },
+    { key: "treeOrBush", label: assistantOptionsEs.assistantPositionOptions.treeOrBush },
+    { key: "buildingOrRoof", label: assistantOptionsEs.assistantPositionOptions.buildingOrRoof },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   largeBird: [
-    { key: "ground", label: "En el suelo" },
-    { key: "treeOrBush", label: "En un árbol o arbusto" },
-    { key: "buildingOrRoof", label: "En un edificio o tejado" },
-    { key: "water", label: "En el agua" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "ground", label: assistantOptionsEs.assistantPositionOptions.ground },
+    { key: "treeOrBush", label: assistantOptionsEs.assistantPositionOptions.treeOrBush },
+    { key: "buildingOrRoof", label: assistantOptionsEs.assistantPositionOptions.buildingOrRoof },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   bat: [
-    { key: "ground", label: "En el suelo" },
-    { key: "treeOrBush", label: "En un árbol o arbusto" },
-    { key: "buildingOrRoof", label: "En un edificio o tejado" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "ground", label: assistantOptionsEs.assistantPositionOptions.ground },
+    { key: "treeOrBush", label: assistantOptionsEs.assistantPositionOptions.treeOrBush },
+    { key: "buildingOrRoof", label: assistantOptionsEs.assistantPositionOptions.buildingOrRoof },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   smallMammal: [
-    { key: "ground", label: "En el suelo" },
-    { key: "treeOrBush", label: "En un árbol o arbusto" },
-    { key: "buildingOrRoof", label: "En un edificio o tejado" },
-    { key: "water", label: "En el agua" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "ground", label: assistantOptionsEs.assistantPositionOptions.ground },
+    { key: "treeOrBush", label: assistantOptionsEs.assistantPositionOptions.treeOrBush },
+    { key: "buildingOrRoof", label: assistantOptionsEs.assistantPositionOptions.buildingOrRoof },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   largeMammal: [
-    { key: "ground", label: "En el suelo" },
-    { key: "buildingOrRoof", label: "En un edificio o tejado" },
-    { key: "water", label: "En el agua" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "ground", label: assistantOptionsEs.assistantPositionOptions.ground },
+    { key: "buildingOrRoof", label: assistantOptionsEs.assistantPositionOptions.buildingOrRoof },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   reptileAmphibian: [
-    { key: "ground", label: "En el suelo" },
-    { key: "treeOrBush", label: "En un árbol o arbusto" },
-    { key: "buildingOrRoof", label: "En un edificio o tejado" },
-    { key: "water", label: "En el agua" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "ground", label: assistantOptionsEs.assistantPositionOptions.ground },
+    { key: "treeOrBush", label: assistantOptionsEs.assistantPositionOptions.treeOrBush },
+    { key: "buildingOrRoof", label: assistantOptionsEs.assistantPositionOptions.buildingOrRoof },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   dolphin: [
-    { key: "beachSand", label: "En arena / playa" },
-    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
-    { key: "water", label: "En el agua" },
-    { key: "rocksBreakwater", label: "En rocas / espigón" },
-    { key: "portDock", label: "En un puerto / muelle" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "beachSand", label: assistantOptionsEs.assistantPositionOptions.beachSand },
+    { key: "shoreShallowWater", label: assistantOptionsEs.assistantPositionOptions.shoreShallowWater },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "rocksBreakwater", label: assistantOptionsEs.assistantPositionOptions.rocksBreakwater },
+    { key: "portDock", label: assistantOptionsEs.assistantPositionOptions.portDock },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   largeCetacean: [
-    { key: "beachSand", label: "En arena / playa" },
-    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
-    { key: "water", label: "En el agua" },
-    { key: "rocksBreakwater", label: "En rocas / espigón" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "beachSand", label: assistantOptionsEs.assistantPositionOptions.beachSand },
+    { key: "shoreShallowWater", label: assistantOptionsEs.assistantPositionOptions.shoreShallowWater },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "rocksBreakwater", label: assistantOptionsEs.assistantPositionOptions.rocksBreakwater },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   seal: [
-    { key: "beachSand", label: "En arena / playa" },
-    { key: "rocksBreakwater", label: "En rocas / piedras / espigón" },
-    { key: "portDock", label: "En un puerto / muelle" },
-    { key: "water", label: "En el agua" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "beachSand", label: assistantOptionsEs.assistantPositionOptions.beachSand },
+    { key: "rocksBreakwater", label: assistantOptionsEs.assistantPositionOptions.rocksStonesBreakwater },
+    { key: "portDock", label: assistantOptionsEs.assistantPositionOptions.portDock },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   seaTurtle: [
-    { key: "beachSand", label: "En arena / playa" },
-    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
-    { key: "water", label: "En el agua" },
-    { key: "rocksBreakwater", label: "En rocas / espigón" },
-    { key: "portDock", label: "En un puerto / muelle" },
-    { key: "onBoat", label: "En una embarcación" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "beachSand", label: assistantOptionsEs.assistantPositionOptions.beachSand },
+    { key: "shoreShallowWater", label: assistantOptionsEs.assistantPositionOptions.shoreShallowWater },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "rocksBreakwater", label: assistantOptionsEs.assistantPositionOptions.rocksBreakwater },
+    { key: "portDock", label: assistantOptionsEs.assistantPositionOptions.portDock },
+    { key: "onBoat", label: assistantOptionsEs.assistantPositionOptions.onBoat },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   sharkRay: [
-    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
-    { key: "water", label: "En el agua" },
-    { key: "beachSand", label: "En arena / playa" },
-    { key: "rocksBreakwater", label: "En rocas / espigón" },
-    { key: "portDock", label: "En un puerto / muelle" },
-    { key: "onBoat", label: "En una embarcación" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "shoreShallowWater", label: assistantOptionsEs.assistantPositionOptions.shoreShallowWater },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "beachSand", label: assistantOptionsEs.assistantPositionOptions.beachSand },
+    { key: "rocksBreakwater", label: assistantOptionsEs.assistantPositionOptions.rocksBreakwater },
+    { key: "portDock", label: assistantOptionsEs.assistantPositionOptions.portDock },
+    { key: "onBoat", label: assistantOptionsEs.assistantPositionOptions.onBoat },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   otherMarine: [
-    { key: "beachSand", label: "En arena / playa" },
-    { key: "shoreShallowWater", label: "En la orilla / agua somera" },
-    { key: "water", label: "En el agua" },
-    { key: "rocksBreakwater", label: "En rocas / piedras / espigón" },
-    { key: "portDock", label: "En un puerto / muelle" },
-    { key: "onBoat", label: "En una embarcación" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "beachSand", label: assistantOptionsEs.assistantPositionOptions.beachSand },
+    { key: "shoreShallowWater", label: assistantOptionsEs.assistantPositionOptions.shoreShallowWater },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "rocksBreakwater", label: assistantOptionsEs.assistantPositionOptions.rocksStonesBreakwater },
+    { key: "portDock", label: assistantOptionsEs.assistantPositionOptions.portDock },
+    { key: "onBoat", label: assistantOptionsEs.assistantPositionOptions.onBoat },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
   unknown: [
-    { key: "ground", label: "En el suelo" },
-    { key: "treeOrBush", label: "En un árbol o arbusto" },
-    { key: "buildingOrRoof", label: "En un edificio o tejado" },
-    { key: "water", label: "En el agua" },
-    { key: "shoreShallowWater", label: "En playa / orilla" },
-    { key: "otherPlace", label: "Otro lugar" },
+    { key: "ground", label: assistantOptionsEs.assistantPositionOptions.ground },
+    { key: "treeOrBush", label: assistantOptionsEs.assistantPositionOptions.treeOrBush },
+    { key: "buildingOrRoof", label: assistantOptionsEs.assistantPositionOptions.buildingOrRoof },
+    { key: "water", label: assistantOptionsEs.assistantPositionOptions.water },
+    { key: "shoreShallowWater", label: assistantOptionsEs.assistantPositionOptions.beachShore },
+    { key: "otherPlace", label: assistantOptionsEs.assistantPositionOptions.otherPlace },
   ],
 };
 
@@ -301,98 +328,98 @@ const VISIBLE_ENVIRONMENT_OPTIONS_BY_ANIMAL_TYPE: Record<
   EnvironmentOption[]
 > = {
   smallBird: [
-    { key: "roadOrStreet", label: "En una carretera o calle" },
-    { key: "parkOrGarden", label: "En un parque o jardín" },
-    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
-    { key: "industrialArea", label: "En una zona industrial" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "roadOrStreet", label: assistantOptionsEs.assistantEnvironmentOptions.roadOrStreet },
+    { key: "parkOrGarden", label: assistantOptionsEs.assistantEnvironmentOptions.parkOrGarden },
+    { key: "fieldOrNatural", label: assistantOptionsEs.assistantEnvironmentOptions.fieldOrNatural },
+    { key: "industrialArea", label: assistantOptionsEs.assistantEnvironmentOptions.industrialArea },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   largeBird: [
-    { key: "roadOrStreet", label: "En una carretera o calle" },
-    { key: "parkOrGarden", label: "En un parque o jardín" },
-    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
-    { key: "industrialArea", label: "En una zona industrial" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "roadOrStreet", label: assistantOptionsEs.assistantEnvironmentOptions.roadOrStreet },
+    { key: "parkOrGarden", label: assistantOptionsEs.assistantEnvironmentOptions.parkOrGarden },
+    { key: "fieldOrNatural", label: assistantOptionsEs.assistantEnvironmentOptions.fieldOrNatural },
+    { key: "industrialArea", label: assistantOptionsEs.assistantEnvironmentOptions.industrialArea },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   bat: [
-    { key: "urbanArea", label: "En una zona urbana" },
-    { key: "parkOrGarden", label: "En un parque o jardín" },
-    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
-    { key: "industrialArea", label: "En una zona industrial" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "urbanArea", label: assistantOptionsEs.assistantEnvironmentOptions.urbanArea },
+    { key: "parkOrGarden", label: assistantOptionsEs.assistantEnvironmentOptions.parkOrGarden },
+    { key: "fieldOrNatural", label: assistantOptionsEs.assistantEnvironmentOptions.fieldOrNatural },
+    { key: "industrialArea", label: assistantOptionsEs.assistantEnvironmentOptions.industrialArea },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   smallMammal: [
-    { key: "roadOrStreet", label: "En una carretera o calle" },
-    { key: "parkOrGarden", label: "En un parque o jardín" },
-    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
-    { key: "urbanArea", label: "En una zona urbana" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "roadOrStreet", label: assistantOptionsEs.assistantEnvironmentOptions.roadOrStreet },
+    { key: "parkOrGarden", label: assistantOptionsEs.assistantEnvironmentOptions.parkOrGarden },
+    { key: "fieldOrNatural", label: assistantOptionsEs.assistantEnvironmentOptions.fieldOrNatural },
+    { key: "urbanArea", label: assistantOptionsEs.assistantEnvironmentOptions.urbanArea },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   largeMammal: [
-    { key: "roadOrStreet", label: "En una carretera o calle" },
-    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
-    { key: "urbanArea", label: "En una zona urbana" },
-    { key: "parkOrGarden", label: "En un parque o jardín" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "roadOrStreet", label: assistantOptionsEs.assistantEnvironmentOptions.roadOrStreet },
+    { key: "fieldOrNatural", label: assistantOptionsEs.assistantEnvironmentOptions.fieldOrNatural },
+    { key: "urbanArea", label: assistantOptionsEs.assistantEnvironmentOptions.urbanArea },
+    { key: "parkOrGarden", label: assistantOptionsEs.assistantEnvironmentOptions.parkOrGarden },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   reptileAmphibian: [
-    { key: "roadOrStreet", label: "En una carretera o calle" },
-    { key: "parkOrGarden", label: "En un parque o jardín" },
-    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
-    { key: "urbanArea", label: "En una zona urbana" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "roadOrStreet", label: assistantOptionsEs.assistantEnvironmentOptions.roadOrStreet },
+    { key: "parkOrGarden", label: assistantOptionsEs.assistantEnvironmentOptions.parkOrGarden },
+    { key: "fieldOrNatural", label: assistantOptionsEs.assistantEnvironmentOptions.fieldOrNatural },
+    { key: "urbanArea", label: assistantOptionsEs.assistantEnvironmentOptions.urbanArea },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   dolphin: [
-    { key: "coastBeach", label: "Costa / playa" },
-    { key: "portMarina", label: "Puerto / marina" },
-    { key: "openSea", label: "Mar abierto" },
-    { key: "estuaryMouth", label: "Desembocadura / estuario" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "coastBeach", label: assistantOptionsEs.assistantEnvironmentOptions.coastBeach },
+    { key: "portMarina", label: assistantOptionsEs.assistantEnvironmentOptions.portMarina },
+    { key: "openSea", label: assistantOptionsEs.assistantEnvironmentOptions.openSea },
+    { key: "estuaryMouth", label: assistantOptionsEs.assistantEnvironmentOptions.estuaryMouth },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   largeCetacean: [
-    { key: "coastBeach", label: "Costa / playa" },
-    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
-    { key: "portMarina", label: "Puerto / marina" },
-    { key: "openSea", label: "Mar abierto" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "coastBeach", label: assistantOptionsEs.assistantEnvironmentOptions.coastBeach },
+    { key: "rockyCoastCliff", label: assistantOptionsEs.assistantEnvironmentOptions.rockyCoastCliff },
+    { key: "portMarina", label: assistantOptionsEs.assistantEnvironmentOptions.portMarina },
+    { key: "openSea", label: assistantOptionsEs.assistantEnvironmentOptions.openSea },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   seal: [
-    { key: "coastBeach", label: "Costa / playa" },
-    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
-    { key: "portMarina", label: "Puerto / marina" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "coastBeach", label: assistantOptionsEs.assistantEnvironmentOptions.coastBeach },
+    { key: "rockyCoastCliff", label: assistantOptionsEs.assistantEnvironmentOptions.rockyCoastCliff },
+    { key: "portMarina", label: assistantOptionsEs.assistantEnvironmentOptions.portMarina },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   seaTurtle: [
-    { key: "coastBeach", label: "Costa / playa" },
-    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
-    { key: "portMarina", label: "Puerto / marina" },
-    { key: "openSea", label: "Mar abierto" },
-    { key: "estuaryMouth", label: "Desembocadura / estuario" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "coastBeach", label: assistantOptionsEs.assistantEnvironmentOptions.coastBeach },
+    { key: "rockyCoastCliff", label: assistantOptionsEs.assistantEnvironmentOptions.rockyCoastCliff },
+    { key: "portMarina", label: assistantOptionsEs.assistantEnvironmentOptions.portMarina },
+    { key: "openSea", label: assistantOptionsEs.assistantEnvironmentOptions.openSea },
+    { key: "estuaryMouth", label: assistantOptionsEs.assistantEnvironmentOptions.estuaryMouth },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   sharkRay: [
-    { key: "coastBeach", label: "Costa / playa" },
-    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
-    { key: "portMarina", label: "Puerto / marina" },
-    { key: "openSea", label: "Mar abierto" },
-    { key: "estuaryMouth", label: "Desembocadura / estuario" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "coastBeach", label: assistantOptionsEs.assistantEnvironmentOptions.coastBeach },
+    { key: "rockyCoastCliff", label: assistantOptionsEs.assistantEnvironmentOptions.rockyCoastCliff },
+    { key: "portMarina", label: assistantOptionsEs.assistantEnvironmentOptions.portMarina },
+    { key: "openSea", label: assistantOptionsEs.assistantEnvironmentOptions.openSea },
+    { key: "estuaryMouth", label: assistantOptionsEs.assistantEnvironmentOptions.estuaryMouth },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   otherMarine: [
-    { key: "coastBeach", label: "Costa / playa" },
-    { key: "rockyCoastCliff", label: "Zona rocosa / acantilado" },
-    { key: "portMarina", label: "Puerto / marina" },
-    { key: "openSea", label: "Mar abierto" },
-    { key: "estuaryMouth", label: "Desembocadura / estuario" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "coastBeach", label: assistantOptionsEs.assistantEnvironmentOptions.coastBeach },
+    { key: "rockyCoastCliff", label: assistantOptionsEs.assistantEnvironmentOptions.rockyCoastCliff },
+    { key: "portMarina", label: assistantOptionsEs.assistantEnvironmentOptions.portMarina },
+    { key: "openSea", label: assistantOptionsEs.assistantEnvironmentOptions.openSea },
+    { key: "estuaryMouth", label: assistantOptionsEs.assistantEnvironmentOptions.estuaryMouth },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
   unknown: [
-    { key: "roadOrStreet", label: "En una carretera o calle" },
-    { key: "parkOrGarden", label: "En un parque o jardín" },
-    { key: "fieldOrNatural", label: "En el campo o entorno natural" },
-    { key: "coastBeach", label: "En costa / playa" },
-    { key: "portMarina", label: "En puerto / marina" },
-    { key: "otherEnvironment", label: "Otro entorno" },
+    { key: "roadOrStreet", label: assistantOptionsEs.assistantEnvironmentOptions.roadOrStreet },
+    { key: "parkOrGarden", label: assistantOptionsEs.assistantEnvironmentOptions.parkOrGarden },
+    { key: "fieldOrNatural", label: assistantOptionsEs.assistantEnvironmentOptions.fieldOrNatural },
+    { key: "coastBeach", label: assistantOptionsEs.assistantEnvironmentOptions.coastBeachWithPreposition },
+    { key: "portMarina", label: assistantOptionsEs.assistantEnvironmentOptions.portMarinaWithPreposition },
+    { key: "otherEnvironment", label: assistantOptionsEs.assistantEnvironmentOptions.otherEnvironment },
   ],
 };
 
@@ -586,222 +613,224 @@ function canUseCannotFly(animalType: AnimalType) {
   );
 }
 
-function getTrappedAdvice(animalType: AnimalType) {
+function getTrappedAdvice(animalType: AnimalType, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const commonEnd =
     COMMON_END;
 
   if (animalType === "smallBird") {
-    return (
-  "🪤 AVE ATRAPADA\n\n" +
-  "🚨 ACTÚA CON CALMA\n" +
-  "• Un intento de liberación precipitado puede provocar lesiones en las alas, las patas o el cuello.\n" +
-  "• Antes de intervenir, observa cómo está atrapada y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No tires del animal para liberarlo.\n" +
-  "• No fuerces las alas, las patas o el cuello.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Reduce los ruidos y evita que se acerquen personas o animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo, cúbrela suavemente con una toalla, un trapo, un jersey o cualquier otra tela disponible para reducir su estrés.\n" +
-  "• Si consigues liberarla sin causarle lesiones, introdúcela en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.trappedAdvice.smallBirdTitle +
+  protocolTexts.rescueHeadings.actCalmlyLine +
+  protocolTexts.trappedAdvice.rushedReleaseInjuresBird +
+  protocolTexts.trappedAdvice.assessTrappedBirdSafetyParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.trappedAdvice.doNotPullAnimalLine +
+  protocolTexts.trappedAdvice.doNotForceWingsLegsOrNeck +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.trappedAdvice.reduceNoiseAndBystanders +
+  protocolTexts.trappedAdvice.coverBirdGentlyIfSafe +
+  protocolTexts.trappedAdvice.releasedBirdBoxOrCarrier +
+  protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "largeBird") {
-    return (
-  "🪤 RAPAZ ATRAPADA\n\n" +
-  "🚨 ACTÚA CON CALMA\n" +
-  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras, aunque parezca inmóvil o debilitada.\n" +
-  "• Antes de intervenir, observa cómo está atrapada y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No tires del animal para liberarlo.\n" +
-  "• No sujetes con fuerza las alas, las patas o el cuello.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo, cúbrela suavemente con una toalla, una manta o una tela gruesa para reducir su estrés y protegerte de las garras.\n" +
-  "• Si consigues liberarla sin causarle lesiones, observa si puede ser liberada en el acto. Si presenta alguna anomalía, introdúcela en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.trappedAdvice.largeBirdTitle +
+  protocolTexts.rescueHeadings.actCalmlyLine +
+  protocolTexts.trappedAdvice.defensiveBirdEvenWhenWeak +
+  protocolTexts.trappedAdvice.assessTrappedBirdSafetyParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.trappedAdvice.doNotPullAnimalLine +
+  protocolTexts.trappedAdvice.doNotGripWingsLegsOrNeck +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+  protocolTexts.trappedAdvice.coverLargeBirdAndProtectFromClaws +
+  protocolTexts.trappedAdvice.assessReleasedBirdBeforeRelease +
+  protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "bat") {
-    return (
-  "🪤 MURCIÉLAGO ATRAPADO\n\n" +
-  "🚨 ACTÚA CON CALMA\n" +
-  "• Antes de intervenir, observa cómo está atrapado y comprueba si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No lo manipules directamente con las manos desnudas.\n" +
-  "• No tires del animal para liberarlo.\n" +
-  "• Haz solo las fotos o vídeos necesarios para valorar el caso y evita utilizar flash.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Si es necesario manipularlo, utiliza guantes gruesos o una tela resistente para protegerte.\n" +
-  "• Si consigues liberarlo sin causarle lesiones, introdúcelo en una caja de cartón ventilada y bien cerrada, con una tela o papel absorbente en el fondo.\n" +
-  "• Mantén la caja en un lugar tranquilo, oscuro y protegido del frío y del calor.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.trappedAdvice.batTitle +
+  protocolTexts.rescueHeadings.actCalmlyLine +
+  protocolTexts.trappedAdvice.assessTrappedBatSafetyParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.trappedAdvice.noDirectBareHandHandling +
+  protocolTexts.trappedAdvice.doNotPullAnimalLine +
+  protocolTexts.trappedAdvice.documentBatWithoutFlash +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+  protocolTexts.trappedAdvice.thickGlovesOrClothIfNecessary +
+  protocolTexts.trappedAdvice.releasedBatLinedBox +
+  protocolTexts.trappedAdvice.quietDarkBoxProtectedFromColdAndHeat +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "smallMammal") {
-    return (
-  "🪤 MAMÍFERO PEQUEÑO ATRAPADO\n\n" +
-  "🚨 ACTÚA CON CALMA\n" +
-  "• Un mamífero atrapado puede sentirse amenazado siente miedo o dolor.\n" +
-  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No tires del animal para liberarlo.\n" +
-  "• No lo manipules directamente si existe riesgo de mordedura.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo, utiliza guantes gruesos o una tela resistente para manipularlo.\n" +
-  "• Si consigues liberarlo sin causarle lesiones, introdúcelo en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.trappedAdvice.smallMammalTitle +
+  protocolTexts.rescueHeadings.actCalmlyLine +
+  protocolTexts.trappedAdvice.trappedMammalFearOrPain +
+  protocolTexts.trappedAdvice.assessTrappedAnimalSafetyParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.trappedAdvice.doNotPullAnimalLine +
+  protocolTexts.trappedAdvice.avoidDirectHandlingIfBiteRisk +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+  protocolTexts.trappedAdvice.thickGlovesOrClothOnlyIfSafe +
+  protocolTexts.trappedAdvice.releasedMammalBoxOrCarrier +
+  protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "largeMammal") {
-    return (
-  "🪤 MAMÍFERO GRANDE ATRAPADO\n\n" +
-  "🚨 ACTÚA CON CALMA\n" +
-  "• Un mamífero grande atrapado puede reaccionar de forma imprevisible e intentar escapar bruscamente, provocando lesiones tanto al animal como a las personas.\n" +
-  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No intentes liberarlo tú solo.\n" +
-  "• No te acerques si el animal está agitado o puede embestir, cocear o morder.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo, observa el tipo de atrapamiento para poder describirlo a los servicios de ayuda.\n" +
-  "• Contacta cuanto antes con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.trappedAdvice.largeMammalTitle +
+  protocolTexts.rescueHeadings.actCalmlyLine +
+  protocolTexts.trappedAdvice.unpredictableEscapeRisksPeopleAndAnimal +
+  protocolTexts.trappedAdvice.assessTrappedAnimalSafetyParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.trappedAdvice.doNotReleaseAlone +
+  protocolTexts.trappedAdvice.avoidAgitatedOrDangerousAnimal +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+  protocolTexts.trappedAdvice.observeTrappingOnlyIfSafe +
+  protocolTexts.trappedAdvice.contactRecoveryCenterPromptlyParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "reptileAmphibian") {
-    return (
-  "🪤 REPTIL O ANFIBIO ATRAPADO\n\n" +
-  "🚨 ACTÚA CON CALMA\n" +
-  "• Un reptil o un anfibio atrapado puede sufrir lesiones si intentas liberarlo de forma brusca.\n" +
-  "• Observa cómo está atrapado desde una distancia prudente. No intentes coger, capturar, manipular ni trasladar serpientes, culebras o víboras, aunque creas haber identificado la especie. No intentes liberarlas. Si no puedes descartar que sea una serpiente, culebra o víbora, mantén la distancia y no intentes cogerla, capturarla, manipularla, liberarla ni trasladarla. Si se trata de una serpiente, culebra o víbora, mantén la distancia y contacta con un centro especializado cuando necesite ayuda o exista peligro. No intentes moverla.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No tires del animal para liberarlo.\n" +
-  "• No lo sujetes con fuerza ni manipules partes del cuerpo que puedan lesionarse.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Reduce los ruidos y mantén la distancia mientras valoras la situación.\n" +
-  "• Solo para otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras: valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal. Si consigues liberarlo sin causarle lesiones, colócalo en una caja o recipiente ventilado y bien cerrado.\n" +
-  "• Solo en esos otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras, mantén el recipiente en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.trappedAdvice.reptileAmphibianTitle +
+  protocolTexts.rescueHeadings.actCalmlyLine +
+  protocolTexts.trappedAdvice.roughReleaseMayInjureReptile +
+  protocolTexts.trappedAdvice.snakeDistanceNoHandlingOrReleaseParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.trappedAdvice.doNotPullAnimalLine +
+  protocolTexts.trappedAdvice.noForcefulGripOrInjuriousHandling +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+  protocolTexts.trappedAdvice.reduceNoiseAndMaintainDistance +
+  protocolTexts.trappedAdvice.releaseAndBoxOnlyOtherIdentifiedSpecies +
+  protocolTexts.trappedAdvice.protectContainerOnlyOtherIdentifiedSpecies +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
-  return (
-  "🪤 ANIMAL ATRAPADO\n\n" +
-  "🚨 ACTÚA CON CALMA\n" +
-  "• Un animal atrapado puede lesionarse gravemente si intentas liberarlo de forma precipitada.\n" +
-  "• Antes de intervenir, observa cómo está atrapado y valora si puedes ayudar sin poner en riesgo tu seguridad ni la del animal.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No tires del animal para liberarlo.\n" +
-  "• No fuerces ninguna parte de su cuerpo.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo, cúbrelo suavemente con una tela para reducir su estrés, siempre que sea apropiado para la especie.\n" +
-  "• Si consigues liberarlo sin causarle lesiones, colócalo en una caja o recipiente ventilado y bien cerrado.\n" +
-  "• Mantén la caja o el recipiente en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  return withCommonEnd(
+  protocolTexts.trappedAdvice.unknownTitle +
+  protocolTexts.rescueHeadings.actCalmlyLine +
+  protocolTexts.trappedAdvice.rushedReleaseMayCauseSeriousInjury +
+  protocolTexts.trappedAdvice.assessTrappedAnimalSafetyParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.trappedAdvice.doNotPullAnimalLine +
+  protocolTexts.trappedAdvice.doNotForceBodyParts +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+  protocolTexts.trappedAdvice.coverOnlyIfSafeAndAppropriateForSpecies +
+  protocolTexts.trappedAdvice.releasedAnimalVentilatedContainer +
+  protocolTexts.trappedAdvice.quietProtectedBoxOrContainer +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
 }
-function getBabyAdvice(animalType: AnimalType) {
+function getBabyAdvice(animalType: AnimalType, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const commonEnd =
     COMMON_END;
 
   if (animalType === "smallBird") {
-return (
-  "🐣 POLLO O VOLANTÓN\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Antes de actuar, intenta distinguir si se trata de un pollo o de un volantón. No todas las aves jóvenes encontradas en el suelo necesitan ayuda.\n" +
-  "• Si crees que es un vencejo, no lo dejes en el suelo esperando a sus padres. Recógelo, mantenlo en una caja de cartón ventilada y contacta con un centro especializado.\n\n" +
+return withCommonEnd(
+  protocolTexts.babyAdvice.smallBirdTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.babyAdvice.distinguishNestlingAndFledgling +
+  protocolTexts.babyAdvice.groundedSwiftNeedsSpecialist +
 
-  "🐥 POLLO\n" +
-  "• Tiene poco plumaje, plumón visible o zonas sin plumas.\n" +
-  "• Normalmente debería permanecer en el nido.\n" +
-  "• Si localizas el nido y puedes acceder con seguridad, devuélvelo con la mínima manipulación posible.\n" +
-  "• Si no es posible devolverlo al nido, puede necesitar ayuda. Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  protocolTexts.babyAdvice.nestlingHeading +
+  protocolTexts.babyAdvice.limitedFeathering +
+  protocolTexts.babyAdvice.nestlingNormallyInNest +
+  protocolTexts.babyAdvice.returnNestOnlySafely +
+  protocolTexts.babyAdvice.seekHelpIfCannotReturnNest +
 
-  "🕊️ VOLANTÓN\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
-  "• Suele estar completamente emplumado.\n" +
-  "• Es normal encontrarlo fuera del nido.\n" +
-  "• Puede desplazarse por el suelo o por ramas bajas mientras aprende a volar.\n" +
-  "• Sus padres suelen continuar alimentándolo y protegiéndolo.\n" +
-  "• No lo retires salvo que exista un peligro inmediato.\n" +
-  "• Si presenta heridas, está muy débil o muestra un comportamiento anómalo, puede necesitar ayuda. Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  protocolTexts.babyAdvice.fledglingHeading +
+  protocolTexts.sharedRescueAdvice.observeFromDistanceLine +
+  protocolTexts.babyAdvice.fullyFeathered +
+  protocolTexts.babyAdvice.fledglingOutsideNestNormal +
+  protocolTexts.babyAdvice.fledglingLearningFlight +
+  protocolTexts.babyAdvice.parentsContinueCare +
+  protocolTexts.babyAdvice.doNotRemoveUnlessDanger +
+  protocolTexts.babyAdvice.fledglingWarningSignsSeekHelp +
 
-  "🚨 SI NECESITA AYUDA\n\n" +
+  protocolTexts.rescueHeadings.ifNeedsHelpParagraph +
 
-  "❌ QUÉ NO HACER\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No lo manipules más de lo necesario.\n" +
-  "• No le extiendas las alas.\n\n" +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.babyAdvice.minimalHandlingLine +
+  protocolTexts.babyAdvice.noWingExtensionParagraph +
 
-  "✅ QUÉ HACER\n" +
-  "• Colócalo en una caja de cartón ventilada y bien cerrada.\n" +
-  "• Mantén la caja en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.babyAdvice.ventilatedClosedBoxLine +
+  protocolTexts.babyAdvice.quietProtectedBoxLine +
+  protocolTexts.babyAdvice.reduceNoisePeopleAndPetsLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
 
   commonEnd
 );
   }
 
   if (animalType === "largeBird") {
-    return (
-  "🦉 CRÍA DE AVE MEDIANA / GRANDE\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• No toda cría de ave mediana o grande encontrada fuera del nido necesita ser recogida.\n" +
-  "• Puede encontrarse en una fase de aprendizaje.\n" +
-  "• Los adultos pueden continuar alimentándola y vigilándola desde las proximidades.\n" +
-  "• Algunas especies permanecen varios días en el suelo o en ramas bajas mientras aprenden a volar.\n\n" +
-  "🚨 PUEDE NECESITAR AYUDA SI\n" +
-  "• Presenta heridas.\n" +
-  "• Está muy débil.\n" +
-  "• Existe un peligro inmediato.\n" +
-  "• Lleva mucho tiempo expuesta en una zona peligrosa.\n" +
-  "• Tienes dudas razonables sobre su estado.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la manipules sin necesidad.\n" +
-  "• No la recojas automáticamente por estar en el suelo.\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No acerques la cara ni las manos desnudas.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
-  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo, introdúcela en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo y, si es posible, cúbrelo parcialmente con una toalla o tela sin bloquear la ventilación para reducir el estrés.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.babyAdvice.largeBirdTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.babyAdvice.youngLargeBirdNotAlwaysNeedsCollection +
+  protocolTexts.babyAdvice.learningStage +
+  protocolTexts.babyAdvice.nearbyAdultsContinueCare +
+  protocolTexts.babyAdvice.lowBranchesLearningFlight +
+  protocolTexts.rescueHeadings.mayNeedHelpLine +
+  protocolTexts.babyAdvice.injuryLine +
+  protocolTexts.babyAdvice.severeWeaknessLine +
+  protocolTexts.babyAdvice.immediateDangerLine +
+  protocolTexts.babyAdvice.prolongedDangerExposure +
+  protocolTexts.babyAdvice.reasonableDoubtsParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.babyAdvice.avoidUnnecessaryHandlingLine +
+  protocolTexts.babyAdvice.doNotCollectGroundedAutomatically +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.babyAdvice.avoidBareFaceAndHandsParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.observeFromDistanceLine +
+  protocolTexts.babyAdvice.reduceNoisePeopleAndPetsLine +
+  protocolTexts.babyAdvice.boxOrCarrierOnlyIfSafe +
+  protocolTexts.babyAdvice.partiallyCoverCarrierWithVentilation +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
@@ -810,142 +839,142 @@ return (
   const commonEnd =
     COMMON_END;
 
- return (
-  "🦇 CRÍA DE MURCIÉLAGO\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• No te fíes solo del tamaño: algunos murciélagos adultos son muy pequeños.\n" +
-  "• Si parece una cría, intenta localizar el refugio o la colonia de la que pudo caer.\n" +
-  "• Consulta con el centro de recuperación más cercano o con una entidad especializada antes de intentar devolverla o reunificarla.\n" +
-  "• La devolución al refugio o la reunificación al anochecer solo deben plantearse si la cría está en buen estado y te indican que procede.\n\n" +
-  "🚨 PUEDE NECESITAR AYUDA SI\n" +
-  "• Presenta heridas.\n" +
-  "• Está muy débil.\n" +
-  "• Ha sido atacada por un gato u otro animal.\n" +
-  "• Se encuentra en una situación de peligro.\n" +
-  "• Tienes dudas razonables sobre su estado.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la manipules con las manos desnudas.\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No la mantengas expuesta al sol, al frío o a fuentes de calor directas.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Utiliza guantes o una tela si necesitas recogerla.\n" +
-  "• Si necesita ayuda, colócala en una caja de cartón ventilada y bien cerrada, con una tela o papel absorbente en el fondo.\n" +
-  "• Mantén la caja en un lugar tranquilo, oscuro y protegido del frío o del calor extremo.\n" +
-  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+ return withCommonEnd(
+  protocolTexts.babyAdvice.batTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.babyAdvice.sizeNotReliable +
+  protocolTexts.babyAdvice.locateBatRoost +
+  protocolTexts.babyAdvice.adviceBeforeReunification +
+  protocolTexts.babyAdvice.reuniteOnlyWhenHealthyAndAdvised +
+  protocolTexts.rescueHeadings.mayNeedHelpLine +
+  protocolTexts.babyAdvice.injuryLine +
+  protocolTexts.babyAdvice.severeWeaknessLine +
+  protocolTexts.babyAdvice.catOrOtherAnimalAttackLine +
+  protocolTexts.babyAdvice.dangerousSituationLine +
+  protocolTexts.babyAdvice.reasonableDoubtsParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.babyAdvice.noBareHandHandlingLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.babyAdvice.avoidDirectSunColdHeatParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.babyAdvice.glovesOrClothForCollection +
+  protocolTexts.babyAdvice.batBoxWithLiningIfNeedsHelp +
+  protocolTexts.babyAdvice.quietDarkProtectedBoxLine +
+  protocolTexts.babyAdvice.reduceNoisePeopleAndPetsLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "smallMammal") {
-    return (
-  "🐭 CRÍA DE PEQUEÑO MAMÍFERO\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Muchas crías de pequeños mamíferos permanecen solas temporalmente mientras la madre busca alimento o se mantiene oculta en las proximidades.\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
-  "• No la recojas salvo que exista un peligro inmediato.\n\n" +
-  "🚨 PUEDE NECESITAR AYUDA SI\n" +
-  "• Presenta heridas.\n" +
-  "• Está muy débil.\n" +
-  "• Ha sido atacada por un gato, un perro u otro animal.\n" +
-  "• Se encuentra en una situación de peligro.\n" +
-  "• Tienes dudas razonables sobre su estado.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la recojas automáticamente por estar sola.\n" +
-  "• No la manipules más de lo necesario.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Observa primero si la madre continúa atendiéndola.\n" +
-  "• Si necesita ayuda, colócala en una caja de cartón ventilada y bien cerrada.\n" +
-  "• Mantén la caja en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.babyAdvice.smallMammalTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.babyAdvice.motherMayBeNearby +
+  protocolTexts.sharedRescueAdvice.observeFromDistanceLine +
+  protocolTexts.babyAdvice.noCollectionExceptDangerParagraph +
+  protocolTexts.rescueHeadings.mayNeedHelpLine +
+  protocolTexts.babyAdvice.injuryLine +
+  protocolTexts.babyAdvice.severeWeaknessLine +
+  protocolTexts.babyAdvice.catDogOrOtherAttackLine +
+  protocolTexts.babyAdvice.dangerousSituationLine +
+  protocolTexts.babyAdvice.reasonableDoubtsParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.babyAdvice.doNotCollectBecauseAlone +
+  protocolTexts.babyAdvice.minimizeFemaleHandlingLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.babyAdvice.observeMotherCareFirst +
+  protocolTexts.babyAdvice.boxIfNeedsHelpLine +
+  protocolTexts.babyAdvice.quietProtectedBoxLine +
+  protocolTexts.babyAdvice.reduceNoisePeopleAndPetsLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "largeMammal") {
-    return (
-  "🦌 CRÍA DE GRAN MAMÍFERO\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Muchas crías de ciervo, corzo u otros grandes mamíferos permanecen ocultas durante horas mientras la madre se mantiene alejada para no atraer depredadores.\n" +
-  "• Permanecer sola no significa necesariamente que haya sido abandonada.\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n\n" +
-  "🚨 PUEDE NECESITAR AYUDA SI\n" +
-  "• Presenta heridas evidentes.\n" +
-  "• Está muy débil.\n" +
-  "• Se encuentra en una situación de peligro.\n" +
-  "• Ha sido atacada por un perro u otro animal o ha sufrido un atropello.\n" +
-  "• Tienes dudas razonables sobre su estado.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la recojas ni la traslades sin necesidad.\n" +
-  "• No la manipules ni intentes acariciarla.\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No te acerques más de lo necesario.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén una distancia prudente y observa desde lejos.\n" +
-  "• Reduce los ruidos y evita la presencia de personas, animales domésticos y vehículos.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Si se encuentra cerca de una carretera o de una zona con tráfico, prioriza tu seguridad y solicita ayuda.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
-  "• Sigue siempre las indicaciones del personal especializado.\n\n" +
+    return withCommonEnd(
+  protocolTexts.babyAdvice.largeMammalTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.babyAdvice.hiddenYoungMotherAvoidsPredators +
+  protocolTexts.babyAdvice.aloneDoesNotMeanAbandoned +
+  protocolTexts.babyAdvice.observeDistanceParagraph +
+  protocolTexts.rescueHeadings.mayNeedHelpLine +
+  protocolTexts.babyAdvice.evidentInjuriesLine +
+  protocolTexts.babyAdvice.severeWeaknessLine +
+  protocolTexts.babyAdvice.dangerousSituationLine +
+  protocolTexts.babyAdvice.dogAttackOrRoadCollisionLine +
+  protocolTexts.babyAdvice.reasonableDoubtsParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.babyAdvice.noUnnecessaryCollectionOrTransportLine +
+  protocolTexts.babyAdvice.noHandlingOrStrokingLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.babyAdvice.noUnnecessaryApproachParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.babyAdvice.distanceObserveFarAwayLine +
+  protocolTexts.babyAdvice.reduceNoisePeoplePetsVehiclesLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.babyAdvice.roadSafetySeekHelpLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterLine +
+  protocolTexts.babyAdvice.followSpecialistsParagraph ,
   commonEnd
 );
   }
 
   if (animalType === "reptileAmphibian") {
-    return (
-  "🦎 CRÍA DE REPTIL O ANFIBIO\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Las crías de reptiles y anfibios suelen ser independientes desde etapas muy tempranas.\n" +
-  "• Encontrar una cría sola no significa necesariamente que necesite ayuda.\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n\n" +
-  "🚨 PUEDE NECESITAR AYUDA SI\n" +
-  "• Presenta heridas.\n" +
-  "• Está atrapada o no puede desplazarse.\n" +
-  "• Se encuentra en una carretera, piscina, obra o cualquier otra zona de peligro.\n" +
-  "• Existe riesgo por la presencia de perros, gatos u otros animales.\n" +
-  "• Tienes dudas razonables sobre su estado.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la manipules sin necesidad.\n" +
-  "• No la traslades a grandes distancias.\n" +
-  "• No intentes coger, capturar, manipular ni trasladar serpientes, culebras o víboras, aunque creas haber identificado la especie. Si no puedes descartar que sea una serpiente, culebra o víbora, mantén la distancia y no intentes cogerla, capturarla, manipularla, liberarla ni trasladarla.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Si se trata de una serpiente, culebra o víbora, mantén la distancia y contacta con un centro especializado cuando necesite ayuda o exista peligro. No intentes moverla. No intentes liberarla si está atrapada. Si está dentro de una vivienda, solicita orientación especializada sin intentar capturarla.\n" +
-  "• Solo para crías de otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras: si necesitas moverla por seguridad, utiliza un recipiente seguro y ventilado.\n" +
-  "• Solo en esas crías de otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras, déjala en una zona adecuada, lo más cercana posible al lugar donde fue encontrada.\n" +
-  "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+    return withCommonEnd(
+  protocolTexts.babyAdvice.reptileAmphibianTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.babyAdvice.earlyIndependence +
+  protocolTexts.babyAdvice.aloneNotNecessarilyNeedsHelp +
+  protocolTexts.babyAdvice.observeDistanceParagraph +
+  protocolTexts.rescueHeadings.mayNeedHelpLine +
+  protocolTexts.babyAdvice.injuryLine +
+  protocolTexts.babyAdvice.trappedOrCannotMoveLine +
+  protocolTexts.babyAdvice.roadPoolConstructionDangerLine +
+  protocolTexts.babyAdvice.petsPredationRiskLine +
+  protocolTexts.babyAdvice.reasonableDoubtsParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.babyAdvice.avoidUnnecessaryHandlingLine +
+  protocolTexts.babyAdvice.noLongDistanceTransportLine +
+  protocolTexts.babyAdvice.neverCaptureHandleOrMoveSnakesLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.babyAdvice.snakesSpecialistHelpNoReleaseLine +
+  protocolTexts.babyAdvice.moveOnlyOtherIdentifiedReptileYoungLine +
+  protocolTexts.babyAdvice.releaseNearbyOnlyOtherIdentifiedReptileYoungLine +
+  protocolTexts.babyAdvice.reduceNoisePeoplePetsNearbyLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
   }
 
-  return (
-  "❓ NO ESTOY SEGURO - ES UNA CRÍA\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Muchas crías no están abandonadas aunque parezcan solas.\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
-  "• Evita llevártela a casa o alimentarla.\n\n" +
-  "🚨 PUEDE NECESITAR AYUDA SI\n" +
-  "• Presenta heridas.\n" +
-  "• Está muy débil.\n" +
-  "• Existe un peligro inmediato.\n" +
-  "• Ha sido atacada por un perro, gato u otro animal.\n" +
-  "• Tienes dudas razonables sobre su estado.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la recojas automáticamente por estar sola.\n" +
-  "• No la manipules más de lo necesario.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos cerca del animal.\n" +
-  "• Si debes moverla por seguridad, mantenla en una caja de cartón ventilada y bien cerrada.\n" +
-  "• Mantén la caja en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n" +
+  return withCommonEnd(
+  protocolTexts.babyAdvice.unknownTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.babyAdvice.apparentlyAloneNotAbandoned +
+  protocolTexts.sharedRescueAdvice.observeFromDistanceLine +
+  protocolTexts.babyAdvice.doNotTakeHomeOrFeedParagraph +
+  protocolTexts.rescueHeadings.mayNeedHelpLine +
+  protocolTexts.babyAdvice.injuryLine +
+  protocolTexts.babyAdvice.severeWeaknessLine +
+  protocolTexts.babyAdvice.immediateDangerLine +
+  protocolTexts.babyAdvice.dogCatOtherAnimalAttackLine +
+  protocolTexts.babyAdvice.reasonableDoubtsParagraph +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.babyAdvice.doNotCollectBecauseAlone +
+  protocolTexts.babyAdvice.minimizeFemaleHandlingLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.babyAdvice.reduceNoisePeoplePetsNearbyLine +
+  protocolTexts.babyAdvice.safeBoxIfMustMoveLine +
+  protocolTexts.babyAdvice.quietProtectedBoxLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph ,
   commonEnd
 );
 }
@@ -976,83 +1005,80 @@ function hasAnyConcern(flags: FlagsState) {
   );
 }
 
-function getObservedSigns(flags: FlagsState, includeCannotFly = false) {
+function getObservedSigns(flags: FlagsState, includeCannotFly = false, protocolTexts: Catalog = getEffectiveCatalog()) {
   const signs: string[] = [];
 
-  if (flags.bleeding) signs.push("• Presenta signos de lesión.");
-  if (flags.catDog) signs.push("• Ha sufrido un ataque de gato o perro.");
-  if (flags.canNotMove) signs.push("• No se mueve con normalidad.");
-  if (includeCannotFly && flags.cannotFly) signs.push("• No puede volar.");
-  if (flags.weakness) signs.push("• Presenta debilidad o decaimiento.");
-  if (flags.breathing) signs.push("• Presenta respiración agitada.");
-  if (flags.stranded) signs.push("• Está varado o fuera del agua.");
+  if (flags.bleeding) signs.push(protocolTexts.observedSigns.bleeding);
+  if (flags.catDog) signs.push(protocolTexts.observedSigns.catDog);
+  if (flags.canNotMove) signs.push(protocolTexts.observedSigns.canNotMove);
+  if (includeCannotFly && flags.cannotFly) signs.push(protocolTexts.observedSigns.cannotFly);
+  if (flags.weakness) signs.push(protocolTexts.observedSigns.weakness);
+  if (flags.breathing) signs.push(protocolTexts.observedSigns.breathing);
+  if (flags.stranded) signs.push(protocolTexts.observedSigns.stranded);
   if (flags.fishingLineHook)
-    signs.push("• Tiene sedal, anzuelo o aparejos.");
-  if (flags.moreAnimals) signs.push("• Hay más animales afectados.");
+    signs.push(protocolTexts.observedSigns.fishingLineHook);
+  if (flags.moreAnimals) signs.push(protocolTexts.observedSigns.moreAnimals);
   if (flags.peopleDogsNearby)
-    signs.push("• Hay personas o perros cerca del animal.");
-  if (flags.restingOnLand) signs.push("• Está descansando en tierra.");
+    signs.push(protocolTexts.observedSigns.peopleDogsNearby);
+  if (flags.restingOnLand) signs.push(protocolTexts.observedSigns.restingOnLand);
   if (flags.roadRisk)
-    signs.push("• Se encuentra en una zona con tráfico o peligro inmediato.");
+    signs.push(protocolTexts.observedSigns.roadRisk);
   if (flags.other)
-    signs.push("• Se ha observado otra circunstancia que genera preocupación.");
+    signs.push(protocolTexts.observedSigns.other);
 
   return signs.join("\n");
 }
 
-function addSupplementalAdvice(baseAdvice: string, flags: FlagsState) {
+function addSupplementalAdvice(parts: AdviceParts, flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const supplementalBlocks: string[] = [];
-  let advice = baseAdvice.trimEnd();
 
   if (flags.ringGps) {
     supplementalBlocks.push(
-      "🔎 MARCA O DISPOSITIVO DE SEGUIMIENTO\n" +
-        "• La marca o el dispositivo puede aportar información importante sobre el animal y su seguimiento.\n" +
-        "• No retires ni manipules la marca o el dispositivo.\n" +
-        "• Si puedes hacerlo sin molestar al animal, fotografía los números, letras, marcas o etiquetas visibles.\n" +
-        "• Anota también cualquier información que puedas leer y comunícala al centro de recuperación o a los agentes medioambientales.",
+      protocolTexts.supplementalAdvice.trackingHeading +
+        protocolTexts.supplementalAdvice.trackingInformation +
+        protocolTexts.supplementalAdvice.trackingDoNotRemove +
+        protocolTexts.supplementalAdvice.trackingPhotograph +
+        protocolTexts.supplementalAdvice.trackingReport,
     );
   }
 
   if (flags.normalAppearance && !hasAnyConcern(flags) && !flags.cannotFly) {
     supplementalBlocks.push(
-      "ℹ️ APARIENCIA NORMAL\n" +
-        "• Si el animal se desplaza y se comporta con normalidad, y no existe un peligro inmediato, observa la situación desde una distancia prudente.\n" +
-        "• Evita recogerlo o cambiarlo de lugar sin necesidad.\n" +
-        "• En muchos casos, la mejor ayuda es permitir que continúe su comportamiento natural.\n" +
-        "• Si la situación cambia o detectas alguna anomalía, vuelve al paso anterior y marca las opciones correspondientes.",
+      protocolTexts.supplementalAdvice.normalHeading +
+        protocolTexts.supplementalAdvice.normalObserve +
+        protocolTexts.supplementalAdvice.normalAvoidCollection +
+        protocolTexts.supplementalAdvice.normalNaturalBehaviour +
+        protocolTexts.supplementalAdvice.normalUpdateFlags,
     );
   }
 
-  if (advice.endsWith(COMMON_END)) {
-    advice = advice.slice(0, -COMMON_END.length).trimEnd();
-  }
-
-  return [advice, ...supplementalBlocks, COMMON_END].join("\n\n");
+  return withAdviceSupplements(parts, supplementalBlocks, COMMON_END);
 }
 
-function getSmallBirdAdvice(flags: FlagsState) {
+function getSmallBirdAdvice(flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   if (hasPhysicalWarning(flags)) {
-    const signs = getObservedSigns(flags, true);
+    const signs = getObservedSigns(flags, true, protocolTexts);
     const commonEnd =
     COMMON_END;
 
-    return (
-  "🐦 AVE PEQUEÑA QUE PUEDE NECESITAR AYUDA\n\n" +
-  "🚨 SEÑALES OBSERVADAS\n" +
+    return withCommonEnd(
+  protocolTexts.smallBirdAdvice.physicalWarningTitle +
+  protocolTexts.rescueHeadings.observedSignsLine +
   signs +
-  "\n\n❌ QUÉ NO HACER\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No intentes extenderle las alas ni comprobar lesiones mediante manipulaciones.\n" +
-  "• No la persigas ni la lances al aire para comprobar si vuela.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Manipúlala únicamente si es necesario.\n" +
-  "• Colócala en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Si ha sido atacada por un gato o un perro, necesita valoración aunque no observes heridas evidentes.\n" +
-  "• Contacta con el centro de recuperación más cercano o con los agentes medioambientales para recibir orientación.\n" +
-  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+  protocolTexts.rescueHeadings.doNotAfterParagraph +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.smallBirdAdvice.avoidWingExamination +
+  protocolTexts.smallBirdAdvice.avoidChasingOrThrowing +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.smallBirdAdvice.handleOnlyWhenNecessary +
+  protocolTexts.smallBirdAdvice.safeBoxForInjuredBird +
+  protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine +
+  protocolTexts.sharedRescueAdvice.catOrDogAttackAssessmentFemaleLine +
+  protocolTexts.smallBirdAdvice.contactCenterOrAgents +
+  protocolTexts.sharedRescueAdvice.continueToShareInformationParagraph,
   commonEnd
   );
   }
@@ -1061,26 +1087,26 @@ function getSmallBirdAdvice(flags: FlagsState) {
 	  const commonEnd =
     COMMON_END;
 
-    return (
-  "🐦 AVE QUE NO VUELA\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Un ave que no vuela no siempre necesita ser rescatada de inmediato.\n" +
-  "• Algunas aves encontradas en el suelo pueden ser volantones atendidos por sus padres, pero otras necesitan ayuda.\n" +
-  "• En especies como los vencejos, encontrarlas en el suelo o comprobar que no mantienen el vuelo requiere recogerlas y solicitar valoración.\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
-  "• Si tienes dudas sobre si se trata de una cría, un pollo o un volantón, vuelve al paso anterior y selecciona la opción «Es cría».\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No la manipules más de lo necesario.\n" +
-  "• No la persigas ni intentes forzar el vuelo.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-  "• Observa si presenta heridas, está muy débil, tiene dificultad para moverse o muestra un comportamiento anómalo.\n" +
-  "• Si observas alguno de estos signos, colócala en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
-  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+    return withCommonEnd(
+  protocolTexts.smallBirdAdvice.cannotFlyTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.smallBirdAdvice.flightDoesNotAlwaysRequireRescue +
+  protocolTexts.smallBirdAdvice.fledglingsMayBeAttended +
+  protocolTexts.smallBirdAdvice.groundedSwiftsNeedAssessment +
+  protocolTexts.sharedRescueAdvice.observeFromDistanceLine +
+  protocolTexts.smallBirdAdvice.reviewBabySelection +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.rescueInstructions.minimalHandlingFemaleLine +
+  protocolTexts.smallBirdAdvice.avoidForcingFlight +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+  protocolTexts.smallBirdAdvice.observeInjuryOrWeakness +
+  protocolTexts.smallBirdAdvice.safeBoxIfWarningSigns +
+  protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterLine +
+  protocolTexts.sharedRescueAdvice.continueToShareInformationParagraph,
   commonEnd
 );
   }
@@ -1089,21 +1115,21 @@ function getSmallBirdAdvice(flags: FlagsState) {
 	  const commonEnd =
     COMMON_END;
 
-    return (
-  "🐦 AVE PEQUEÑA EN SITUACIÓN DE RIESGO\n\n" +
-  "🚨 SEÑALES OBSERVADAS\n" +
-  getObservedSigns(flags) +
-  "\n\n❌ QUÉ NO HACER\n" +
-  "• No la persigas ni la manipules más de lo necesario.\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No pongas en riesgo tu propia seguridad para intentar rescatarla.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Prioriza siempre tu seguridad, especialmente si te encuentras en una carretera o zona con tráfico.\n" +
-  "• Si puedes apartarla del peligro sin asumir riesgos, muévela únicamente a un lugar cercano y seguro.\n" +
-  "• Si necesita ayuda, colócala en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+    return withCommonEnd(
+  protocolTexts.smallBirdAdvice.riskTitle +
+  protocolTexts.rescueHeadings.observedSignsLine +
+  getObservedSigns(flags, false, protocolTexts) +
+  protocolTexts.rescueHeadings.doNotAfterParagraph +
+  protocolTexts.smallBirdAdvice.avoidChasingOrHandling +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.smallBirdAdvice.avoidPersonalRisk +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.smallBirdAdvice.roadSafetyFirst +
+  protocolTexts.smallBirdAdvice.moveNearbyIfSafe +
+  protocolTexts.smallBirdAdvice.safeBoxIfNeedsHelp +
+  protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph,
   commonEnd
 );
   }
@@ -1111,50 +1137,51 @@ function getSmallBirdAdvice(flags: FlagsState) {
   const commonEnd =
     COMMON_END;
 
- return (
-  "🐦 AVE PEQUEÑA\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• No todas las aves pequeñas encontradas en el suelo necesitan ayuda.\n" +
-  "• Si parece un vencejo, estar en el suelo no es normal: protégelo en una caja de cartón ventilada y consulta cuanto antes.\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
-  "• Si no existe un peligro inmediato, evita recogerla.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la recojas automáticamente por estar en el suelo.\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• No la manipules para comprobar si está sana.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Comprueba si presenta heridas, está muy débil, tiene dificultad para moverse o se encuentra en una situación de peligro.\n" +
-  "• Si crees que puede tratarse de una cría, vuelve al paso anterior y selecciona la opción «Es cría».\n" +
-  "• Si observas cualquiera de estas señales, vuelve al paso anterior y marca las opciones correspondientes.\n\n"+
+ return withCommonEnd(
+  protocolTexts.smallBirdAdvice.defaultTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.smallBirdAdvice.notAllGroundedBirdsNeedHelp +
+  protocolTexts.smallBirdAdvice.groundedSwiftBoxAndConsult +
+  protocolTexts.sharedRescueAdvice.observeFromDistanceLine +
+  protocolTexts.smallBirdAdvice.avoidCollectingWithoutDanger +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.rescueInstructions.doNotCollectAutomaticallyLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.rescueInstructions.doNotTestHealthFemaleParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.smallBirdAdvice.checkInjuryMovementAndDanger +
+  protocolTexts.smallBirdAdvice.reviewPossibleBabySelection +
+  protocolTexts.rescueInstructions.returnToSignsParagraph,
   commonEnd
 );
 }
 
-function getLargeBirdAdvice(flags: FlagsState) {
+function getLargeBirdAdvice(flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   if (hasPhysicalWarning(flags)) {
 	  const commonEnd =
     COMMON_END;
 
-    return (
-  "🦅 AVE MEDIANA / GRANDE QUE PUEDE NECESITAR AYUDA\n\n" +
-  "🚨 SEÑALES OBSERVADAS\n" +
-  getObservedSigns(flags, true) +
-  "\n\n⚠️ PRECAUCIÓN\n" +
-  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
-  "• Mantén una distancia prudente y evita acercar la cara o las manos.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No intentes sujetarla por las alas, las patas, el cuello o las plumas.\n" +
-  "• No la persigas ni intentes comprobar si puede volar lanzándola al aire.\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Reduce ruidos y evita la presencia innecesaria de personas y animales domésticos.\n" +
-  "• Si puedes hacerlo sin riesgo y te indican que debes contenerla, cúbrela con una manta o toalla gruesa.\n" +
-  "• Introdúcela en una caja de cartón resistente, ventilada y bien cerrada o en un transportín seguro.\n" +
-  "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n" +
-  "• Si ha sido atacada por un gato o un perro, necesita valoración aunque no observes heridas evidentes.\n" +
-  "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
-  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+    return withCommonEnd(
+  protocolTexts.largeBirdAdvice.physicalWarningTitle +
+  protocolTexts.rescueHeadings.observedSignsLine +
+  getObservedSigns(flags, true, protocolTexts) +
+  protocolTexts.largeBirdAdvice.precautionHeading +
+  protocolTexts.largeBirdAdvice.defensiveReaction +
+  protocolTexts.largeBirdAdvice.avoidFaceAndHands +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.largeBirdAdvice.avoidHoldingByWingsLegsNeckFeathers +
+  protocolTexts.largeBirdAdvice.avoidFlightTests +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.largeBirdAdvice.reduceNoiseAndBystanders +
+  protocolTexts.largeBirdAdvice.coverOnlyWhenAdvised +
+  protocolTexts.largeBirdAdvice.secureSturdyBox +
+  protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine +
+  protocolTexts.sharedRescueAdvice.catOrDogAttackAssessmentFemaleLine +
+  protocolTexts.sharedRescueAdvice.contactRecoveryCenterLine +
+  protocolTexts.sharedRescueAdvice.continueToShareInformationParagraph,
   commonEnd
 );
   }
@@ -1164,37 +1191,37 @@ function getLargeBirdAdvice(flags: FlagsState) {
 	const commonEnd =
     COMMON_END;
 
-    return (
-  "🦅 AVE MEDIANA / GRANDE QUE NO VUELA\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Un ave mediana o grande que no vuela no siempre necesita ser rescatada de inmediato.\n" +
-  "• Puede tratarse de un ejemplar joven en fase de aprendizaje o emancipación.\n" +
-  "• Los adultos pueden continuar alimentándolo y vigilándolo desde las proximidades.\n" +
-  "• Observa la situación desde una distancia prudente antes de intervenir, siempre que no exista un peligro inmediato.\n\n" +
+    return withCommonEnd(
+  protocolTexts.largeBirdAdvice.cannotFlyTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.largeBirdAdvice.flightDoesNotAlwaysRequireRescue +
+  protocolTexts.largeBirdAdvice.youngBirdLearning +
+  protocolTexts.largeBirdAdvice.adultsMayStillCare +
+  protocolTexts.largeBirdAdvice.observeSafelyWithoutImmediateDanger +
   (additionalRisk
-    ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags, true) + "\n\n"
-    : "🚨 PUEDE NECESITAR AYUDA SI\n" +
-      "• Presenta heridas o signos de lesión, está muy débil o respira con dificultad.\n" +
-      "• No puede mantenerse erguida o desplazarse con normalidad.\n" +
-      "• Tiene un ala caída o en una posición anómala.\n" +
-      "• Ha sido atacada por un gato o un perro.\n" +
-      "• Permanece expuesta en una carretera, zona de paso o lugar peligroso.\n" +
-      "• Tras observarla a distancia, muestra un comportamiento claramente anómalo.\n\n") +
-  "❌ QUÉ NO HACER\n" +
-  "• No la recojas automáticamente por estar en el suelo o no volar.\n" +
-  "• No la persigas ni la lances al aire para comprobar si puede volar.\n" +
-  "• No acerques la cara ni las manos desnudas.\n" +
-  "• No intentes sujetarla por las alas, las patas o el cuello.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos y reduce los ruidos.\n" +
-  "• Observa si los adultos permanecen cerca o continúan atendiéndola.\n" +
+    ? protocolTexts.rescueHeadings.observedSignsLine + getObservedSigns(flags, true, protocolTexts) + "\n\n"
+    : protocolTexts.rescueHeadings.mayNeedHelpLine +
+      protocolTexts.largeBirdAdvice.injuryWeaknessOrBreathing +
+      protocolTexts.largeBirdAdvice.cannotStandOrMoveNormally +
+      protocolTexts.largeBirdAdvice.abnormalWingPosition +
+      protocolTexts.largeBirdAdvice.catOrDogAttack +
+      protocolTexts.largeBirdAdvice.exposedToTrafficOrDanger +
+      protocolTexts.largeBirdAdvice.abnormalBehaviourAfterObservation) +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.largeBirdAdvice.avoidAutomaticCollection +
+  protocolTexts.largeBirdAdvice.avoidChasingOrThrowing +
+  protocolTexts.rescueInstructions.keepFaceAndBareHandsAwayLine +
+  protocolTexts.largeBirdAdvice.avoidHoldingByWingsLegsNeck +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.largeBirdAdvice.keepPeopleAndPetsAway +
+  protocolTexts.largeBirdAdvice.observeAdultsCare +
   (additionalRisk
-    ? "• Si existe un peligro inmediato, prioriza tu seguridad y solicita ayuda antes de intervenir.\n"
-    : "• Si no presenta anomalías y se encuentra en un lugar seguro, evita intervenir y solicita orientación si tienes dudas.\n") +
-  "• Si necesita ayuda, contacta con el centro de recuperación más cercano antes de manipularla.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-  "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+    ? protocolTexts.sharedRescueAdvice.immediateDangerSafetyLine
+    : protocolTexts.largeBirdAdvice.avoidInterventionWhenSafe) +
+  protocolTexts.largeBirdAdvice.contactBeforeHandling +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+  protocolTexts.sharedRescueAdvice.continueToShareInformationParagraph,
   commonEnd
 );
   }
@@ -1203,22 +1230,22 @@ function getLargeBirdAdvice(flags: FlagsState) {
 	  const commonEnd =
     COMMON_END;
 
-    return (
-  "🦅 AVE MEDIANA / GRANDE EN SITUACIÓN DE RIESGO\n\n" +
-  "🚨 SEÑALES OBSERVADAS\n" +
-  getObservedSigns(flags) +
-  "\n\n⚠️ PRECAUCIÓN\n" +
-  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
-  "• Mantén una distancia prudente y evita acorralarla.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No pongas en riesgo tu propia seguridad ni intentes detener el tráfico por tu cuenta.\n" +
-  "• No la persigas ni intentes capturarla sin orientación.\n" +
-  "• No le des comida ni agua sin indicación.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Aleja a las personas y a los animales domésticos si puedes hacerlo con seguridad.\n" +
-  "• Si se encuentra en una carretera o zona con tráfico, prioriza siempre tu seguridad y avisa a Emergencias o a los agentes competentes.\n" +
-  "• Si necesita ayuda, contacta con el centro de recuperación más cercano para recibir orientación.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n"+
+    return withCommonEnd(
+  protocolTexts.largeBirdAdvice.riskTitle +
+  protocolTexts.rescueHeadings.observedSignsLine +
+  getObservedSigns(flags, false, protocolTexts) +
+  protocolTexts.largeBirdAdvice.precautionHeading +
+  protocolTexts.largeBirdAdvice.defensiveReaction +
+  protocolTexts.largeBirdAdvice.avoidCornering +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.largeBirdAdvice.avoidTrafficIntervention +
+  protocolTexts.largeBirdAdvice.avoidCaptureWithoutAdvice +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.largeBirdAdvice.movePeopleAndPetsAwaySafely +
+  protocolTexts.sharedRescueAdvice.trafficSafetyAndEmergencyHelpLine +
+  protocolTexts.largeBirdAdvice.contactIfHelpNeeded +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashParagraph,
   commonEnd
 );
   }
@@ -1226,148 +1253,152 @@ function getLargeBirdAdvice(flags: FlagsState) {
   const commonEnd =
     COMMON_END;
 
-  return (
-  "🦅 AVE MEDIANA / GRANDE\n\n" +
-  "⚠️ ANTES DE INTERVENIR\n" +
-  "• Mantén una distancia prudente y observa la situación antes de intervenir.\n" +
-  "• Un ave mediana o grande puede sentirse amenazada y usar el pico, las alas o las garras.\n" +
-  "• Su presencia en el suelo o en una rama baja no significa necesariamente que necesite ayuda.\n\n" +
-  "❌ QUÉ NO HACER\n" +
-  "• No la manipules para comprobar si está sana.\n" +
-  "• No acerques la cara ni las manos desnudas.\n" +
-  "• No le des comida ni agua sin indicación.\n" +
-  "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
-  "✅ QUÉ HACER\n" +
-  "• Comprueba desde una distancia segura si presenta heridas, está muy débil, tiene dificultad para moverse o muestra un comportamiento anómalo.\n" +
-  "• Mantén alejadas a las personas y a los animales domésticos y reduce los ruidos.\n" +
-  "• Si crees que puede tratarse de una cría o de un ejemplar joven, vuelve al paso anterior y selecciona la opción «Es cría».\n" +
-  "• Si observas cualquiera de estas señales, vuelve al paso anterior y marca las opciones correspondientes.\n" +
-  "• Si tienes dudas, contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+  return withCommonEnd(
+  protocolTexts.largeBirdAdvice.defaultTitle +
+  protocolTexts.rescueHeadings.beforeInterveningLine +
+  protocolTexts.sharedRescueAdvice.observeSituationFromDistanceLine +
+  protocolTexts.largeBirdAdvice.defensiveReaction +
+  protocolTexts.largeBirdAdvice.groundOrLowBranchNotEnough +
+  protocolTexts.rescueHeadings.doNotLine +
+  protocolTexts.rescueInstructions.doNotTestHealthFemaleLine +
+  protocolTexts.rescueInstructions.keepFaceAndBareHandsAwayLine +
+  protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+  protocolTexts.sharedRescueAdvice.documentWithoutFlashParagraph +
+  protocolTexts.rescueHeadings.actionsLine +
+  protocolTexts.largeBirdAdvice.checkInjuryMovementAndBehaviour +
+  protocolTexts.largeBirdAdvice.keepPeopleAndPetsAway +
+  protocolTexts.largeBirdAdvice.reviewPossibleYoungBird +
+  protocolTexts.rescueInstructions.returnToSignsLine +
+  protocolTexts.largeBirdAdvice.contactIfUnsure,
   commonEnd
 );
 }
 
-function getBatAdvice(flags: FlagsState) {
+function getBatAdvice(flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const needsHelp = hasAnyConcern(flags) || flags.cannotFly;
 const commonEnd =
     COMMON_END;
 
-  return (
-    "🦇 MURCIÉLAGO\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Encontrar un murciélago durante el día o en el suelo puede indicar que necesita ayuda o valoración especializada.\n" +
-    "• Un murciélago encontrado en el suelo suele ser un animal vulnerable, no una amenaza.\n" +
-    "• Mantén alejados a los niños y a los animales domésticos y observa la situación con calma.\n" +
+  return withCommonEnd(
+    protocolTexts.batAdvice.title +
+    protocolTexts.rescueHeadings.beforeInterveningLine +
+    protocolTexts.batAdvice.daytimeOrGroundAssessment +
+    protocolTexts.batAdvice.vulnerableNotThreatening +
+    protocolTexts.batAdvice.keepChildrenAndPetsAway +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
-      : "• Puede necesitar ayuda si presenta heridas, está muy débil, tiene dificultad para moverse o permanece en el suelo durante el día.\n\n") +
+      ? protocolTexts.sharedRescueAdvice.selectedSignsNeedSpecialistHelpParagraph
+      : protocolTexts.batAdvice.warningSignsAssessment) +
     (needsHelp
-      ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags, true) + "\n\n"
+      ? protocolTexts.rescueHeadings.observedSignsLine + getObservedSigns(flags, true, protocolTexts) + "\n\n"
       : "") +
-    "❌ QUÉ NO HACER\n" +
-    "• No intentes comprobar si puede volar lanzándolo al aire.\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• No lo manipules más de lo necesario.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Si es necesario moverlo para evitar un peligro inmediato, protege tus manos con guantes o, si no dispones de ellos, utiliza un trapo, una toalla o una prenda gruesa.\n" +
-    "• Manipúlalo únicamente el tiempo imprescindible y evita sujetarlo con fuerza.\n" +
-    "• Colócalo en una caja de cartón ventilada y bien cerrada, con una tela o papel absorbente en el fondo.\n" +
-    "• Mantén la caja en un lugar tranquilo, oscuro y protegido del frío o del calor extremo.\n" +
-    "• Si ha tenido contacto con una persona o con un animal doméstico, comunícalo al centro de recuperación.\n" +
-    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
-    "• Continúa con el siguiente paso para compartir la información necesaria y recibir una mejor orientación.\n\n"+
+    protocolTexts.rescueHeadings.doNotLine +
+    protocolTexts.batAdvice.neverThrowToTestFlight +
+    protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+    protocolTexts.rescueInstructions.minimalHandlingMaleParagraph +
+    protocolTexts.rescueHeadings.actionsLine +
+    protocolTexts.batAdvice.protectHandsWhenMovementNecessary +
+    protocolTexts.batAdvice.handleBrieflyAndGently +
+    protocolTexts.batAdvice.ventilatedBoxWithAbsorbentLining +
+    protocolTexts.rescueInstructions.quietDarkProtectedBoxLine +
+    protocolTexts.batAdvice.reportHumanOrDomesticAnimalContact +
+    protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+    protocolTexts.sharedRescueAdvice.contactRecoveryCenterLine +
+    protocolTexts.sharedRescueAdvice.continueToShareInformationParagraph,
   commonEnd
   );
 }
 
-function getSmallMammalAdvice(flags: FlagsState) {
+function getSmallMammalAdvice(flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const needsHelp = hasAnyConcern(flags);
 const commonEnd =
     COMMON_END;
 
-  return (
-    "🐭 PEQUEÑO MAMÍFERO\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Mantén una distancia prudente y observa su comportamiento antes de intervenir.\n" +
+  return withCommonEnd(
+    protocolTexts.smallMammalAdvice.title +
+    protocolTexts.rescueHeadings.beforeInterveningLine +
+    protocolTexts.smallMammalAdvice.observeBehaviourFromDistance +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
-      : "• Si no presenta anomalías ni existe un peligro inmediato, evita recogerlo.\n\n") +
+      ? protocolTexts.sharedRescueAdvice.selectedSignsNeedSpecialistHelpParagraph
+      : protocolTexts.smallMammalAdvice.avoidCollectingWithoutConcern) +
     (needsHelp
-      ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags) + "\n\n"
+      ? protocolTexts.rescueHeadings.observedSignsLine + getObservedSigns(flags, false, protocolTexts) + "\n\n"
       : "") +
-    "❌ QUÉ NO HACER\n" +
-    "• No lo manipules más de lo necesario.\n" +
-    "• No lo sujetes por la cola, las patas o la cabeza.\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
-    "✅ QUÉ HACER\n" +
+    protocolTexts.rescueHeadings.doNotLine +
+    protocolTexts.rescueInstructions.minimalHandlingMaleLine +
+    protocolTexts.smallMammalAdvice.neverHoldTailLegsOrHead +
+    protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+    protocolTexts.sharedRescueAdvice.documentWithoutFlashParagraph +
+    protocolTexts.rescueHeadings.actionsLine +
     (needsHelp
-      ? "• Si puedes hacerlo sin riesgo, colócalo en una caja de cartón ventilada y bien cerrada o en un transportín seguro.\n" +
-        "• Mantén la caja o el transportín en un lugar tranquilo, protegido del frío o del calor extremo.\n"
-      : "• Mantén alejadas a las personas y a los animales domésticos y solicita orientación si tienes dudas.\n") +
-    "• Si ha sido atacado por un gato o un perro, necesita valoración aunque no observes heridas evidentes.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+      ? protocolTexts.smallMammalAdvice.safeBoxOnlyWithoutRisk +
+        protocolTexts.sharedRescueAdvice.protectBoxOrCarrierLine
+      : protocolTexts.smallMammalAdvice.keepPeopleAndPetsAwayAndSeekAdvice) +
+    protocolTexts.smallMammalAdvice.assessmentAfterCatOrDogAttack +
+    protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph,
   commonEnd
   );
 }
 
-function getLargeMammalAdvice(flags: FlagsState) {
+function getLargeMammalAdvice(flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const needsHelp = hasAnyConcern(flags);
 const commonEnd =
     COMMON_END;
 
-  return (
-    "🦌 MAMÍFERO GRANDE\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Mantén una distancia prudente y observa la situación antes de intervenir.\n" +
-    "• Puede reaccionar de forma imprevisible por miedo, estrés o dolor.\n" +
+  return withCommonEnd(
+    protocolTexts.largeMammalAdvice.title +
+    protocolTexts.rescueHeadings.beforeInterveningLine +
+    protocolTexts.sharedRescueAdvice.observeSituationFromDistanceLine +
+    protocolTexts.largeMammalAdvice.unpredictableReaction +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
-      : "• Si no existe un peligro inmediato ni presenta anomalías, evita acercarte o intervenir.\n\n") +
+      ? protocolTexts.sharedRescueAdvice.selectedSignsNeedSpecialistHelpParagraph
+      : protocolTexts.largeMammalAdvice.avoidApproachWithoutConcern) +
     (needsHelp
-      ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags) + "\n\n"
+      ? protocolTexts.rescueHeadings.observedSignsLine + getObservedSigns(flags, false, protocolTexts) + "\n\n"
       : "") +
-    "❌ QUÉ NO HACER\n" +
-    "• No intentes capturarlo, sujetarlo ni trasladarlo.\n" +
-    "• No lo acorrales ni bloquees su vía de escape.\n" +
-    "• No le des comida ni agua sin indicación.\n" +
-    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Reduce los ruidos y aleja a las personas, los perros y los vehículos si puedes hacerlo con seguridad.\n" +
-    "• Si se encuentra en una carretera o zona con tráfico, prioriza siempre tu seguridad y avisa a Emergencias o a los agentes competentes.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n" +
-    "• Sigue siempre las indicaciones del personal especializado.\n\n"+
+    protocolTexts.rescueHeadings.doNotLine +
+    protocolTexts.largeMammalAdvice.neverCaptureRestrainOrTransport +
+    protocolTexts.largeMammalAdvice.neverCornerOrBlockEscape +
+    protocolTexts.sharedRescueAdvice.noFoodOrWaterLine +
+    protocolTexts.sharedRescueAdvice.documentWithoutFlashParagraph +
+    protocolTexts.rescueHeadings.actionsLine +
+    protocolTexts.largeMammalAdvice.reduceNoiseAndKeepOthersAwaySafely +
+    protocolTexts.sharedRescueAdvice.trafficSafetyAndEmergencyHelpLine +
+    protocolTexts.sharedRescueAdvice.contactRecoveryCenterLine +
+    protocolTexts.rescueInstructions.followSpecialistsParagraph,
   commonEnd
   );
 }
 
-function getReptileAmphibianAdvice(flags: FlagsState) {
+function getReptileAmphibianAdvice(flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const needsHelp = hasAnyConcern(flags);
 const commonEnd =
     COMMON_END;
 
-  return (
-    "🐸 REPTIL O ANFIBIO\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Observa la situación desde una distancia prudente antes de intervenir y evita el contacto directo si no puedes identificar el animal con seguridad.\n" +
+  return withCommonEnd(
+    protocolTexts.reptileAmphibianAdvice.title +
+    protocolTexts.rescueHeadings.beforeInterveningLine +
+    protocolTexts.reptileAmphibianAdvice.observeAndAvoidUnidentifiedContact +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar ayuda. Las indicaciones para apartarlo de un peligro inmediato se refieren solo a otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras.\n\n"
-      : "• Si se desplaza con normalidad y no existe un peligro inmediato, evita manipularlo o trasladarlo.\n\n") +
+      ? protocolTexts.reptileAmphibianAdvice.warningSignsExcludeSnakesFromMovementAdvice
+      : protocolTexts.reptileAmphibianAdvice.avoidHandlingWithoutDanger) +
     (needsHelp
-      ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags) + "\n\n"
+      ? protocolTexts.rescueHeadings.observedSignsLine + getObservedSigns(flags, false, protocolTexts) + "\n\n"
       : "") +
-    "❌ QUÉ NO HACER\n" +
-    "• No lo manipules sin necesidad.\n" +
-    "• No intentes coger, capturar, manipular ni trasladar serpientes, culebras o víboras, aunque creas haber identificado la especie. Si no puedes descartar que sea una serpiente, culebra o víbora, mantén la distancia y no intentes cogerla, capturarla, manipularla, liberarla ni trasladarla.\n" +
-    "• No lo traslades a grandes distancias.\n" +
-    "• No le des comida ni agua sin indicación.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Reduce los ruidos y evita la presencia de personas y animales domésticos.\n" +
-    "• Si se trata de una serpiente, culebra o víbora, mantén la distancia y contacta con un centro especializado cuando necesite ayuda o exista peligro. No intentes moverla. Si está dentro de una vivienda, solicita orientación especializada sin intentar capturarla.\n• Solo para otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras: si debes moverlo por seguridad y puedes hacerlo sin riesgo, utiliza un recipiente seguro y ventilado.\n" +
-    "• Solo en esos otros reptiles y anfibios identificados con seguridad, excluyendo serpientes, culebras y víboras, déjalo en una zona adecuada, lo más cercana posible al lugar donde fue encontrado.\n" +
-    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+    protocolTexts.rescueHeadings.doNotLine +
+    protocolTexts.reptileAmphibianAdvice.avoidUnnecessaryHandling +
+    protocolTexts.rescueInstructions.snakeNoHandlingOrTransferLine +
+    protocolTexts.reptileAmphibianAdvice.avoidLongDistanceTransport +
+    protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+    protocolTexts.rescueHeadings.actionsLine +
+    protocolTexts.rescueInstructions.reduceNoisePeopleAndPetsLine +
+    protocolTexts.reptileAmphibianAdvice.snakeSpecialistHelpAndOtherSpeciesContainer +
+    protocolTexts.reptileAmphibianAdvice.nearbyReleaseOnlyForOtherIdentifiedSpecies +
+    protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+    protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph,
   commonEnd
   );
 }
@@ -1423,80 +1454,80 @@ function mayNeedTurtleHeatOrAirReminder(
   );
 }
 
-function addUnique(target: string[], text: string) {
-  if (!target.includes(text)) {
-    target.push(text);
+function addUnique(target: MarineAdviceRecommendation[], recommendation: MarineAdviceRecommendation) {
+  if (!target.some((item) => item.id === recommendation.id)) {
+    target.push(recommendation);
   }
 }
 
 function addMarineFlagAdvice(
   flags: FlagsState,
-  dont: string[],
-  actions: string[],
+  dont: MarineAdviceRecommendation[],
+  actions: MarineAdviceRecommendation[], protocolTexts: Catalog = getEffectiveCatalog(),
 ) {
   if (flags.stranded) {
-    addUnique(dont, "• No intentes devolverlo al agua por tu cuenta.");
+    addUnique(dont, { id: "marine.do-not-return-to-water", text: protocolTexts.marineFlagAdvice.doNotReturnToWater });
   }
 
   if (flags.trapped) {
     addUnique(
       dont,
-      "• No retires redes, cabos o aparejos enganchados por tu cuenta.",
+      { id: "marine.do-not-remove-entangled-gear", text: protocolTexts.marineFlagAdvice.doNotRemoveEntangledGear },
     );
     addUnique(
       actions,
-      "• Describe el tipo de enredo y dónde está enganchado, sin tocarlo.",
+      { id: "marine.describe-entanglement-without-touching", text: protocolTexts.marineFlagAdvice.describeEntanglementWithoutTouching },
     );
   }
 
   if (flags.fishingLineHook) {
     addUnique(
       dont,
-      "• No tires del sedal ni intentes extraer el anzuelo.",
+      { id: "marine.do-not-pull-line-or-remove-hook", text: protocolTexts.marineFlagAdvice.doNotPullLineOrRemoveHook },
     );
     addUnique(
       actions,
-      "• Indica si ves sedal, anzuelo o aparejos y en qué zona del cuerpo están.",
+      { id: "marine.report-fishing-gear-location", text: protocolTexts.marineFlagAdvice.reportFishingGearLocation },
     );
   }
 
   if (flags.moreAnimals) {
     addUnique(
       actions,
-      "• Indica aproximadamente cuántos animales hay y dónde se encuentran.",
+      { id: "marine.report-animal-count-and-location", text: protocolTexts.marineFlagAdvice.reportAnimalCountAndLocation },
     );
   }
 
   if (flags.peopleDogsNearby) {
     addUnique(
       actions,
-      "• Mantén personas y perros alejados si puedes hacerlo sin riesgo.",
+      { id: "marine.keep-people-and-dogs-away", text: protocolTexts.rescueInstructions.keepPeopleAndDogsAway },
     );
   }
 
   if (flags.bleeding) {
-    addUnique(dont, "• No manipules la herida ni intentes curarla.");
+    addUnique(dont, { id: "marine.do-not-treat-wound", text: protocolTexts.marineFlagAdvice.doNotTreatWound });
     addUnique(
       actions,
-      "• Documenta las lesiones visibles desde distancia y comunícalas al servicio competente.",
+      { id: "marine.document-visible-injuries-from-distance", text: protocolTexts.marineFlagAdvice.documentVisibleInjuriesFromDistance },
     );
   }
 
   if (flags.weakness) {
     addUnique(
       dont,
-      "• No lo muevas para comprobar si puede desplazarse.",
+      { id: "marine.do-not-move-to-test-mobility", text: protocolTexts.marineFlagAdvice.doNotMoveToTestMobility },
     );
     addUnique(
       actions,
-      "• Observa su estado desde lejos e informa de si parece débil o inmóvil.",
+      { id: "marine.observe-weakness-from-distance", text: protocolTexts.marineFlagAdvice.observeWeaknessFromDistance },
     );
   }
 
   if (flags.other) {
     addUnique(
       actions,
-      "• Describe con claridad al servicio competente cualquier otra circunstancia que te preocupe.",
+      { id: "marine.describe-other-concerns", text: protocolTexts.marineFlagAdvice.describeOtherConcerns },
     );
   }
 }
@@ -1505,60 +1536,61 @@ function getMarineAnimalAdvice(
   animalType: AnimalType,
   flags: FlagsState,
   animalPosition?: AnimalPosition | null,
-  animalEnvironment?: AnimalEnvironment | null,
+  animalEnvironment?: AnimalEnvironment | null, protocolTexts: Catalog = getEffectiveCatalog(),
 ) {
-  const signs = getObservedSigns(flags);
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
+  const signs = getObservedSigns(flags, false, protocolTexts);
   const hasSigns = signs.length > 0;
   const title =
     animalType === "dolphin"
-      ? "🐬 DELFÍN"
+      ? protocolTexts.marineAnimalAdvice.dolphinTitle
       : animalType === "largeCetacean"
-        ? "🐋 BALLENA O CETÁCEO GRANDE"
+        ? protocolTexts.marineAnimalAdvice.largeCetaceanTitle
         : animalType === "seal"
-          ? "🦭 FOCA"
+          ? protocolTexts.marineAnimalAdvice.sealTitle
           : animalType === "seaTurtle"
-            ? "🐢 TORTUGA MARINA"
+            ? protocolTexts.marineAnimalAdvice.seaTurtleTitle
             : animalType === "sharkRay"
-              ? "🦈 TIBURÓN O RAYA"
-              : "🌊 ANIMAL MARINO";
+              ? protocolTexts.marineAnimalAdvice.sharkRayTitle
+              : protocolTexts.marineAnimalAdvice.otherMarineTitle;
   const isCetacean =
     animalType === "dolphin" || animalType === "largeCetacean";
 
-  const before =
+  const before: MarineAdviceRecommendation[] =
     animalType === "largeCetacean"
       ? [
-          "• Mantén una distancia especialmente prudente por su tamaño y evita ruido o aglomeraciones.",
-          "• No manipules al animal ni intentes moverlo por tu cuenta.",
-          "• No le des comida ni agua.",
+          { id: "marine.large-cetacean-distance", text: protocolTexts.marineAnimalAdvice.largeCetaceanDistance },
+          { id: "marine.do-not-handle-or-move", text: protocolTexts.marineAnimalAdvice.doNotHandleOrMove },
+          { id: "marine.no-food-or-water", text: protocolTexts.marineAnimalAdvice.noFoodOrWater },
         ]
       : animalType === "sharkRay"
         ? [
-            "• Prioriza tu seguridad y mantén una distancia especialmente prudente.",
-            "• No manipules al animal ni intentes moverlo por tu cuenta.",
-            "• No le des comida ni agua.",
+            { id: "marine.shark-ray-distance", text: protocolTexts.marineAnimalAdvice.sharkRayDistance },
+            { id: "marine.do-not-handle-or-move", text: protocolTexts.marineAnimalAdvice.doNotHandleOrMove },
+            { id: "marine.no-food-or-water", text: protocolTexts.marineAnimalAdvice.noFoodOrWater },
           ]
         : [
-            "• Mantén distancia y evita ruidos, aglomeraciones o molestias.",
-            "• No manipules al animal ni intentes moverlo por tu cuenta.",
-            "• No le des comida ni agua.",
+            { id: "marine.distance-and-quiet", text: protocolTexts.marineAnimalAdvice.distanceAndQuiet },
+            { id: "marine.do-not-handle-or-move", text: protocolTexts.marineAnimalAdvice.doNotHandleOrMove },
+            { id: "marine.no-food-or-water", text: protocolTexts.marineAnimalAdvice.noFoodOrWater },
           ];
-  const dont: string[] = [];
-  const actions = [
-    "• Anota la ubicación exacta del hallazgo.",
-    "• Haz fotos o vídeos solo si puedes hacerlo sin acercarte ni molestar.",
+  const dont: MarineAdviceRecommendation[] = [];
+  const actions: MarineAdviceRecommendation[] = [
+    { id: "marine.note-exact-location", text: protocolTexts.marineAnimalAdvice.noteExactLocation },
+    { id: "marine.document-without-approaching", text: protocolTexts.marineAnimalAdvice.documentWithoutApproaching },
   ];
 
   if (animalType === "seal") {
     if (flags.restingOnLand || isCoastalSealPosition(animalPosition, animalEnvironment)) {
       addUnique(
         before,
-        "• Una foca en tierra puede estar simplemente descansando; obsérvala desde una distancia prudente.",
+        { id: "marine.seal-may-be-resting", text: protocolTexts.marineAnimalAdvice.sealMayBeResting },
       );
-      addUnique(dont, "• No la rodees ni bloquees su posible regreso al agua.");
+      addUnique(dont, { id: "marine.do-not-block-seal-return", text: protocolTexts.marineAnimalAdvice.doNotBlockSealReturn });
       if (!flags.peopleDogsNearby) {
         addUnique(
           actions,
-          "• Si hay perros en la zona, mantenlos atados y alejados.",
+          { id: "marine.keep-dogs-leashed", text: protocolTexts.marineAnimalAdvice.keepDogsLeashed },
         );
       }
     }
@@ -1566,7 +1598,7 @@ function getMarineAnimalAdvice(
     if (flags.restingOnLand) {
       addUnique(
         actions,
-        "• Permite que descanse y avisa si observas heridas, debilidad, enredo o acoso de personas o perros.",
+        { id: "marine.allow-seal-rest-and-report-concerns", text: protocolTexts.marineAnimalAdvice.allowSealRestAndReportConcerns },
       );
     }
   }
@@ -1575,12 +1607,12 @@ function getMarineAnimalAdvice(
     isCetacean &&
     flags.stranded
   ) {
-    addUnique(dont, "• No lo empujes ni lo arrastres.");
+    addUnique(dont, { id: "marine.do-not-push-or-drag", text: protocolTexts.marineAnimalAdvice.doNotPushOrDrag });
 
     if (animalType === "largeCetacean") {
       addUnique(
         dont,
-        "• No utilices vehículos, embarcaciones ni medios mecánicos para moverlo.",
+        { id: "marine.no-mechanical-movement", text: protocolTexts.marineAnimalAdvice.noMechanicalMovement },
       );
     }
   }
@@ -1592,7 +1624,7 @@ function getMarineAnimalAdvice(
   ) {
     addUnique(
       actions,
-      "• Indica si está en arena, orilla o agua somera para que el equipo valore cómo intervenir.",
+      { id: "marine.report-stranding-position", text: protocolTexts.marineAnimalAdvice.reportStrandingPosition },
     );
   }
 
@@ -1600,8 +1632,8 @@ function getMarineAnimalAdvice(
     addUnique(
       actions,
       flags.moreAnimals
-        ? "• Si puedes observarlos sin acercarte, indica la hora, tamaño aproximado y comportamiento visible."
-        : "• Si puedes observarlo sin acercarte, indica la hora, tamaño aproximado y comportamiento visible.",
+        ? { id: "marine.observe-multiple-cetaceans", text: protocolTexts.marineAnimalAdvice.observeMultipleCetaceans }
+        : { id: "marine.observe-single-cetacean", text: protocolTexts.marineAnimalAdvice.observeSingleCetacean },
     );
   }
 
@@ -1612,60 +1644,60 @@ function getMarineAnimalAdvice(
   ) {
     addUnique(
       dont,
-      "• No lo persigas, interceptes ni intentes dirigir su movimiento.",
+      { id: "marine.do-not-pursue-dolphin", text: protocolTexts.marineAnimalAdvice.doNotPursueDolphin },
     );
   }
 
   if (animalType === "seaTurtle") {
-    addUnique(dont, "• No le des la vuelta ni la coloques boca arriba.");
+    addUnique(dont, { id: "marine.do-not-turn-turtle-over", text: protocolTexts.marineAnimalAdvice.doNotTurnTurtleOver });
 
     if (flags.trapped || flags.fishingLineHook) {
       addUnique(
         before,
-        "• En tortugas marinas, redes, sedales y anzuelos requieren valoración especializada.",
+        { id: "marine.turtle-fishing-gear-needs-assessment", text: protocolTexts.marineAnimalAdvice.turtleFishingGearNeedsAssessment },
       );
     }
 
     if (flags.bleeding) {
       addUnique(
         dont,
-        "• No intentes vendar, entablillar ni tratar el caparazón o las heridas.",
+        { id: "marine.do-not-treat-turtle-injuries", text: protocolTexts.marineAnimalAdvice.doNotTreatTurtleInjuries },
       );
       addUnique(
         actions,
-        "• Indica si observas daños en el caparazón o heridas visibles.",
+        { id: "marine.report-turtle-injuries", text: protocolTexts.marineAnimalAdvice.reportTurtleInjuries },
       );
     }
 
     if (animalPosition === "onBoat") {
       addUnique(
         actions,
-        "• Si está en una embarcación, evita maniobras de rescate por iniciativa propia y espera instrucciones profesionales.",
+        { id: "marine.turtle-on-boat-await-instructions", text: protocolTexts.marineAnimalAdvice.turtleOnBoatAwaitInstructions },
       );
     }
 
     if (flags.fishingLineHook && animalPosition === "onBoat") {
       addUnique(
         dont,
-        "• No uses el sedal, garfios ni objetos punzantes para moverla.",
+        { id: "marine.no-fishing-line-or-sharp-tools", text: protocolTexts.marineAnimalAdvice.noFishingLineOrSharpTools },
       );
     }
 
     if (mayNeedTurtleHeatOrAirReminder(flags, animalPosition)) {
       addUnique(
         before,
-        "• Las tortugas marinas respiran aire; mantenla tranquila y evita sol o calor directo mientras esperas instrucciones.",
+        { id: "marine.turtle-air-and-heat-reminder", text: protocolTexts.marineAnimalAdvice.turtleAirAndHeatReminder },
       );
     }
   }
 
   if (animalType === "sharkRay") {
-    addUnique(dont, "• Evita acercarte a la cabeza, cola o aletas.");
+    addUnique(dont, { id: "marine.avoid-head-tail-and-fins", text: protocolTexts.marineAnimalAdvice.avoidHeadTailAndFins });
 
     if (flags.stranded || animalPosition === "shoreShallowWater") {
       addUnique(
         dont,
-        "• No lo toques para desplazarlo.",
+        { id: "marine.do-not-touch-to-move", text: protocolTexts.marineAnimalAdvice.doNotTouchToMove },
       );
     }
   }
@@ -1673,104 +1705,106 @@ function getMarineAnimalAdvice(
   if (animalPosition === "onBoat" && animalType !== "seaTurtle") {
     addUnique(
       actions,
-      "• Si el animal está en una embarcación, contacta cuanto antes y sigue solo instrucciones profesionales.",
+      { id: "marine.animal-on-boat-seek-help", text: protocolTexts.marineAnimalAdvice.animalOnBoatSeekHelp },
     );
   }
 
   if (animalType === "otherMarine") {
     addUnique(
       actions,
-      "• Si puedes observarlo sin acercarte, indica la hora, tamaño aproximado, estado aparente y comportamiento visible.",
+      { id: "marine.observe-other-marine-animal", text: protocolTexts.marineAnimalAdvice.observeOtherMarineAnimal },
     );
   }
 
   if (hasMarineWaterInterventionRisk(animalPosition, animalEnvironment)) {
     addUnique(
       dont,
-      "• No entres al agua ni te pongas en riesgo para intervenir.",
+      { id: "marine.do-not-enter-water", text: protocolTexts.marineAnimalAdvice.doNotEnterWater },
     );
   }
 
-  addMarineFlagAdvice(flags, dont, actions);
+  addMarineFlagAdvice(flags, dont, actions, protocolTexts);
 
   actions.push(
-    "• Contacta con Emergencias o con el servicio especializado competente y espera instrucciones.",
+    { id: "marine.contact-competent-service", text: protocolTexts.marineAnimalAdvice.contactCompetentService },
   );
 
-  return (
+  return withCommonEnd(
     title +
-    "\n\n⚠️ ANTES DE INTERVENIR\n" +
-    before.join("\n") +
+    protocolTexts.rescueHeadings.beforeInterveningAfterParagraph +
+    before.map((item) => item.text).join("\n") +
     "\n" +
-    (hasSigns ? "\n🚨 SEÑALES OBSERVADAS\n" + signs + "\n\n" : "\n") +
-    "❌ QUÉ NO HACER\n" +
+    (hasSigns ? protocolTexts.rescueHeadings.observedSignsAfterLine + signs + "\n\n" : "\n") +
+    protocolTexts.rescueHeadings.doNotLine +
     (dont.length > 0
-      ? dont.join("\n")
-      : "• No improvises maniobras de rescate ni actuaciones no indicadas por profesionales.") +
+      ? dont.map((item) => item.text).join("\n")
+      : protocolTexts.marineAnimalAdvice.noImprovisedRescue) +
     "\n\n" +
-    "✅ QUÉ HACER\n" +
-    actions.join("\n") +
-    "\n\n" +
+    protocolTexts.rescueHeadings.actionsLine +
+    actions.map((item) => item.text).join("\n") +
+    "\n\n" ,
     COMMON_END
   );
 }
 
-function getDeadMarineAnimalAdvice(animalType: AnimalType) {
+function getDeadMarineAnimalAdvice(animalType: AnimalType, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const title =
     animalType === "dolphin"
-      ? "☠️ DELFÍN MUERTO"
+      ? protocolTexts.deadAdvice.marineDolphinTitle
       : animalType === "largeCetacean"
-        ? "☠️ BALLENA O CETÁCEO GRANDE MUERTO"
+        ? protocolTexts.deadAdvice.marineLargeCetaceanTitle
         : animalType === "seal"
-          ? "☠️ FOCA MUERTA"
+          ? protocolTexts.deadAdvice.marineSealTitle
           : animalType === "seaTurtle"
-            ? "☠️ TORTUGA MARINA MUERTA"
+            ? protocolTexts.deadAdvice.marineSeaTurtleTitle
             : animalType === "sharkRay"
-              ? "☠️ TIBURÓN O RAYA MUERTO"
-              : "☠️ ANIMAL MARINO MUERTO";
+              ? protocolTexts.deadAdvice.marineSharkRayTitle
+              : protocolTexts.deadAdvice.marineOtherTitle;
 
-  return (
+  return withCommonEnd(
     title +
-    "\n\n⚠️ ANTES DE INTERVENIR\n" +
-    "• Un animal marino muerto puede aportar información sanitaria, científica y de conservación.\n" +
-    "• Mantén personas y perros alejados si puedes hacerlo sin riesgo.\n\n" +
-    "❌ QUÉ NO HACER\n" +
-    "• No toques ni muevas el cadáver.\n" +
-    "• No alteres el lugar del hallazgo.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Registra la ubicación exacta.\n" +
-    "• Realiza fotos si puedes hacerlo sin riesgo.\n" +
-    "• Avisa a Emergencias o al servicio competente.\n" +
-    "• Indica la especie aproximada, el tamaño, la hora y cómo lo encontraste, y si existen más ejemplares.\n\n" +
+    protocolTexts.rescueHeadings.beforeInterveningAfterParagraph +
+    protocolTexts.deadAdvice.marineScientificValueLine +
+    protocolTexts.deadAdvice.marineKeepPeopleAndDogsAwayParagraph +
+    protocolTexts.rescueHeadings.doNotLine +
+    protocolTexts.deadAdvice.marineDoNotTouchOrMoveBodyLine +
+    protocolTexts.deadAdvice.doNotAlterDiscoverySiteParagraph +
+    protocolTexts.rescueHeadings.actionsLine +
+    protocolTexts.deadAdvice.recordExactLocationLine +
+    protocolTexts.deadAdvice.safePhotosLine +
+    protocolTexts.deadAdvice.notifyCompetentServiceLine +
+    protocolTexts.deadAdvice.marineReportSpeciesSizeTimeAndOthersParagraph ,
     COMMON_END
   );
 }
 
-function getUnknownAnimalAdvice(flags: FlagsState) {
+function getUnknownAnimalAdvice(flags: FlagsState, protocolTexts: Catalog = getEffectiveCatalog()) {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   const needsHelp = hasAnyConcern(flags) || flags.cannotFly;
 const commonEnd =
     COMMON_END;
 
-  return (
-    "❓ NO ESTOY SEGURO\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• No pasa nada. No es necesario identificar exactamente al animal para poder ayudar.\n" +
-    "• Observa la situación desde una distancia prudente antes de intervenir.\n" +
+  return withCommonEnd(
+    protocolTexts.rescueHeadings.unknownAnimalParagraph +
+    protocolTexts.rescueHeadings.beforeInterveningLine +
+    protocolTexts.unknownAnimalAdvice.exactIdentificationNotRequired +
+    protocolTexts.sharedRescueAdvice.observeFromDistanceLine +
     (needsHelp
-      ? "• Las señales seleccionadas indican que puede necesitar ayuda especializada.\n\n"
-      : "• Si no presenta anomalías ni existe un peligro inmediato, evita intervenir.\n\n") +
+      ? protocolTexts.sharedRescueAdvice.selectedSignsNeedSpecialistHelpParagraph
+      : protocolTexts.unknownAnimalAdvice.avoidInterventionWithoutConcern) +
     (needsHelp
-      ? "🚨 SEÑALES OBSERVADAS\n" + getObservedSigns(flags, true) + "\n\n"
+      ? protocolTexts.rescueHeadings.observedSignsLine + getObservedSigns(flags, true, protocolTexts) + "\n\n"
       : "") +
-    "❌ QUÉ NO HACER\n" +
-    "• No lo manipules ni lo traslades sin necesidad.\n" +
-    "• No intentes liberarlo a la fuerza.\n" +
-    "• No le des comida ni agua sin indicación.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Mantén alejadas a las personas y a los animales domésticos.\n" +
-    "• Si existe un peligro inmediato, prioriza tu seguridad y solicita ayuda antes de intervenir.\n" +
-    "• Realiza únicamente las fotos o vídeos necesarios para la identificación del caso y evita utilizar flash.\n" +
-    "• Contacta con el centro de recuperación más cercano para recibir orientación.\n\n"+
+    protocolTexts.rescueHeadings.doNotLine +
+    protocolTexts.unknownAnimalAdvice.avoidUnnecessaryHandlingOrTransport +
+    protocolTexts.unknownAnimalAdvice.neverForceRelease +
+    protocolTexts.sharedRescueAdvice.noFoodOrWaterParagraph +
+    protocolTexts.rescueHeadings.actionsLine +
+    protocolTexts.sharedRescueAdvice.keepPeopleAndPetsAwayLine +
+    protocolTexts.sharedRescueAdvice.immediateDangerSafetyLine +
+    protocolTexts.sharedRescueAdvice.documentWithoutFlashLine +
+    protocolTexts.sharedRescueAdvice.contactRecoveryCenterParagraph,
   commonEnd
   );
 }
@@ -1782,31 +1816,42 @@ export function getAdvice(
   animalPosition?: AnimalPosition | null,
   animalEnvironment?: AnimalEnvironment | null,
 ) {
+  return formatAdvice(getAdviceParts(animalState, animalType, flags, animalPosition, animalEnvironment));
+}
+
+function getAdvicePartsWithTexts(
+  animalState: AnimalState,
+  animalType: AnimalType,
+  flags: FlagsState,
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null, protocolTexts: Catalog = getEffectiveCatalog(),
+): AdviceParts {
+  const COMMON_END = protocolTexts.supplementalAdvice.commonEnd;
   if (animalState === "dead" && isMarineAnimal(animalType)) {
-    return getDeadMarineAnimalAdvice(animalType);
+    return getDeadMarineAnimalAdvice(animalType, protocolTexts);
   }
 
      if (animalState === "dead") {
 		 const commonEnd =
     COMMON_END;
 
-     return (
-    "☠️ ANIMAL MUERTO\n\n" +
-    "⚠️ ANTES DE INTERVENIR\n" +
-    "• Encontrar un animal muerto puede resultar impactante. Antes de actuar, observa la situación con calma y evita modificar el entorno.\n" +
-    "• Lo que observes puede ayudar a identificar la causa de la muerte y a prevenir que otros animales sufran el mismo problema.\n\n" +
-    "🔍 QUÉ OBSERVAR\n" +
-    "• Comprueba desde una distancia segura si hay más animales muertos o afectados en la zona.\n" +
-    "• Fíjate si existen posibles causas visibles, como tendidos eléctricos, vallados, carreteras, cristaleras, trampas, cebos o restos sospechosos, sin acercarte ni manipular nada.\n" +
-    "• Comprueba también si existe algún riesgo para las personas o los animales domésticos.\n\n" +
-    "❌ QUÉ NO HACER\n" +
-    "• No toques ni muevas el cadáver, salvo que exista un peligro inmediato y recibas indicaciones para hacerlo.\n" +
-    "• No manipules cebos, recipientes, sustancias u otros objetos sospechosos.\n" +
-    "• No alteres el lugar del hallazgo.\n\n" +
-    "✅ QUÉ HACER\n" +
-    "• Realiza únicamente las fotografías o vídeos necesarios para documentar el animal y el entorno, sin modificar la escena.\n" +
-    "• Facilita la ubicación exacta del hallazgo. Esta información puede ser fundamental para que los profesionales localicen el lugar, investiguen la causa y adopten las medidas necesarias.\n" +
-    "• Comunica el hallazgo a los Agentes Forestales, agentes medioambientales, fuerzas y cuerpos de seguridad o servicios de emergencias, aportando toda la información que hayas podido observar.\n\n"+
+     return withCommonEnd(
+    protocolTexts.deadAdvice.terrestrialTitle +
+    protocolTexts.rescueHeadings.beforeInterveningLine +
+    protocolTexts.deadAdvice.findingDeadAnimalObserveCalmlyLine +
+    protocolTexts.deadAdvice.observationsMayPreventOtherDeathsParagraph +
+    protocolTexts.rescueHeadings.whatToObserveLine +
+    protocolTexts.deadAdvice.checkOtherAffectedAnimalsFromDistanceLine +
+    protocolTexts.deadAdvice.lookForVisibleCausesWithoutTouchingLine +
+    protocolTexts.deadAdvice.checkPeopleAndPetsRiskParagraph +
+    protocolTexts.rescueHeadings.doNotLine +
+    protocolTexts.deadAdvice.doNotTouchOrMoveExceptDangerAndInstructionLine +
+    protocolTexts.deadAdvice.doNotHandleSuspiciousObjectsLine +
+    protocolTexts.deadAdvice.doNotAlterDiscoverySiteParagraph +
+    protocolTexts.rescueHeadings.actionsLine +
+    protocolTexts.deadAdvice.documentAnimalAndSurroundingsWithoutChangingSceneLine +
+    protocolTexts.deadAdvice.provideExactLocationForProfessionalsLine +
+    protocolTexts.deadAdvice.reportToAuthoritiesWithObservationsParagraph,
   commonEnd
   );
    }
@@ -1817,51 +1862,83 @@ export function getAdvice(
         animalType,
         flags,
         animalPosition,
-        animalEnvironment,
+        animalEnvironment, protocolTexts,
       ),
       {
         ...flags,
         normalAppearance: false,
-      },
+      }, protocolTexts,
     );
   }
 
   // Prioridad 1: el atrapamiento requiere instrucciones específicas de liberación y seguridad.
   if (flags.trapped) {
-    return addSupplementalAdvice(getTrappedAdvice(animalType), flags);
+    return addSupplementalAdvice(getTrappedAdvice(animalType, protocolTexts), flags, protocolTexts);
   }
 
   // Prioridad 2: una cría necesita primero valorar edad, dependencia y posible reunificación.
   if (flags.baby) {
-    return addSupplementalAdvice(getBabyAdvice(animalType), flags);
+    return addSupplementalAdvice(getBabyAdvice(animalType, protocolTexts), flags, protocolTexts);
   }
 
-  let advice: string;
+  let advice: AdviceParts;
 
   switch (animalType) {
     case "smallBird":
-      advice = getSmallBirdAdvice(flags);
+      advice = getSmallBirdAdvice(flags, protocolTexts);
       break;
     case "largeBird":
-      advice = getLargeBirdAdvice(flags);
+      advice = getLargeBirdAdvice(flags, protocolTexts);
       break;
     case "bat":
-      advice = getBatAdvice(flags);
+      advice = getBatAdvice(flags, protocolTexts);
       break;
     case "smallMammal":
-      advice = getSmallMammalAdvice(flags);
+      advice = getSmallMammalAdvice(flags, protocolTexts);
       break;
     case "largeMammal":
-      advice = getLargeMammalAdvice(flags);
+      advice = getLargeMammalAdvice(flags, protocolTexts);
       break;
     case "reptileAmphibian":
-      advice = getReptileAmphibianAdvice(flags);
+      advice = getReptileAmphibianAdvice(flags, protocolTexts);
       break;
     default:
-      advice = getUnknownAnimalAdvice(flags);
+      advice = getUnknownAnimalAdvice(flags, protocolTexts);
   }
 
-  return addSupplementalAdvice(advice, flags);
+  return addSupplementalAdvice(advice, flags, protocolTexts);
+}
+
+export function getAdviceForLocale(
+  locale: Locale,
+  animalState: AnimalState,
+  animalType: AnimalType,
+  flags: FlagsState,
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
+): string {
+  return formatAdvice(getAdvicePartsForLocale(locale, animalState, animalType, flags, animalPosition, animalEnvironment));
+}
+
+export function getAdvicePartsForLocale(
+  locale: Locale,
+  animalState: AnimalState,
+  animalType: AnimalType,
+  flags: FlagsState,
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
+): AdviceParts {
+  return getAdvicePartsWithTexts(animalState, animalType, flags, animalPosition, animalEnvironment, getEffectiveCatalog(locale));
+}
+
+export function getAdviceParts(
+  animalState: AnimalState,
+  animalType: AnimalType,
+  flags: FlagsState,
+  animalPosition?: AnimalPosition | null,
+  animalEnvironment?: AnimalEnvironment | null,
+): AdviceParts {
+  return getAdvicePartsForLocale(DEFAULT_LOCALE, animalState, animalType, flags, animalPosition, animalEnvironment);
 }
 
 function normalizeWhatsAppNumber(phone: string) {
@@ -1980,17 +2057,18 @@ async function reverseGeocodeWithTimeout(coords: RescueCoordinates) {
 function buildLocationSummaryLines(
   approximateLocation: string | undefined,
   coords: RescueCoordinates | null,
+  texts: Catalog = generalTexts,
 ) {
-  const lines: string[] = [];
+  const lines: LocationSummaryLine[] = [];
 
   if (approximateLocation) {
-    lines.push(`Referencia del lugar: ${approximateLocation}`);
+    lines.push({ kind: "reference", text: `${texts.summaryLocation.referencePrefix}${approximateLocation}` });
   }
 
   if (coords) {
     lines.push(
-      `Coordenadas: ${formatCoordinates(coords)}`,
-      `Mapa: https://maps.google.com/?q=${coords.latitude},${coords.longitude}`,
+      { kind: "coordinates", text: `${texts.summaryLocation.coordinatesPrefix}${formatCoordinates(coords)}` },
+      { kind: "map", text: `${texts.summaryLocation.mapPrefix}https://maps.google.com/?q=${coords.latitude},${coords.longitude}` },
     );
   }
 
@@ -2014,6 +2092,13 @@ export default function HomeScreen({
   initialCase = null,
   initialAnimalType = null,
 }: SosAssistantProps) {
+  const { t, locale } = useI18n();
+  const generalTexts = getEffectiveCatalog(locale);
+  const pagePath = useInformationPagePath();
+  const homePath = pagePath("home");
+  const backNavigationRef = useRef({ homePath, t, url: "" });
+  backNavigationRef.current = { homePath, t, url: Platform.OS === "web" && typeof window !== "undefined" ? window.location.href : "" };
+  const displayLabel = useCallback((text: string) => localiseAssistantLabel(text, locale), [locale]);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const router = useRouter();
@@ -2062,9 +2147,10 @@ export default function HomeScreen({
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [videoUri, setVideoUri] = useState<string | null>(null);
 
-  const [locationText, setLocationText] = useState(
-    initialCase?.locationText ?? "Ubicación no capturada todavía.",
+  const [locationValue, setLocationValue] = useState<StoredLocationValue>(() =>
+    readStoredLocationText(initialCase?.locationText),
   );
+  const locationText = writeStoredLocationText(locationValue);
   const [approximateLocation, setApproximateLocation] = useState(
     normalizeUsefulText(initialCase?.approximateLocation),
   );
@@ -2103,14 +2189,15 @@ export default function HomeScreen({
 
   const advice = useMemo(
     () =>
-      getAdvice(
+      getAdviceForLocale(
+        locale,
         animalState,
         animalType,
         flags,
         animalPosition,
         animalEnvironment,
       ),
-    [animalState, animalType, flags, animalPosition, animalEnvironment],
+    [animalState, animalType, flags, animalPosition, animalEnvironment, locale],
   );
 
   const finishSpeaking = useCallback(() => {
@@ -2135,7 +2222,7 @@ export default function HomeScreen({
 
     try {
       Speech.speak(speechText, {
-        language: "es-ES",
+        language: locale === "en" ? "en-GB" : "es-ES",
         rate: 0.9,
         onDone: finishSpeaking,
         onStopped: finishSpeaking,
@@ -2144,7 +2231,7 @@ export default function HomeScreen({
     } catch {
       finishSpeaking();
     }
-  }, [advice, finishSpeaking, isSpeaking]);
+  }, [advice, finishSpeaking, isSpeaking, locale]);
 
   useEffect(() => {
     return () => {
@@ -2197,28 +2284,28 @@ export default function HomeScreen({
   const selectedAnimalLabel = useMemo(
     () =>
       ANIMAL_OPTIONS.find((option) => option.key === animalType)?.label ||
-      "No indicado",
+      generalTexts.summaryPreview.notSpecified,
     [animalType],
   );
 
   const selectedAnimalStateLabel = useMemo(
     () =>
       ANIMAL_STATE_OPTIONS.find((option) => option.key === animalState)
-        ?.label || "No indicado",
+        ?.label || generalTexts.summaryPreview.notSpecified,
     [animalState],
   );
 
   const selectedAnimalPlaceLabel = useMemo(
     () =>
       ANIMAL_PLACE_OPTIONS.find((option) => option.key === animalPlace)
-        ?.label || "No indicado",
+        ?.label || generalTexts.summaryPreview.notSpecified,
     [animalPlace],
   );
 
   const selectedAnimalPositionLabel = useMemo(
     () =>
       ANIMAL_POSITION_OPTIONS.find((option) => option.key === animalPosition)
-        ?.label || "No indicado",
+        ?.label || generalTexts.summaryPreview.notSpecified,
     [animalPosition],
   );
 
@@ -2226,7 +2313,7 @@ export default function HomeScreen({
     () =>
       ANIMAL_ENVIRONMENT_OPTIONS.find(
         (option) => option.key === animalEnvironment,
-      )?.label || "No indicado",
+      )?.label || generalTexts.summaryPreview.notSpecified,
     [animalEnvironment],
   );
 
@@ -2412,28 +2499,30 @@ export default function HomeScreen({
   ]);
 
   const locationSummaryLines = useMemo(
-    () => buildLocationSummaryLines(approximateLocation, coords),
-    [approximateLocation, coords],
+    () => buildLocationSummaryLines(approximateLocation, coords, generalTexts),
+    [approximateLocation, coords, generalTexts],
   );
 
   const generatedSummary = useMemo(() => {
     return buildRescueShareMessage({
-      animalStateLabel: selectedAnimalStateLabel,
-      animalTypeLabel: selectedAnimalLabel,
-      animalPositionLabel: animalPosition ? selectedAnimalPositionLabel : null,
+      animalStateLabel: displayLabel(selectedAnimalStateLabel),
+      animalTypeLabel: displayLabel(selectedAnimalLabel),
+      animalPositionLabel: animalPosition ? displayLabel(selectedAnimalPositionLabel) : null,
       animalEnvironmentLabel: animalEnvironment
-        ? selectedAnimalEnvironmentLabel
+        ? displayLabel(selectedAnimalEnvironmentLabel)
         : null,
       animalPlaceLabel:
         !animalPosition && !animalEnvironment && animalPlace
-          ? selectedAnimalPlaceLabel
+          ? displayLabel(selectedAnimalPlaceLabel)
           : null,
-      observedSigns: selectedFlagLabels,
-      locationLines: locationSummaryLines,
+      observedSigns: selectedFlagLabels.map(displayLabel),
+      locationLines: locationSummaryLines.map((line) => line.text),
       hasPhoto: Boolean(photoUri),
       hasVideo: Boolean(videoUri),
-    });
+    }, locale);
   }, [
+    locale,
+    displayLabel,
     locationSummaryLines,
     animalEnvironment,
     animalPlace,
@@ -2454,8 +2543,8 @@ export default function HomeScreen({
 
       if (!permission.granted) {
         Alert.alert(
-          "Permiso recomendado",
-          `No se ha concedido permiso para guardar ${label} en la galería.`,
+          generalTexts.assistantCaptureUi.galleryPermissionTitle,
+          `${generalTexts.assistantCaptureUi.galleryPermissionPrefix}${label}${generalTexts.assistantCaptureUi.galleryPermissionSuffix}`,
         );
         return;
       }
@@ -2463,8 +2552,8 @@ export default function HomeScreen({
       await MediaLibrary.saveToLibraryAsync(uri);
     } catch {
       Alert.alert(
-        "No se pudo guardar",
-        `No se pudo guardar ${label} en la galería del dispositivo.`,
+        generalTexts.assistantCaptureUi.galleryErrorTitle,
+        `${generalTexts.assistantCaptureUi.galleryErrorPrefix}${label}${generalTexts.assistantCaptureUi.galleryErrorSuffix}`,
       );
     }
   };
@@ -2474,8 +2563,8 @@ export default function HomeScreen({
 
     if (!permission.granted) {
       Alert.alert(
-        "Permiso necesario",
-        "Necesitamos acceso a la cámara para capturar la foto.",
+        t("assistantUi", "permissionRequired"),
+        t("assistantUi", "photoPermissionMessage"),
       );
       return;
     }
@@ -2491,7 +2580,7 @@ export default function HomeScreen({
 
       await saveCurrentProgress();
 
-      await saveToGallery(uri, "la foto");
+      await saveToGallery(uri, generalTexts.assistantCaptureUi.photoObject);
     }
   };
 
@@ -2500,8 +2589,8 @@ export default function HomeScreen({
 
     if (!permission.granted) {
       Alert.alert(
-        "Permiso necesario",
-        "Necesitamos acceso a la cámara para grabar el vídeo.",
+        t("assistantUi", "permissionRequired"),
+        t("assistantUi", "videoPermissionMessage"),
       );
       return;
     }
@@ -2518,7 +2607,7 @@ export default function HomeScreen({
 
       await saveCurrentProgress();
 
-      await saveToGallery(uri, "el vídeo");
+      await saveToGallery(uri, generalTexts.assistantCaptureUi.videoObject);
     }
   };
 
@@ -2530,8 +2619,8 @@ export default function HomeScreen({
 
       if (!permission.granted) {
         Alert.alert(
-          "Permiso necesario",
-          "Necesitamos tu ubicación para enviar el aviso.",
+          generalTexts.assistantCaptureUi.locationPermissionTitle,
+          generalTexts.assistantCaptureUi.locationPermissionMessage,
         );
         return;
       }
@@ -2549,7 +2638,7 @@ export default function HomeScreen({
         formatCoordinates(newCoords);
 
       setCoords(newCoords);
-      setLocationText(newLocationText);
+      setLocationValue({ kind: "text", text: newLocationText });
       setApproximateLocation(undefined);
       setLocationCaptured(true);
 
@@ -2563,8 +2652,8 @@ export default function HomeScreen({
       void updateApproximateLocation(newCoords, newLocationText);
     } catch {
       Alert.alert(
-        "No se pudo obtener la ubicación",
-        "Inténtalo de nuevo en unos segundos.",
+        generalTexts.assistantCaptureUi.locationErrorTitle,
+        generalTexts.assistantCaptureUi.locationErrorMessage,
       );
     } finally {
       setLocationLoading(false);
@@ -2595,8 +2684,8 @@ export default function HomeScreen({
       !canUseCannotFly(animalType)
     ) {
       Alert.alert(
-        "Revisa el tipo de animal",
-        'La opción "No vuela" solo tiene sentido para aves o murciélagos. Cambia primero el tipo de animal si corresponde.',
+        t("assistantUi", "reviewAnimalTitle"),
+        t("assistantUi", "cannotFlyWarning"),
       );
       return;
     }
@@ -2630,8 +2719,8 @@ export default function HomeScreen({
   const selectAnimalType = (nextAnimalType: AnimalType) => {
     if (flags.cannotFly && !canUseCannotFly(nextAnimalType)) {
       Alert.alert(
-        "Situación no compatible",
-        'Has marcado "No vuela", pero el tipo seleccionado no parece compatible. Se desmarcará esa opción para evitar confusión.',
+        t("assistantUi", "incompatibleSituationTitle"),
+        t("assistantUi", "incompatibleFlightWarning"),
       );
       setFlags((prev) => ({ ...prev, cannotFly: false }));
     }
@@ -2648,8 +2737,8 @@ export default function HomeScreen({
 
     if (!cleaned || countDigits(cleaned) < 9) {
       showMessage(
-        "Número no válido",
-        "Introduce un número de WhatsApp válido, con prefijo si hace falta.",
+        t("assistantUi", "invalidNumberTitle"),
+        t("assistantUi", "invalidNumberMessage"),
       );
       return;
     }
@@ -2687,8 +2776,8 @@ export default function HomeScreen({
     }
 
     showMessage(
-      "No se pudo abrir WhatsApp",
-      "Comprueba que WhatsApp está instalado y vuelve a intentarlo.",
+      t("assistantUi", "whatsAppErrorTitle"),
+      t("assistantUi", "whatsAppErrorMessage"),
     );
   };
 
@@ -2707,7 +2796,7 @@ export default function HomeScreen({
 
   const copySummary = async () => {
     await Clipboard.setStringAsync(generatedSummary);
-    showMessage("Resumen copiado", "El resumen se ha copiado al portapapeles.");
+    showMessage(t("assistantUi", "summaryCopiedTitle"), t("assistantUi", "summaryCopiedMessage"));
   };
 
 const saveCurrentProgress = async (
@@ -2834,14 +2923,14 @@ const saveCurrentProgress = async (
       currentCaseRef.current,
     );
 
-    router.replace("/");
+    router.replace(homePath);
   };
 
   const finishFlow = () => {
     const confirmationMessage =
-      "¿Deseas finalizar este aviso?\n\nSi continúas, el aviso se guardará en el historial y volverás a la pantalla inicial.";
+      t("assistantUi", "finishConfirmation");
 
-    const thankYouMessage = "Gracias por colaborar y ayudar a los animales.";
+    const thankYouMessage = t("assistantUi", "thankYouMessage");
 
     if (Platform.OS === "web") {
       const confirmed = window.confirm(confirmationMessage);
@@ -2854,17 +2943,17 @@ const saveCurrentProgress = async (
       return;
     }
 
-    Alert.alert("Finalizar aviso", confirmationMessage, [
+    Alert.alert(t("assistantUi", "finishNoticeTitle"), confirmationMessage, [
       {
-        text: "No",
+        text: t("assistantUi", "no"),
         style: "cancel",
       },
       {
-        text: "Sí",
+        text: t("assistantUi", "yes"),
         onPress: () => {
-          Alert.alert("Gracias", thankYouMessage, [
+          Alert.alert(t("assistantUi", "thankYouTitle"), thankYouMessage, [
             {
-              text: "Aceptar",
+              text: t("assistantUi", "accept"),
               onPress: () => void completeAndReturnHome(),
             },
           ]);
@@ -2941,10 +3030,9 @@ const saveCurrentProgress = async (
     if (Platform.OS !== "web") return;
 
     let allowNavigation = false;
-    const guardedUrl = window.location.href;
 
     const addGuardEntry = () => {
-      window.history.pushState({ sosFaunaBackGuard: true }, "", guardedUrl);
+      window.history.pushState({ sosFaunaBackGuard: true }, "", backNavigationRef.current.url);
     };
 
     const guardTimer = window.setTimeout(addGuardEntry, 0);
@@ -2954,12 +3042,12 @@ const saveCurrentProgress = async (
 
       if (!shouldConfirmExitRef.current) {
         allowNavigation = true;
-        router.replace("/");
+        router.replace(backNavigationRef.current.homePath);
         return;
       }
 
       const confirmed = window.confirm(
-        "¿Deseas salir de este aviso?\n\nEl progreso quedará guardado y podrás continuarlo o eliminarlo desde la pantalla inicial.",
+        backNavigationRef.current.t("assistantUi", "exitConfirmation"),
       );
 
       if (confirmed) {
@@ -2967,7 +3055,7 @@ const saveCurrentProgress = async (
 
         void (async () => {
           await saveCurrentProgressRef.current();
-          router.replace("/");
+          router.replace(backNavigationRef.current.homePath);
         })();
 
         return;
@@ -3010,14 +3098,14 @@ const saveCurrentProgress = async (
   );
 
   const renderWhatsAppConfirmation = () => (
-    <SectionCard title="Confirmar envío">
+    <SectionCard title={t("assistantUi", "sendConfirmationTitle")}>
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          ¿Has conseguido enviar el aviso al contacto de WhatsApp?
+          {t("assistantUi", "sendConfirmationQuestion")}
         </Text>
 
         <Pressable style={styles.primaryButton} onPress={finishFlow}>
-          <Text style={styles.primaryButtonText}>Sí, finalizar aviso</Text>
+          <Text style={styles.primaryButtonText}>{t("assistantUi", "finishAfterSending")}</Text>
         </Pressable>
 
         <Pressable
@@ -3027,26 +3115,24 @@ const saveCurrentProgress = async (
             openWhatsAppWithNumber(lastWhatsAppNumber);
           }}
         >
-          <Text style={styles.secondaryButtonText}>No, volver a WhatsApp</Text>
+          <Text style={styles.secondaryButtonText}>{t("assistantUi", "returnToWhatsApp")}</Text>
         </Pressable>
 
         <Pressable
           style={styles.secondaryButton}
           onPress={() => setShowWhatsAppConfirmation(false)}
         >
-          <Text style={styles.secondaryButtonText}>Volver a opciones</Text>
+          <Text style={styles.secondaryButtonText}>{t("assistantUi", "returnToOptions")}</Text>
         </Pressable>
       </View>
     </SectionCard>
   );
 
   const renderEmptyStep3Confirmation = () => (
-    <SectionCard title="Continuar sin información">
+    <SectionCard title={t("assistantUi", "emptyInformationTitle")}>
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          No has añadido ubicación, foto ni vídeo. Esta información puede ser
-          muy útil para valorar la situación y localizar al animal. ¿Quieres
-          continuar de todos modos?
+          {t("assistantUi", "emptyInformationQuestion")}
         </Text>
 
         <Pressable
@@ -3054,7 +3140,7 @@ const saveCurrentProgress = async (
           onPress={() => setShowEmptyStep3Confirmation(false)}
         >
           <Text style={styles.secondaryButtonText}>
-            Volver y añadir información
+            {t("assistantUi", "returnAndAddInformation")}
           </Text>
         </Pressable>
 
@@ -3065,17 +3151,17 @@ const saveCurrentProgress = async (
             void advanceToNextStep();
           }}
         >
-          <Text style={styles.primaryButtonText}>Continuar sin añadirla</Text>
+          <Text style={styles.primaryButtonText}>{t("assistantUi", "continueWithoutInformation")}</Text>
         </Pressable>
       </View>
     </SectionCard>
   );
 
   const renderWhatsAppOptions = () => (
-    <SectionCard title="Enviar el aviso">
+    <SectionCard title={t("assistantUi", "sendTitle")}>
       <View style={styles.sectionContent}>
         <Text style={styles.sectionDescription}>
-          Elige cómo deseas enviar este aviso.
+          {t("assistantUi", "sendIntro")}
         </Text>
 
         <View style={styles.sectionGroup}>
@@ -3083,12 +3169,12 @@ const saveCurrentProgress = async (
             style={styles.primaryButton}
             onPress={() => openWhatsAppWithNumber(GREFA_WHATSAPP)}
           >
-            <Text style={styles.primaryButtonText}>Enviar a GREFA (Madrid)</Text>
+            <Text style={styles.primaryButtonText}>{t("assistantUi", "sendToGrefa")}</Text>
           </Pressable>
 
           <View style={styles.warningBox}>
             <Text style={styles.warningText}>
-              ℹ️ Solo para avisos localizados en la Comunidad de Madrid.
+              {t("assistantUi", "madridOnlyNotice")}
             </Text>
           </View>
         </View>
@@ -3097,13 +3183,13 @@ const saveCurrentProgress = async (
           style={[styles.secondaryButton, styles.sendOtherContactButton]}
           onPress={() => setShowOtherContact((current) => !current)}
         >
-          <Text style={styles.secondaryButtonText}>Enviar a otro contacto</Text>
+          <Text style={styles.secondaryButtonText}>{t("assistantUi", "sendToOtherContact")}</Text>
         </Pressable>
 
         {showOtherContact ? (
           <>
             <TextInput
-              placeholder="Enviar a otro contacto de WhatsApp"
+              placeholder={t("assistantUi", "otherContactPlaceholder")}
               value={customWhatsAppNumber}
               onChangeText={setCustomWhatsAppNumber}
               keyboardType="phone-pad"
@@ -3114,14 +3200,14 @@ const saveCurrentProgress = async (
               style={styles.secondaryButton}
               onPress={() => openWhatsAppWithNumber(customWhatsAppNumber)}
             >
-              <Text style={styles.secondaryButtonText}>Enviar por WhatsApp</Text>
+              <Text style={styles.secondaryButtonText}>{t("assistantUi", "sendViaWhatsApp")}</Text>
             </Pressable>
           </>
         ) : null}
 
         <View style={[styles.warningBox, styles.sendPhotoNotice]}>
           <Text style={styles.warningText}>
-            ℹ️ Importante: La foto y el vídeo no se adjuntan automáticamente al mensaje de WhatsApp. Si deseas enviarlos, deberás añadirlos manualmente desde WhatsApp antes de enviar el aviso.
+            {t("assistantUi", "attachmentsNotice")}
           </Text>
         </View>
 
@@ -3134,7 +3220,7 @@ const saveCurrentProgress = async (
           onPress={finishFlow}
           disabled={!hasSentWhatsApp}
         >
-          <Text style={styles.primaryButtonText}>Finalizar</Text>
+          <Text style={styles.primaryButtonText}>{t("assistantUi", "finish")}</Text>
         </Pressable>
       </View>
     </SectionCard>
@@ -3142,69 +3228,70 @@ const saveCurrentProgress = async (
 
   const renderSummaryPreview = () => (
     <View style={[styles.summaryBox, styles.summaryPreview]}>
-      <Text style={styles.summaryPreviewTitle}>📋 RESUMEN DEL AVISO</Text>
+      <Text style={styles.summaryPreviewTitle}>{generalTexts.summaryPreview.title}</Text>
 
       <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>🐾 Animal</Text>
-        <Text style={styles.summaryPreviewValue}>{selectedAnimalLabel}</Text>
+        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.animal}</Text>
+        <Text style={styles.summaryPreviewValue}>{displayLabel(selectedAnimalLabel)}</Text>
       </View>
 
       <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>❤️ Estado</Text>
+        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.state}</Text>
         <Text style={styles.summaryPreviewValue}>
-          {selectedAnimalStateLabel}
+          {displayLabel(selectedAnimalStateLabel)}
         </Text>
       </View>
 
       {animalPosition ? (
         <View style={styles.summaryPreviewSection}>
-          <Text style={styles.summaryPreviewLabel}>📍 Dónde está</Text>
+          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.position}</Text>
           <Text style={styles.summaryPreviewValue}>
-            {selectedAnimalPositionLabel}
+            {displayLabel(selectedAnimalPositionLabel)}
           </Text>
         </View>
       ) : null}
 
       {animalEnvironment ? (
         <View style={styles.summaryPreviewSection}>
-          <Text style={styles.summaryPreviewLabel}>🌍 Entorno</Text>
+          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.environment}</Text>
           <Text style={styles.summaryPreviewValue}>
-            {selectedAnimalEnvironmentLabel}
+            {displayLabel(selectedAnimalEnvironmentLabel)}
           </Text>
         </View>
       ) : null}
 
       {!animalPosition && !animalEnvironment && animalPlace ? (
         <View style={styles.summaryPreviewSection}>
-          <Text style={styles.summaryPreviewLabel}>📍 Dónde está el animal</Text>
+          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.legacyPlace}</Text>
           <Text style={styles.summaryPreviewValue}>
-            {selectedAnimalPlaceLabel}
+            {displayLabel(selectedAnimalPlaceLabel)}
           </Text>
         </View>
       ) : null}
 
       <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>⚠️ Situación observada</Text>
+        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.observedSituation}</Text>
         {selectedFlagLabels.length > 0 ? (
           <View style={styles.summaryPreviewList}>
             {selectedFlagLabels.map((label) => (
               <Text key={label} style={styles.summaryPreviewListItem}>
-                • {label}
+                • {displayLabel(label)}
               </Text>
             ))}
           </View>
         ) : (
-          <Text style={styles.summaryPreviewValue}>Sin marcas</Text>
+          <Text style={styles.summaryPreviewValue}>{generalTexts.summaryPreview.noFlags}</Text>
         )}
       </View>
 
       <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>📍 Ubicación</Text>
+        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.location}</Text>
         {locationSummaryLines.length > 0 ? (
           <View style={styles.summaryPreviewList}>
-            {locationSummaryLines.map((line) => {
-              const displayLine = line.startsWith("Mapa:")
-                ? "Mapa incluido en el aviso"
+            {locationSummaryLines.map((entry) => {
+              const line = entry.text;
+              const displayLine = entry.kind === "map"
+                ? generalTexts.summaryPreview.mapIncluded
                 : line;
 
               return (
@@ -3215,22 +3302,22 @@ const saveCurrentProgress = async (
             })}
           </View>
         ) : (
-          <Text style={styles.summaryPreviewValue}>❌ No</Text>
+          <Text style={styles.summaryPreviewValue}>{generalTexts.summaryPreview.no}</Text>
         )}
       </View>
 
       <View style={styles.summaryPreviewMetaRow}>
         <View style={styles.summaryPreviewMetaItem}>
-          <Text style={styles.summaryPreviewLabel}>📷 Fotografía</Text>
+          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.photo}</Text>
           <Text style={styles.summaryPreviewValue}>
-            {photoUri ? "✅ Sí" : "❌ No"}
+            {photoUri ? generalTexts.summaryPreview.yes : generalTexts.summaryPreview.no}
           </Text>
         </View>
 
         <View style={styles.summaryPreviewMetaItem}>
-          <Text style={styles.summaryPreviewLabel}>🎥 Vídeo</Text>
+          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.video}</Text>
           <Text style={styles.summaryPreviewValue}>
-            {videoUri ? "✅ Sí" : "❌ No"}
+            {videoUri ? generalTexts.summaryPreview.yes : generalTexts.summaryPreview.no}
           </Text>
         </View>
       </View>
@@ -3260,12 +3347,12 @@ const saveCurrentProgress = async (
 
         <Pressable style={styles.menuActionButton} onPress={copySummary}>
           <Text style={styles.menuActionEmoji}>📋</Text>
-          <Text style={styles.menuActionLabel}>Copiar</Text>
+          <Text style={styles.menuActionLabel}>{t("assistantUi", "copy")}</Text>
         </Pressable>
 
         <Pressable style={styles.menuActionButton} onPress={handleOpenHelp}>
           <Text style={styles.menuActionEmoji}>📞</Text>
-          <Text style={styles.menuActionLabel}>Ayuda</Text>
+          <Text style={styles.menuActionLabel}>{t("assistantUi", "help")}</Text>
         </Pressable>
 
         <Pressable
@@ -3273,7 +3360,7 @@ const saveCurrentProgress = async (
           onPress={finishFlow}
         >
           <Text style={styles.menuActionEmoji}>✅</Text>
-          <Text style={styles.menuActionLabelPrimary}>Finalizar</Text>
+          <Text style={styles.menuActionLabelPrimary}>{t("assistantUi", "finish")}</Text>
         </Pressable>
       </View>
     );
@@ -3295,7 +3382,7 @@ const saveCurrentProgress = async (
         {canShowBackArrow ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Volver"
+            accessibilityLabel={t("assistantUi", "back")}
             style={styles.sideArrowLeft}
             onPress={goBack}
           >
@@ -3306,7 +3393,7 @@ const saveCurrentProgress = async (
         {canShowForwardArrow ? (
           <AnimatedPressable
             accessibilityRole="button"
-            accessibilityLabel="Continuar"
+            accessibilityLabel={t("assistantUi", "continue")}
             style={[
               styles.sideArrowRight,
               {
@@ -3340,14 +3427,14 @@ const saveCurrentProgress = async (
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={90}
         >
-          <SectionCard title="Paso 1. Tipo y situación del animal">
+          <SectionCard title={t("assistantUi", "step1Title")}>
             <View style={styles.sectionContent}>
               <Text style={styles.sectionDescription}>
-                Indica qué ocurre y observa algunas señales sencillas. No necesitas identificar exactamente al animal para poder ayudar.
+                {t("assistantUi", "step1Intro")}
               </Text>
 
               <View style={styles.sectionGroup}>
-                <Text style={styles.subheading}>❤️ ¿El animal está vivo o muerto?</Text>
+                <Text style={styles.subheading}>{t("assistantUi", "animalStateQuestion")}</Text>
                 <View style={styles.flagGrid}>
                   {ANIMAL_STATE_OPTIONS.map((option) => {
                     const active = animalState === option.key;
@@ -3371,7 +3458,7 @@ const saveCurrentProgress = async (
                             active && styles.flagTextActive,
                           ]}
                         >
-                          {option.label}
+                          {displayLabel(option.label)}
                         </Text>
                       </Pressable>
                     );
@@ -3381,10 +3468,10 @@ const saveCurrentProgress = async (
 
               <>
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>🐾 ¿Qué animal has encontrado?</Text>
+                    <Text style={styles.subheading}>{t("assistantUi", "animalTypeQuestion")}</Text>
                     {ANIMAL_OPTION_GROUPS.map((group) => (
                       <View
-                        key={group.title}
+                        key={displayLabel(group.title)}
                         style={[
                           styles.optionGroup,
                           group.kind === "terrestrial" &&
@@ -3401,7 +3488,7 @@ const saveCurrentProgress = async (
                               styles.optionGroupLabelMarine,
                           ]}
                         >
-                          {group.title}
+                          {displayLabel(group.title)}
                         </Text>
                         <View style={styles.flagGrid}>
                           {group.options.map((option) => {
@@ -3426,7 +3513,7 @@ const saveCurrentProgress = async (
                                     active && styles.flagTextActive,
                                   ]}
                                 >
-                                  {option.label}
+                                  {displayLabel(option.label)}
                                 </Text>
                               </Pressable>
                             );
@@ -3450,7 +3537,7 @@ const saveCurrentProgress = async (
                               styles.flagTextActive,
                           ]}
                         >
-                          🔍 {UNKNOWN_ANIMAL_OPTION.label}
+                          🔍 {displayLabel(UNKNOWN_ANIMAL_OPTION.label)}
                         </Text>
                       </Pressable>
                     </View>
@@ -3458,7 +3545,7 @@ const saveCurrentProgress = async (
 
                   {animalState !== "dead" ? (
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>👀 ¿Qué observas?</Text>
+                    <Text style={styles.subheading}>{t("assistantUi", "observedSignsQuestion")}</Text>
                     <View style={styles.flagGrid}>
                       {visibleFlagLabels.map(({ key, label }) => {
                         const active = flags[key];
@@ -3480,7 +3567,7 @@ const saveCurrentProgress = async (
                                 active && styles.flagTextActive,
                               ]}
                             >
-                              {label}
+                              {displayLabel(label)}
                             </Text>
                           </Pressable>
                         );
@@ -3490,7 +3577,7 @@ const saveCurrentProgress = async (
                   ) : null}
 
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>📍 ¿Dónde está exactamente?</Text>
+                    <Text style={styles.subheading}>{t("assistantUi", "positionQuestion")}</Text>
                     <View style={styles.flagGrid}>
                       {visiblePositionOptions.map((option) => {
                         const active = animalPosition === option.key;
@@ -3512,7 +3599,7 @@ const saveCurrentProgress = async (
                                 active && styles.flagTextActive,
                               ]}
                             >
-                              {option.label}
+                              {displayLabel(option.label)}
                             </Text>
                           </Pressable>
                         );
@@ -3521,7 +3608,7 @@ const saveCurrentProgress = async (
                   </View>
 
                   <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>🌍 ¿En qué entorno se encuentra?</Text>
+                    <Text style={styles.subheading}>{t("assistantUi", "environmentQuestion")}</Text>
                     <View style={styles.flagGrid}>
                       {visibleEnvironmentOptions.map((option) => {
                         const active = animalEnvironment === option.key;
@@ -3543,7 +3630,7 @@ const saveCurrentProgress = async (
                                 active && styles.flagTextActive,
                               ]}
                             >
-                              {option.label}
+                              {displayLabel(option.label)}
                             </Text>
                           </Pressable>
                         );
@@ -3559,10 +3646,10 @@ const saveCurrentProgress = async (
 
     if (step === 2) {
       return (
-        <SectionCard title="Paso 2. Qué hacer ahora">
+        <SectionCard title={t("assistantUi", "step2Title")}>
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Antes de intervenir, lee estas recomendaciones.
+              {t("assistantUi", "step2Intro")}
             </Text>
 
             <View style={styles.speechControlRow}>
@@ -3570,22 +3657,22 @@ const saveCurrentProgress = async (
                 accessibilityRole="button"
                 accessibilityLabel={
                   isSpeaking
-                    ? "Detener lectura de las recomendaciones"
-                    : "Escuchar las recomendaciones"
+                    ? t("assistantUi", "stopSpeechLabel")
+                    : t("assistantUi", "startSpeechLabel")
                 }
                 style={styles.speechButton}
                 onPress={toggleAdviceSpeech}
               >
                 <Text style={styles.speechButtonText}>
                   {isSpeaking
-                    ? "⏹ Detener lectura"
-                    : "🔊 Escuchar recomendaciones"}
+                    ? t("assistantUi", "stopSpeech")
+                    : t("assistantUi", "startSpeech")}
                 </Text>
               </Pressable>
 
               {isSpeaking ? (
                 <Text style={styles.speechStatusText}>
-                  Leyendo recomendaciones...
+                  {t("assistantUi", "speechStatus")}
                 </Text>
               ) : null}
             </View>
@@ -3606,27 +3693,27 @@ const saveCurrentProgress = async (
 
     if (step === 3) {
       return (
-        <SectionCard title="Paso 3. Foto, vídeo y ubicación">
+        <SectionCard title={t("assistantUi", "step3Title")}>
           <View style={styles.sectionContent}>
             <Text style={styles.sectionDescription}>
-              Facilita una foto, un vídeo o la ubicación del hallazgo. Esta información puede ayudar a valorar mejor la situación y localizar el lugar si fuera necesario.
+              {t("assistantUi", "step3Intro")}
             </Text>
 
             <Text style={styles.sectionDescription}>
-              La ubicación y las fotografías ayudan a valorar mejor la situación y a localizar al animal. Si puedes aportar ambas, facilitarás la atención del aviso.
+              {t("assistantUi", "informationHelp")}
             </Text>
 
-            <Text style={styles.subheading}>¿Qué deseas aportar?</Text>
+            <Text style={styles.subheading}>{t("assistantUi", "contributionQuestion")}</Text>
 
             <Pressable style={styles.primaryButton} onPress={pickPhoto}>
               <Text style={styles.primaryButtonText}>
-                {photoUri ? "Repetir foto" : "Hacer foto"}
+                {photoUri ? t("assistantUi", "repeatPhoto") : t("assistantUi", "takePhoto")}
               </Text>
             </Pressable>
 
             <Pressable style={styles.primaryButton} onPress={pickVideo}>
               <Text style={styles.primaryButtonText}>
-                {videoUri ? "Repetir vídeo" : "Grabar vídeo"}
+                {videoUri ? t("assistantUi", "repeatVideo") : t("assistantUi", "recordVideo")}
               </Text>
             </Pressable>
 
@@ -3640,72 +3727,58 @@ const saveCurrentProgress = async (
             >
               <Text style={styles.secondaryButtonText}>
                 {locationLoading
-                  ? "Capturando ubicación…"
-                  : "Capturar ubicación"}
+                  ? generalTexts.assistantCaptureUi.capturing
+                  : generalTexts.assistantCaptureUi.capture}
               </Text>
             </Pressable>
 
             <View style={styles.sectionGroup}>
-              <Text style={styles.subheading}>Estado de la información</Text>
+              <Text style={styles.subheading}>{t("assistantUi", "informationStatus")}</Text>
               <Text style={styles.helperText}>
-                {photoUri ? "📷 Foto: Añadida ✓" : "📷 Foto: No añadida"}
+                {photoUri ? t("assistantUi", "photoAdded") : t("assistantUi", "photoMissing")}
               </Text>
               <Text style={styles.helperText}>
-                {videoUri ? "🎥 Vídeo: Añadido ✓" : "🎥 Vídeo: No añadido"}
+                {videoUri ? t("assistantUi", "videoAdded") : t("assistantUi", "videoMissing")}
               </Text>
               <Text style={styles.helperText}>
                 {locationCaptured
-                  ? "📍 Ubicación: Capturada ✓"
-                  : "📍 Ubicación: No capturada"}
+                  ? generalTexts.assistantCaptureUi.capturedStatus
+                  : generalTexts.assistantCaptureUi.notCapturedStatus}
               </Text>
             </View>
 
             <View style={styles.mapCard}>
-              <Text style={styles.mapTitle}>Ubicación del hallazgo</Text>
+              <Text style={styles.mapTitle}>{generalTexts.assistantCaptureUi.mapTitle}</Text>
 
               {coords ? (
                 <>
                   <View style={styles.mapLocationBox}>
-                    <Text style={styles.mapLocationTitle}>
-                      📍 Ubicación capturada
-                    </Text>
+                    <Text style={styles.mapLocationTitle}>{generalTexts.assistantCaptureUi.mapCapturedTitle}</Text>
 
                     {approximateLocation ? (
                       <>
-                        <Text style={styles.mapLocationLabel}>
-                          Referencia del lugar
-                        </Text>
+                        <Text style={styles.mapLocationLabel}>{generalTexts.assistantCaptureUi.mapReference}</Text>
                         <Text style={styles.mapLocationText}>
                           {approximateLocation}
                         </Text>
                       </>
                     ) : null}
 
-                    <Text style={styles.mapLocationLabel}>Coordenadas</Text>
+                    <Text style={styles.mapLocationLabel}>{generalTexts.assistantCaptureUi.mapCoordinates}</Text>
                     <Text style={styles.mapCoords}>
                       {formatCoordinates(coords)}
                     </Text>
-                    <Text style={styles.mapEmptyText}>
-                      La referencia del lugar puede no ser exacta. Las
-                      coordenadas suelen ofrecer una localización más precisa.
-                    </Text>
-                    <Text style={styles.mapEmptyText}>
-                      Puedes abrir la ubicación en Google Maps para ver calles,
-                      caminos y referencias cercanas.
-                    </Text>
+                    <Text style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapAccuracyNotice}</Text>
+                    <Text style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapOpenNotice}</Text>
                   </View>
 
                   <Pressable style={styles.mapOpenButton} onPress={openMaps}>
-                    <Text style={styles.mapOpenButtonText}>
-                      Abrir en Google Maps
-                    </Text>
+                    <Text style={styles.mapOpenButtonText}>{generalTexts.assistantCaptureUi.mapOpenButton}</Text>
                   </Pressable>
                 </>
               ) : (
                 <View style={styles.mapEmptyBox}>
-                  <Text style={styles.mapEmptyText}>
-                    Captura la ubicación para ver aquí el punto del hallazgo.
-                  </Text>
+                  <Text style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapEmpty}</Text>
                 </View>
               )}
             </View>
@@ -3721,19 +3794,17 @@ const saveCurrentProgress = async (
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={90}
         >
-          <SectionCard title="Paso 4. Resumen">
+          <SectionCard title={t("assistantUi", "step4Title")}>
             <View style={styles.sectionContent}>
               <Text style={styles.sectionDescription}>
-                Lee el resumen y pulsa en Teléfonos de ayuda para llamar a los
-                servicios de ayuda o emergencias más cercanos.
+                {generalTexts.assistantExtraUi.deadSummaryIntro}
               </Text>
 
               {renderSummaryPreview()}
 
               <View style={styles.warningBox}>
                 <Text style={styles.warningText}>
-                  Llama a Agentes Forestales, seguridad o emergencias según el
-                  caso. Puedes copiar el resumen si te lo piden.
+                  {generalTexts.assistantExtraUi.deadSummaryWarning}
                 </Text>
               </View>
             </View>
@@ -3748,29 +3819,14 @@ const saveCurrentProgress = async (
         style={styles.keyboardAvoid}
         keyboardVerticalOffset={90}
       >
-        <SectionCard title="Paso 4. Resumen">
+        <SectionCard title={t("assistantUi", "step4Title")}>
           <View style={styles.sectionContent}>
             <View style={styles.summaryInstructions}>
-              <Text style={styles.bulletText}>
-                • Revisa si el resumen es correcto o retrocede para corregir.
-              </Text>
-              <Text style={styles.bulletText}>
-                • Usa <Text style={styles.bulletStrong}>WhatsApp</Text> para
-                enviarlo a GREFA Madrid o a otro contacto que elijas.
-              </Text>
-              <Text style={styles.bulletText}>
-                • Usa <Text style={styles.bulletStrong}>Copiar</Text> para
-                guardar el resumen en el portapapeles y compartirlo mediante
-                cualquier aplicación.
-              </Text>
-              <Text style={styles.bulletText}>
-                • Usa <Text style={styles.bulletStrong}>Ayuda</Text> para buscar
-                el centro más cercano a tu provincia o servicios de emergencias.
-              </Text>
-              <Text style={styles.bulletText}>
-                • Usa <Text style={styles.bulletStrong}>Finalizar</Text> si ya
-                has informado a un especialista o para descartar el aviso.
-              </Text>
+              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.review}</Text>
+              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.whatsappPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.whatsappName}</Text>{generalTexts.summaryInstructions.whatsappSuffix}</Text>
+              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.copyPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.copyName}</Text>{generalTexts.summaryInstructions.copySuffix}</Text>
+              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.helpPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.helpName}</Text>{generalTexts.summaryInstructions.helpSuffix}</Text>
+              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.finishPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.finishName}</Text>{generalTexts.summaryInstructions.finishSuffix}</Text>
             </View>
 
             {renderSummaryPreview()}
@@ -3784,7 +3840,7 @@ const saveCurrentProgress = async (
     <SafeAreaView style={styles.screen} edges={["bottom"]}>
       <Stack.Screen
         options={{
-          title: "Rescate SOS Fauna España - Asistente",
+          title: generalTexts.assistantExtraUi.navigationTitle,
           headerLeft: Platform.OS === "web" ? () => null : undefined,
         }}
       />

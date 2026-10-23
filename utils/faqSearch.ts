@@ -1,3 +1,6 @@
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
+import { getFaqSearchVocabulary } from "@/data/faqSearchVocabulary";
+import { getFaqCategoryId, getFaqCategoryLabel } from "@/data/faqCategories";
 import { faqItems, type FaqItem } from "@/data/faq";
 
 type NormalizedFaqItemData = {
@@ -24,32 +27,18 @@ type SearchPhraseMatcher = {
   matches: (text: string) => boolean;
 };
 
+function createFaqSearchEngine(locale: Locale) {
+const vocabulary = getFaqSearchVocabulary(locale);
 const MIN_SINGLE_TERM_SCORE = 10;
 const MIN_MULTI_TERM_SCORE = 18;
-const GENERIC_RANKING_TERMS = new Set(["animal", "animales", "fauna"]);
-const SEARCH_STOP_WORDS = new Set([
-  "a",
-  "al",
-  "de",
-  "del",
-  "el",
-  "en",
-  "esta",
-  "está",
-  "he",
-  "la",
-  "lo",
-  "que",
-  "qué",
-  "un",
-  "una",
-]);
+const GENERIC_RANKING_TERMS = new Set(vocabulary.genericRankingTerms);
+const SEARCH_STOP_WORDS = new Set(vocabulary.stopWords);
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export const normalizeSearchText = (value: string) =>
+const normalizeSearchText = (value: string) =>
   value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -69,7 +58,7 @@ const createSearchPhraseMatcher = (phrase: string): SearchPhraseMatcher => {
   };
 };
 
-export const tokenizeFaqSearchQuery = (query: string): string[] => {
+const tokenizeFaqSearchQuery = (query: string): string[] => {
   const tokens = normalizeSearchText(query).split(" ").filter(Boolean);
 
   return tokens.filter(
@@ -84,7 +73,7 @@ const normalizeFaqItem = (
   item,
   question: normalizeSearchText(item.question),
   answer: normalizeSearchText(item.answer),
-  category: normalizeSearchText(item.category),
+  category: normalizeSearchText(getFaqCategoryLabel(getFaqCategoryId(item.category), locale)),
   keywords: (item.keywords ?? []).map(normalizeSearchText),
 });
 
@@ -213,7 +202,7 @@ const scoreFaqItem = (
   };
 };
 
-export function searchFaqItems(items: FaqItem[], query: string): FaqItem[] {
+function searchFaqItems(items: FaqItem[], query: string): FaqItem[] {
   const terms = tokenizeFaqSearchQuery(query);
 
   if (terms.length === 0) {
@@ -238,3 +227,17 @@ export function searchFaqItems(items: FaqItem[], query: string): FaqItem[] {
     })
     .map(({ item }) => item);
 }
+
+return { normalizeSearchText, tokenizeFaqSearchQuery, searchFaqItems };
+}
+
+const engines = new Map<Locale, ReturnType<typeof createFaqSearchEngine>>();
+export function getFaqSearchEngine(requested: Locale = DEFAULT_LOCALE) {
+  const locale = getFaqSearchVocabulary(requested).locale;
+  let engine = engines.get(locale);
+  if (!engine) { engine = createFaqSearchEngine(locale); engines.set(locale, engine); }
+  return engine;
+}
+export const normalizeSearchText = (value: string) => getFaqSearchEngine().normalizeSearchText(value);
+export const tokenizeFaqSearchQuery = (query: string): string[] => getFaqSearchEngine().tokenizeFaqSearchQuery(query);
+export function searchFaqItems(items: FaqItem[], query: string): FaqItem[] { return getFaqSearchEngine().searchFaqItems(items, query); }

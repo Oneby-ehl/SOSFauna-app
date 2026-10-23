@@ -1,7 +1,8 @@
 import { Link, Stack } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { SeoHead } from "@/components/seo/SeoHead";
+import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const contactPageStructuredData = {
   "@context": "https://schema.org",
@@ -18,6 +19,8 @@ const contactPageStructuredData = {
 };
 
 export default function ContactPage() {
+  const { t, locale } = useI18n();
+  const pagePath = useInformationPagePath();
   return (
     <>
       <SeoHead
@@ -26,31 +29,31 @@ export default function ContactPage() {
         path="/contact"
         structuredData={contactPageStructuredData}
       />
-      <Stack.Screen options={{ title: "Contacto | SOS Fauna España" }} />
+      <Stack.Screen options={{ title: locale === "en" ? `${t("navigation", "contact")} | SOS Fauna España` : "Contacto | SOS Fauna España" }} />
 
       <ScrollView
         style={styles.screen}
         contentContainerStyle={styles.container}
       >
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
-          <Text style={styles.title}>Contacto</Text>
+          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text style={styles.title}>{t("navigation", "contact")}</Text>
 
           <Text style={styles.intro}>
-            SOS Fauna España es un proyecto en evolución. Tus comentarios pueden ayudar a mejorar la información y el funcionamiento del servicio.
+            {t("contact", "intro1")}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Consultas y sugerencias</Text>
+          <Text style={styles.sectionTitle}>{t("contact", "sectionTitle1")}</Text>
 
-          <Text style={styles.paragraph}>Puedes escribirnos si:</Text>
+          <Text style={styles.paragraph}>{t("contact", "paragraph1")}</Text>
 
           <View style={styles.list}>
-            <Text style={styles.listItem}>{"\u2022"} Has encontrado un error.</Text>
-            <Text style={styles.listItem}>{"\u2022"} Quieres proponer una mejora.</Text>
-            <Text style={styles.listItem}>{"\u2022"} Deseas comunicar un recurso que debería revisarse.</Text>
-            <Text style={styles.listItem}>{"\u2022"} Tienes una sugerencia relacionada con el funcionamiento de SOS Fauna España.</Text>
+            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem1")}</Text>
+            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem2")}</Text>
+            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem3")}</Text>
+            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem4")}</Text>
           </View>
 
           <Link href="mailto:contacto@sosfauna.es" asChild>
@@ -61,10 +64,10 @@ export default function ContactPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Privacidad</Text>
+          <Text style={styles.sectionTitle}>{t("contact", "sectionTitle2")}</Text>
 
           <Text style={styles.paragraph}>
-            Para cuestiones relacionadas con privacidad, datos almacenados en el dispositivo o ejercicio de derechos:
+            {t("contact", "paragraph2")}
           </Text>
 
           <Link href="mailto:privacidad@sosfauna.es" asChild>
@@ -76,17 +79,17 @@ export default function ContactPage() {
 
         <View style={styles.notice}>
           <Text style={styles.noticeTitle}>
-            Este correo no es un servicio de emergencias ni de atención inmediata.
+            {t("contact", "noticeTitle1")}
           </Text>
 
           <Text style={styles.noticeText}>
-            Si un animal o una persona se encuentra en peligro, contacta directamente con el 112, los agentes medioambientales o el centro, red o servicio competente.
+            {t("contact", "noticeText1")}
           </Text>
         </View>
 
-        <Link href="/" asChild>
+        <Link href={pagePath("home")} asChild>
           <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver a SOS Fauna España</Text>
+            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
         </Link>
       </ScrollView>
