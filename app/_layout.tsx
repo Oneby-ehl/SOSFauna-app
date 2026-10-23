@@ -10,11 +10,14 @@ export default function RootLayout() {
     <AppVersionGate>
       <LanguagePreviewBar />
       <Stack
-        screenOptions={{
+        screenOptions={({ route }) => ({
           headerStyle: { backgroundColor: '#f5f7f8' },
           headerTintColor: '#1f2937',
           contentStyle: { backgroundColor: '#ffffff' },
-        }}
+          ...(route.name.startsWith("en/") && route.name !== "en/guide"
+            ? { headerTitle: TopicFaqHeaderTitle }
+            : {}),
+        })}
       >
         <Stack.Screen
           name="index"

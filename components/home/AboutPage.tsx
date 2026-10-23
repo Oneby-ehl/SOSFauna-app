@@ -36,7 +36,7 @@ export default function AboutPage() {
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text style={styles.title}>{t("navigation", "about")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "about")}</Text>
 
           <Text style={styles.intro}>
             {t("about", "intro1")}

@@ -37,7 +37,7 @@ export default function ContactPage() {
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text style={styles.title}>{t("navigation", "contact")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "contact")}</Text>
 
           <Text style={styles.intro}>
             {t("contact", "intro1")}
@@ -45,7 +45,7 @@ export default function ContactPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t("contact", "sectionTitle1")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.sectionTitle}>{t("contact", "sectionTitle1")}</Text>
 
           <Text style={styles.paragraph}>{t("contact", "paragraph1")}</Text>
 
@@ -64,7 +64,7 @@ export default function ContactPage() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t("contact", "sectionTitle2")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.sectionTitle}>{t("contact", "sectionTitle2")}</Text>
 
           <Text style={styles.paragraph}>
             {t("contact", "paragraph2")}
@@ -78,7 +78,7 @@ export default function ContactPage() {
         </View>
 
         <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.noticeTitle}>
             {t("contact", "noticeTitle1")}
           </Text>
 

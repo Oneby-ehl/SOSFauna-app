@@ -31,14 +31,14 @@ export default function PrivacyPage() {
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text style={styles.title}>{t("navigation", "privacy")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "privacy")}</Text>
           <Text style={styles.updated}>
             {t("common", "informationUpdated")}
           </Text>
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.heading}>{t("privacy", "heading1")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading1")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph1")}
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             {t("privacy", "paragraph2")}
           </Text>
 
-          <Text style={styles.heading}>{t("privacy", "heading2")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading2")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph3")}
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
             {t("privacy", "paragraph5")}
           </Text>
 
-          <Text style={styles.heading}>{t("privacy", "heading3")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading3")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph6")}
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
             {t("privacy", "paragraph8")}
           </Text>
 
-          <Text style={styles.heading}>{t("privacy", "heading4")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading4")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph9")}
@@ -99,7 +99,7 @@ export default function PrivacyPage() {
             {t("privacy", "paragraph11")}
           </Text>
 
-          <Text style={styles.heading}>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>
             {t("privacy", "heading5")}
           </Text>
 
@@ -115,7 +115,7 @@ export default function PrivacyPage() {
             {t("privacy", "paragraph14")}
           </Text>
 
-          <Text style={styles.heading}>{t("privacy", "heading6")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading6")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph15")}
@@ -125,7 +125,7 @@ export default function PrivacyPage() {
             {t("privacy", "paragraph16")}
           </Text>
 
-          <Text style={styles.heading}>{t("privacy", "heading7")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading7")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph17")}
@@ -143,13 +143,13 @@ export default function PrivacyPage() {
             {t("privacy", "paragraph20")}
           </Text>
 
-          <Text style={styles.heading}>{t("privacy", "heading8")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading8")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph21")}
           </Text>
 
-          <Text style={styles.heading}>{t("privacy", "heading9")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading9")}</Text>
 
           <Text style={styles.paragraph}>
             {t("privacy", "paragraph22")}

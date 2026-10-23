@@ -98,13 +98,13 @@ export default function LegalPage() {
       >
         <View style={styles.header}>
           <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text style={styles.title}>{t("navigation", "legal")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "legal")}</Text>
           <Text style={styles.updated}>{t("common", "informationUpdated")}</Text>
         </View>
 
         {sections.map((section) => (
           <View key={section.titleKey} style={styles.section}>
-            <Text style={styles.sectionTitle}>{t("legal", section.titleKey)}</Text>
+            <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.sectionTitle}>{t("legal", section.titleKey)}</Text>
             {section.paragraphKeys.map((paragraph) => (
               <Text key={paragraph} style={styles.paragraph}>
                 {t("legal", paragraph)}

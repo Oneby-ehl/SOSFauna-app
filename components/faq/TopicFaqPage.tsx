@@ -99,6 +99,18 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
           {results.length === 0 ? <Text style={styles.intro}>{t("faqUi", "topicNoResults")}</Text> : null}
         </View>
         <View style={styles.navigation}>
+          {locale === "en" ? (
+            <>
+              <Link href={pagePath("faq")} style={styles.intro}>
+                {t("faqUi", "backToFaq")}
+              </Link>
+              {topicId === "murcielagos" ? (
+                <Link href={pagePath("centers")} style={styles.intro}>
+                  {t("navigation", "centers")}
+                </Link>
+              ) : null}
+            </>
+          ) : null}
           <Link href={pagePath("home")} asChild>
             <Pressable style={styles.backButton}>
               <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>

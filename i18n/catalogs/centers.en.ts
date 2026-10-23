@@ -3,9 +3,9 @@ import type { Catalog } from "../translate";
 export const centersEn = { centers: {
   info: "Info",
   helpTitle: "Help and contact numbers",
-  chooseServicePrefix: "Choose the ",
-  appropriateService: "appropriate service",
-  chooseServiceSuffix: " according to the urgency and the animal's location.",
+  chooseServicePrefix: "Read the ",
+  appropriateService: "wildlife help FAQs",
+  chooseServiceSuffix: " for guidance on choosing the appropriate service according to the urgency and the animal's location.",
   emergencyGuidance: "Call 112 if there is an immediate danger to people, traffic or safety. For other cases, contact the most appropriate service.",
   marineGuidance: "For marine wildlife that is stranded, injured or in difficulty, 112 activates the relevant services in many regions.",
   immediateHelp: "Immediate help",
