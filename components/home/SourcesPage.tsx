@@ -191,7 +191,7 @@ export default function SourcesPage() {
         </View>
 
         <View style={styles.notice}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}><Link href="/centros">{t("sources", "text1")}</Link></Text>
+          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}><Link href={pagePath("centers")}>{t("sources", "text1")}</Link></Text>
 
           <Text style={styles.noticeText}>
             {t("sources", "noticeText3")}

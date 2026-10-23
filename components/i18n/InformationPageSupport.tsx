@@ -9,6 +9,29 @@ import { getEnglishDevelopmentPage, isLocalLanguagePreview, isWebLanguageEnabled
 import { getLocalizedPath, matchLocalizedRoute } from "@/i18n/routes";
 import { getCatalog } from "@/i18n/translate";
 
+const englishSeo: Partial<Record<InformationPageId, { title: string; description: string }>> = {
+  home: {
+    title: "Injured Wildlife in Spain: What to Do | SOS Fauna España",
+    description: "Found an injured or trapped wild animal in Spain? Get step-by-step guidance and find wildlife rescue centres and emergency contacts. Independent project.",
+  },
+  faq: {
+    title: "Wildlife Help FAQs for Spain | SOS Fauna España",
+    description: "Answers about injured birds, baby birds on the ground, trapped animals and finding wildlife help in Spain. Read the precautions before taking action.",
+  },
+  swifts: {
+    title: "Found a Swift on the Ground? Help in Spain | SOS Fauna España",
+    description: "Found a swift on the ground in Spain? Read guidance on chicks, injuries and when to seek specialist help, plus answers about swift behaviour and biology.",
+  },
+  bats: {
+    title: "Found a Bat in Spain? What to Do | SOS Fauna España",
+    description: "Found a bat in Spain? Read precautions, guidance on young or injured bats and when to seek specialist help. Includes bite and pet-contact safety information.",
+  },
+  centers: {
+    title: "Wildlife Rescue Centres in Spain | SOS Fauna España",
+    description: "Wildlife rescue centres and emergency contacts in Spain, organised by province. Independent directory; assistance in English is not guaranteed.",
+  },
+};
+
 export function useInformationPagePath() {
   const { locale } = useI18n();
   const preview = isWebLanguageEnabled(Platform.OS === "web" ? "web" : "native") && locale === "en";
@@ -29,10 +52,11 @@ export function SeoHead(props: ComponentProps<typeof PublicSeoHead>) {
   const es = getLocalizedPath(page, "es"), en = getLocalizedPath(page, "en");
   const alternates = [{ locale: "es", path: es }, { locale: "en", path: en }, { locale: "x-default", path: es }];
   if (locale === "es") return <PublicSeoHead {...props} robots={robots} alternates={alternates} />;
-  const title = page === "home" ? t("common", "brand")
+  const metadata = englishSeo[page];
+  const title = metadata?.title ?? (page === "home" ? t("common", "brand")
     : page === "swifts" ? t("faqTopics", "vencejosHeading")
     : page === "bats" ? t("faqTopics", "murcielagosHeading")
-    : t("navigation", page);
+    : t("navigation", page));
   const c = getCatalog("en");
   const descriptions: Record<InformationPageId, string> = {
     home: c.home.heroDescription, about: c.about.intro1, sources: c.sources.intro1,
@@ -41,7 +65,7 @@ export function SeoHead(props: ComponentProps<typeof PublicSeoHead>) {
     centers: c.centers.intro, guide: c.home.heroDescription,
   };
   return <Head>
-    <title>{title}</title><meta name="description" content={descriptions[page]} />
+    <title>{title}</title><meta name="description" content={metadata?.description ?? descriptions[page]} />
     <meta name="robots" content={robots} />
     <link rel="canonical" href={`https://sosfauna.es${en}`} />
     {alternates.map(item => <link key={item.locale} rel="alternate" hrefLang={item.locale} href={`https://sosfauna.es${item.path}`} />)}
