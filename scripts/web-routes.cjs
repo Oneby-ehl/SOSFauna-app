@@ -8,7 +8,7 @@ function getWebRoutes() {
     .map(([, id, es, en]) => [id, { es, en }]));
 }
 function getBilingualRoutes() {
-  // History has no English page: its existing selector fallback remains the home page.
+  // History is generated separately as a private page, outside public SEO pairs.
   return Object.entries(getWebRoutes()).filter(([id]) => id !== 'history');
 }
 module.exports = { SITE_URL, getWebRoutes, getBilingualRoutes };

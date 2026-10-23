@@ -130,13 +130,15 @@ export default function LandingPage() {
       setLandingDataState("checking");
 
       const [currentCase, history] = await withTimeout(
-        Promise.all([recoverCurrentCase(), getHistory()]),
+        Promise.allSettled([recoverCurrentCase(), getHistory()]),
         LANDING_DATA_TIMEOUT_MS,
       );
 
-      setPendingCase(currentCase);
-      setHasHistory(history.length > 0);
-      setLandingDataState("ready");
+      // A damaged history must not hide a valid pending report, or vice versa.
+      if (currentCase.status === "fulfilled") setPendingCase(currentCase.value);
+      if (history.status === "fulfilled") setHasHistory(history.value.length > 0);
+      setLandingDataState(currentCase.status === "fulfilled" && history.status === "fulfilled"
+        ? "ready" : "failed");
     } catch {
       setLandingDataState("failed");
     }
@@ -149,9 +151,17 @@ export default function LandingPage() {
   );
 
   const openNewCase = async () => {
-    await discardCurrentCase();
-    setPendingCase(null);
-    router.push({ pathname: pagePath("guide"), params: { mode: "new" } });
+    try {
+      await discardCurrentCase(pendingCase?.id ?? null);
+      setPendingCase(null);
+      router.push({ pathname: pagePath("guide"), params: { mode: "new" } });
+    } catch {
+      setLandingDataState("failed");
+      const title = t("assistantCaptureUi", "galleryErrorTitle");
+      const message = t("assistantCaptureUi", "locationErrorMessage");
+      if (Platform.OS === "web") window.alert(`${title}\n\n${message}`);
+      else Alert.alert(title, message);
+    }
   };
 
   const openNewCaseWithoutDiscardingStoredCase = () => {
@@ -191,7 +201,7 @@ export default function LandingPage() {
   };
 
   const handleOpenHistory = () => {
-    router.push("/history");
+    router.push(pagePath("history"));
   };
 
   const handleOpenFaq = () => {

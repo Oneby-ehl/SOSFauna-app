@@ -1,10 +1,12 @@
 import { getEffectiveCatalog } from "@/i18n/translate";
 import { useI18n } from "@/i18n/I18nProvider";
-// General text catalogs resolve through the effective locale.
+import type { Locale } from "@/i18n/types";
+import { getLocalizedPath, resolveRouteLocale } from "@/i18n/routes";
+import { HeaderBackButton } from "@react-navigation/elements";
 import { readStoredLocationText } from "@/utils/rescueLocation";
-import { Stack, useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useNavigation, useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -19,7 +21,7 @@ import {
 import {
   clearHistory,
   deleteHistoryItem,
-  getHistory,
+  getHistoryReadResult,
 } from "@/services/rescueStorage";
 import { NoIndexHead } from "@/components/seo/SeoHead";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -34,224 +36,232 @@ import type {
   RescueFlags,
 } from "@/types/rescueCase";
 
-const generalTexts = getEffectiveCatalog();
+function createHistoryPresentation(locale: Locale) {
+  const generalTexts = getEffectiveCatalog(locale);
 
-const ANIMAL_TYPE_LABELS: Record<RescueAnimalType, string> = {
-  smallBird: generalTexts.historyAnimalLabels.smallBird,
-  largeBird: generalTexts.historyAnimalLabels.largeBird,
-  bat: generalTexts.historyAnimalLabels.bat,
-  smallMammal: generalTexts.historyAnimalLabels.smallMammal,
-  largeMammal: generalTexts.historyAnimalLabels.largeMammal,
-  reptileAmphibian: generalTexts.historyAnimalLabels.reptileAmphibian,
-  dolphin: generalTexts.historyAnimalLabels.dolphin,
-  largeCetacean: generalTexts.historyAnimalLabels.largeCetacean,
-  seal: generalTexts.historyAnimalLabels.seal,
-  seaTurtle: generalTexts.historyAnimalLabels.seaTurtle,
-  sharkRay: generalTexts.historyAnimalLabels.sharkRay,
-  otherMarine: generalTexts.historyAnimalLabels.otherMarine,
-  unknown: generalTexts.historyAnimalLabels.unknown,
-};
+  const ANIMAL_TYPE_LABELS: Record<RescueAnimalType, string> = {
+    smallBird: generalTexts.historyAnimalLabels.smallBird,
+    largeBird: generalTexts.historyAnimalLabels.largeBird,
+    bat: generalTexts.historyAnimalLabels.bat,
+    smallMammal: generalTexts.historyAnimalLabels.smallMammal,
+    largeMammal: generalTexts.historyAnimalLabels.largeMammal,
+    reptileAmphibian: generalTexts.historyAnimalLabels.reptileAmphibian,
+    dolphin: generalTexts.historyAnimalLabels.dolphin,
+    largeCetacean: generalTexts.historyAnimalLabels.largeCetacean,
+    seal: generalTexts.historyAnimalLabels.seal,
+    seaTurtle: generalTexts.historyAnimalLabels.seaTurtle,
+    sharkRay: generalTexts.historyAnimalLabels.sharkRay,
+    otherMarine: generalTexts.historyAnimalLabels.otherMarine,
+    unknown: generalTexts.historyAnimalLabels.unknown,
+  };
 
-const ANIMAL_STATE_LABELS: Record<RescueAnimalState, string> = {
-  alive: generalTexts.historyStateLabels.alive,
-  dead: generalTexts.historyStateLabels.dead,
-};
+  const ANIMAL_STATE_LABELS: Record<RescueAnimalState, string> = {
+    alive: generalTexts.historyStateLabels.alive,
+    dead: generalTexts.historyStateLabels.dead,
+  };
 
-const ANIMAL_PLACE_LABELS: Record<RescueAnimalPlace, string> = {
-  ground: generalTexts.historyPlaceLabels.ground,
-  treeOrBush: generalTexts.historyPlaceLabels.treeOrBush,
-  buildingOrRoof: generalTexts.historyPlaceLabels.buildingOrRoof,
-  roadOrStreet: generalTexts.historyPlaceLabels.roadOrStreet,
-  parkOrGarden: generalTexts.historyPlaceLabels.parkOrGarden,
-  fieldOrNatural: generalTexts.historyPlaceLabels.fieldOrNatural,
-  industrialArea: generalTexts.historyPlaceLabels.industrialArea,
-  water: generalTexts.historyPlaceLabels.water,
-  otherPlace: generalTexts.historyPlaceLabels.otherPlace,
-};
+  const ANIMAL_PLACE_LABELS: Record<RescueAnimalPlace, string> = {
+    ground: generalTexts.historyPlaceLabels.ground,
+    treeOrBush: generalTexts.historyPlaceLabels.treeOrBush,
+    buildingOrRoof: generalTexts.historyPlaceLabels.buildingOrRoof,
+    roadOrStreet: generalTexts.historyPlaceLabels.roadOrStreet,
+    parkOrGarden: generalTexts.historyPlaceLabels.parkOrGarden,
+    fieldOrNatural: generalTexts.historyPlaceLabels.fieldOrNatural,
+    industrialArea: generalTexts.historyPlaceLabels.industrialArea,
+    water: generalTexts.historyPlaceLabels.water,
+    otherPlace: generalTexts.historyPlaceLabels.otherPlace,
+  };
 
-const ANIMAL_POSITION_LABELS: Record<RescueAnimalPosition, string> = {
-  ground: generalTexts.historyPositionLabels.ground,
-  treeOrBush: generalTexts.historyPositionLabels.treeOrBush,
-  buildingOrRoof: generalTexts.historyPositionLabels.buildingOrRoof,
-  water: generalTexts.historyPositionLabels.water,
-  beachSand: generalTexts.historyPositionLabels.beachSand,
-  shoreShallowWater: generalTexts.historyPositionLabels.shoreShallowWater,
-  rocksBreakwater: generalTexts.historyPositionLabels.rocksBreakwater,
-  portDock: generalTexts.historyPositionLabels.portDock,
-  onBoat: generalTexts.historyPositionLabels.onBoat,
-  otherPlace: generalTexts.historyPositionLabels.otherPlace,
-};
+  const ANIMAL_POSITION_LABELS: Record<RescueAnimalPosition, string> = {
+    ground: generalTexts.historyPositionLabels.ground,
+    treeOrBush: generalTexts.historyPositionLabels.treeOrBush,
+    buildingOrRoof: generalTexts.historyPositionLabels.buildingOrRoof,
+    water: generalTexts.historyPositionLabels.water,
+    beachSand: generalTexts.historyPositionLabels.beachSand,
+    shoreShallowWater: generalTexts.historyPositionLabels.shoreShallowWater,
+    rocksBreakwater: generalTexts.historyPositionLabels.rocksBreakwater,
+    portDock: generalTexts.historyPositionLabels.portDock,
+    onBoat: generalTexts.historyPositionLabels.onBoat,
+    otherPlace: generalTexts.historyPositionLabels.otherPlace,
+  };
 
-const ANIMAL_ENVIRONMENT_LABELS: Record<RescueAnimalEnvironment, string> = {
-  roadOrStreet: generalTexts.historyEnvironmentLabels.roadOrStreet,
-  parkOrGarden: generalTexts.historyEnvironmentLabels.parkOrGarden,
-  fieldOrNatural: generalTexts.historyEnvironmentLabels.fieldOrNatural,
-  industrialArea: generalTexts.historyEnvironmentLabels.industrialArea,
-  urbanArea: generalTexts.historyEnvironmentLabels.urbanArea,
-  coastBeach: generalTexts.historyEnvironmentLabels.coastBeach,
-  rockyCoastCliff: generalTexts.historyEnvironmentLabels.rockyCoastCliff,
-  portMarina: generalTexts.historyEnvironmentLabels.portMarina,
-  openSea: generalTexts.historyEnvironmentLabels.openSea,
-  estuaryMouth: generalTexts.historyEnvironmentLabels.estuaryMouth,
-  otherEnvironment: generalTexts.historyEnvironmentLabels.otherEnvironment,
-};
+  const ANIMAL_ENVIRONMENT_LABELS: Record<RescueAnimalEnvironment, string> = {
+    roadOrStreet: generalTexts.historyEnvironmentLabels.roadOrStreet,
+    parkOrGarden: generalTexts.historyEnvironmentLabels.parkOrGarden,
+    fieldOrNatural: generalTexts.historyEnvironmentLabels.fieldOrNatural,
+    industrialArea: generalTexts.historyEnvironmentLabels.industrialArea,
+    urbanArea: generalTexts.historyEnvironmentLabels.urbanArea,
+    coastBeach: generalTexts.historyEnvironmentLabels.coastBeach,
+    rockyCoastCliff: generalTexts.historyEnvironmentLabels.rockyCoastCliff,
+    portMarina: generalTexts.historyEnvironmentLabels.portMarina,
+    openSea: generalTexts.historyEnvironmentLabels.openSea,
+    estuaryMouth: generalTexts.historyEnvironmentLabels.estuaryMouth,
+    otherEnvironment: generalTexts.historyEnvironmentLabels.otherEnvironment,
+  };
 
-const ANIMAL_STATE_ICONS: Record<RescueAnimalState, string> = {
-  alive: "🟢",
-  dead: "⚫",
-};
+  const ANIMAL_STATE_ICONS: Record<RescueAnimalState, string> = {
+    alive: "🟢",
+    dead: "⚫",
+  };
 
-const FLAG_LABELS: {
-  key: keyof RescueFlags;
-  label: string;
-}[] = [
-  { key: "bleeding", label: generalTexts.historyFlagLabels.bleeding },
-  { key: "baby", label: generalTexts.historyFlagLabels.baby },
-  { key: "catDog", label: generalTexts.historyFlagLabels.catDog },
-  { key: "canNotMove", label: generalTexts.historyFlagLabels.canNotMove },
-  { key: "roadRisk", label: generalTexts.historyFlagLabels.roadRisk },
-  { key: "ringGps", label: generalTexts.historyFlagLabels.ringGps },
-  { key: "trapped", label: generalTexts.historyFlagLabels.trapped },
-  { key: "cannotFly", label: generalTexts.historyFlagLabels.cannotFly },
-  { key: "weakness", label: generalTexts.historyFlagLabels.weakness },
-  { key: "normalAppearance", label: generalTexts.historyFlagLabels.normalAppearance },
-  { key: "breathing", label: generalTexts.historyFlagLabels.breathing },
-  { key: "stranded", label: generalTexts.historyFlagLabels.stranded },
-  { key: "fishingLineHook", label: generalTexts.historyFlagLabels.fishingLineHook },
-  { key: "moreAnimals", label: generalTexts.historyFlagLabels.moreAnimals },
-  { key: "peopleDogsNearby", label: generalTexts.historyFlagLabels.peopleDogsNearby },
-  { key: "restingOnLand", label: generalTexts.historyFlagLabels.restingOnLand },
-  { key: "other", label: generalTexts.historyFlagLabels.other },
-];
+  const FLAG_LABELS: {
+    key: keyof RescueFlags;
+    label: string;
+  }[] = [
+    { key: "bleeding", label: generalTexts.historyFlagLabels.bleeding },
+    { key: "baby", label: generalTexts.historyFlagLabels.baby },
+    { key: "catDog", label: generalTexts.historyFlagLabels.catDog },
+    { key: "canNotMove", label: generalTexts.historyFlagLabels.canNotMove },
+    { key: "roadRisk", label: generalTexts.historyFlagLabels.roadRisk },
+    { key: "ringGps", label: generalTexts.historyFlagLabels.ringGps },
+    { key: "trapped", label: generalTexts.historyFlagLabels.trapped },
+    { key: "cannotFly", label: generalTexts.historyFlagLabels.cannotFly },
+    { key: "weakness", label: generalTexts.historyFlagLabels.weakness },
+    { key: "normalAppearance", label: generalTexts.historyFlagLabels.normalAppearance },
+    { key: "breathing", label: generalTexts.historyFlagLabels.breathing },
+    { key: "stranded", label: generalTexts.historyFlagLabels.stranded },
+    { key: "fishingLineHook", label: generalTexts.historyFlagLabels.fishingLineHook },
+    { key: "moreAnimals", label: generalTexts.historyFlagLabels.moreAnimals },
+    { key: "peopleDogsNearby", label: generalTexts.historyFlagLabels.peopleDogsNearby },
+    { key: "restingOnLand", label: generalTexts.historyFlagLabels.restingOnLand },
+    { key: "other", label: generalTexts.historyFlagLabels.other },
+  ];
 
-function formatDate(value: string | null): string {
-  if (!value) return generalTexts.summaryHistory.dateUnavailable;
+  function formatDate(value: string | null): string {
+    if (!value) return generalTexts.summaryHistory.dateUnavailable;
 
-  const date = new Date(value);
+    const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
-    return generalTexts.summaryHistory.dateUnavailable;
-  }
-
-  return new Intl.DateTimeFormat("es-ES", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
-
-function getActiveFlagLabels(flags: RescueFlags): string[] {
-  return FLAG_LABELS.filter(({ key }) => flags[key]).map(
-    ({ label }) => label,
-  );
-}
-
-function formatObservedSituation(flagLabels: string[]): string {
-  return flagLabels.length > 0
-    ? `${flagLabels.join(". ")}.`
-    : generalTexts.summaryHistory.noIncidents;
-}
-
-function normalizeUsefulText(value: string | null | undefined): string | undefined {
-  const normalized = value?.trim();
-  return normalized && normalized.length > 0 ? normalized : undefined;
-}
-
-function formatCoordinates(coords: NonNullable<RescueCase["coords"]>): string {
-  return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
-}
-
-function getAnimalPlaceLabel(rescueCase: RescueCase): string | null {
-  return rescueCase.animalPlace
-    ? ANIMAL_PLACE_LABELS[rescueCase.animalPlace]
-    : null;
-}
-
-function getAnimalPositionLabel(rescueCase: RescueCase): string | null {
-  return rescueCase.animalPosition
-    ? ANIMAL_POSITION_LABELS[rescueCase.animalPosition]
-    : null;
-}
-
-function getAnimalEnvironmentLabel(rescueCase: RescueCase): string | null {
-  return rescueCase.animalEnvironment
-    ? ANIMAL_ENVIRONMENT_LABELS[rescueCase.animalEnvironment]
-    : null;
-}
-
-function getStoredLocationFallback(rescueCase: RescueCase) {
-  const location = readStoredLocationText(normalizeUsefulText(rescueCase.locationText));
-  return location.kind === "text" ? location.text : undefined;
-}
-
-function buildLocationSummaryLines(rescueCase: RescueCase): string[] {
-  const approximateLocation = normalizeUsefulText(rescueCase.approximateLocation);
-  const lines: string[] = [];
-
-  if (approximateLocation) {
-    lines.push(`${generalTexts.summaryLocation.referencePrefix}${approximateLocation}`);
-  }
-
-  if (rescueCase.coords) {
-    lines.push(
-      `${generalTexts.summaryLocation.coordinatesPrefix}${formatCoordinates(rescueCase.coords)}`,
-      `${generalTexts.summaryLocation.mapPrefix}https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
-    );
-  } else {
-    const fallbackLocation = getStoredLocationFallback(rescueCase);
-
-    if (fallbackLocation) {
-      lines.push(`${generalTexts.summaryLocation.referencePrefix}${fallbackLocation}`);
+    if (Number.isNaN(date.getTime())) {
+      return generalTexts.summaryHistory.dateUnavailable;
     }
+
+    return new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "es-ES", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
   }
 
-  return lines;
-}
-
-function getHistoryLocationFields(rescueCase: RescueCase) {
-  const approximateLocation = normalizeUsefulText(rescueCase.approximateLocation);
-  const fields: string[] = [];
-
-  if (approximateLocation) {
-    fields.push(`${generalTexts.summaryLocation.referencePrefix}${approximateLocation}`);
-  }
-
-  if (rescueCase.coords) {
-    fields.push(
-      `${generalTexts.summaryLocation.coordinatesPrefix}${formatCoordinates(rescueCase.coords)}`,
-      `${generalTexts.summaryLocation.mapPrefix}https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
+  function getActiveFlagLabels(flags: RescueFlags): string[] {
+    return FLAG_LABELS.filter(({ key }) => flags[key]).map(
+      ({ label }) => label,
     );
-  } else {
-    const fallbackLocation = getStoredLocationFallback(rescueCase);
-
-    if (fallbackLocation) {
-      fields.push(`${generalTexts.summaryLocation.referencePrefix}${fallbackLocation}`);
-    }
   }
 
-  return fields;
-}
+  function formatObservedSituation(flagLabels: string[]): string {
+    return flagLabels.length > 0
+      ? `${flagLabels.join(". ")}.`
+      : generalTexts.summaryHistory.noIncidents;
+  }
 
-function buildCaseSummary(rescueCase: RescueCase): string {
-  const flagLabels = getActiveFlagLabels(rescueCase.flags);
-  const animalPositionLabel = getAnimalPositionLabel(rescueCase);
-  const animalEnvironmentLabel = getAnimalEnvironmentLabel(rescueCase);
-  const animalPlaceLabel = getAnimalPlaceLabel(rescueCase);
+  function normalizeUsefulText(value: string | null | undefined): string | undefined {
+    const normalized = value?.trim();
+    return normalized && normalized.length > 0 ? normalized : undefined;
+  }
 
-  return buildRescueShareMessage({
-    animalStateLabel: ANIMAL_STATE_LABELS[rescueCase.animalState],
-    animalTypeLabel: ANIMAL_TYPE_LABELS[rescueCase.animalType],
-    animalPositionLabel,
-    animalEnvironmentLabel,
-    animalPlaceLabel:
-      !animalPositionLabel && !animalEnvironmentLabel
-        ? animalPlaceLabel
-        : null,
-    observedSigns: flagLabels,
-    locationLines: buildLocationSummaryLines(rescueCase),
-    dateLine: `${generalTexts.summaryHistory.datePrefix}${formatDate(
-      rescueCase.completedAt ?? rescueCase.updatedAt,
-    )}`,
-  });
+  function formatCoordinates(coords: NonNullable<RescueCase["coords"]>): string {
+    return `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+  }
+
+  function getAnimalPlaceLabel(rescueCase: RescueCase): string | null {
+    return rescueCase.animalPlace
+      ? ANIMAL_PLACE_LABELS[rescueCase.animalPlace]
+      : null;
+  }
+
+  function getAnimalPositionLabel(rescueCase: RescueCase): string | null {
+    return rescueCase.animalPosition
+      ? ANIMAL_POSITION_LABELS[rescueCase.animalPosition]
+      : null;
+  }
+
+  function getAnimalEnvironmentLabel(rescueCase: RescueCase): string | null {
+    return rescueCase.animalEnvironment
+      ? ANIMAL_ENVIRONMENT_LABELS[rescueCase.animalEnvironment]
+      : null;
+  }
+
+  function getStoredLocationFallback(rescueCase: RescueCase) {
+    const location = readStoredLocationText(normalizeUsefulText(rescueCase.locationText));
+    return location.kind === "text" ? location.text : undefined;
+  }
+
+  function buildLocationSummaryLines(rescueCase: RescueCase): string[] {
+    const approximateLocation = normalizeUsefulText(rescueCase.approximateLocation);
+    const lines: string[] = [];
+
+    if (approximateLocation) {
+      lines.push(`${generalTexts.summaryLocation.referencePrefix}${approximateLocation}`);
+    }
+
+    if (rescueCase.coords) {
+      lines.push(
+        `${generalTexts.summaryLocation.coordinatesPrefix}${formatCoordinates(rescueCase.coords)}`,
+        `${generalTexts.summaryLocation.mapPrefix}https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
+      );
+    } else {
+      const fallbackLocation = getStoredLocationFallback(rescueCase);
+
+      if (fallbackLocation) {
+        lines.push(`${generalTexts.summaryLocation.referencePrefix}${fallbackLocation}`);
+      }
+    }
+
+    return lines;
+  }
+
+  function getHistoryLocationFields(rescueCase: RescueCase) {
+    const approximateLocation = normalizeUsefulText(rescueCase.approximateLocation);
+    const fields: string[] = [];
+
+    if (approximateLocation) {
+      fields.push(`${generalTexts.summaryLocation.referencePrefix}${approximateLocation}`);
+    }
+
+    if (rescueCase.coords) {
+      fields.push(
+        `${generalTexts.summaryLocation.coordinatesPrefix}${formatCoordinates(rescueCase.coords)}`,
+        `${generalTexts.summaryLocation.mapPrefix}https://maps.google.com/?q=${rescueCase.coords.latitude},${rescueCase.coords.longitude}`,
+      );
+    } else {
+      const fallbackLocation = getStoredLocationFallback(rescueCase);
+
+      if (fallbackLocation) {
+        fields.push(`${generalTexts.summaryLocation.referencePrefix}${fallbackLocation}`);
+      }
+    }
+
+    return fields;
+  }
+
+  function buildCaseSummary(rescueCase: RescueCase): string {
+    const flagLabels = getActiveFlagLabels(rescueCase.flags);
+    const animalPositionLabel = getAnimalPositionLabel(rescueCase);
+    const animalEnvironmentLabel = getAnimalEnvironmentLabel(rescueCase);
+    const animalPlaceLabel = getAnimalPlaceLabel(rescueCase);
+
+    return buildRescueShareMessage({
+      animalStateLabel: ANIMAL_STATE_LABELS[rescueCase.animalState],
+      animalTypeLabel: ANIMAL_TYPE_LABELS[rescueCase.animalType],
+      animalPositionLabel,
+      animalEnvironmentLabel,
+      animalPlaceLabel:
+        !animalPositionLabel && !animalEnvironmentLabel
+          ? animalPlaceLabel
+          : null,
+      observedSigns: flagLabels,
+      locationLines: buildLocationSummaryLines(rescueCase),
+      dateLine: `${generalTexts.summaryHistory.datePrefix}${formatDate(
+        rescueCase.completedAt ?? rescueCase.updatedAt,
+      )}`,
+    }, locale);
+  }
+
+  return {
+    ANIMAL_TYPE_LABELS, ANIMAL_STATE_LABELS, ANIMAL_STATE_ICONS, formatDate,
+    getActiveFlagLabels, formatObservedSituation, getHistoryLocationFields,
+    getAnimalPositionLabel, getAnimalEnvironmentLabel, getAnimalPlaceLabel, buildCaseSummary,
+  };
 }
 
 function HistoryCard({
@@ -269,6 +279,10 @@ function HistoryCard({
 }) {
   const { locale } = useI18n();
   const generalTexts = getEffectiveCatalog(locale);
+  const { ANIMAL_TYPE_LABELS, ANIMAL_STATE_LABELS, ANIMAL_STATE_ICONS, formatDate,
+    getActiveFlagLabels, formatObservedSituation, getHistoryLocationFields,
+    getAnimalPositionLabel, getAnimalEnvironmentLabel, getAnimalPlaceLabel } =
+    useMemo(() => createHistoryPresentation(locale), [locale]);
   const flagLabels = getActiveFlagLabels(rescueCase.flags);
   const observedSituation = formatObservedSituation(flagLabels);
   const locationFields = getHistoryLocationFields(rescueCase);
@@ -356,14 +370,34 @@ export default function HistoryPage() {
   const { locale } = useI18n();
   const generalTexts = getEffectiveCatalog(locale);
   const router = useRouter();
+  const navigation = useNavigation();
+  const { buildCaseSummary } = useMemo(() => createHistoryPresentation(locale), [locale]);
+  const homePath = getLocalizedPath("home", locale);
+  const goBack = () => {
+    if (locale === "es") {
+      router.back();
+      return;
+    }
+    const state = navigation.getState();
+    const previous = state?.routes[(state.index ?? 0) - 1];
+    // A language switch can leave a Spanish entry behind in the stack.
+    if (previous && resolveRouteLocale("/" + previous.name, "web") === locale) router.back();
+    else router.replace(homePath);
+  };
   const [history, setHistory] = useState<RescueCase[]>([]);
   const [loading, setLoading] = useState(true);
+  const [historyReadIssue, setHistoryReadIssue] = useState(false);
   const [expandedCaseId, setExpandedCaseId] = useState<string | null>(null);
 
   const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
-      setHistory(await getHistory());
+      const result = await getHistoryReadResult();
+      setHistory(result.cases);
+      setHistoryReadIssue(result.hasIncompatibleEntries);
+    } catch {
+      // Keep any already displayed reports; a failed read is not an empty history.
+      setHistoryReadIssue(true);
     } finally {
       setLoading(false);
     }
@@ -381,9 +415,19 @@ export default function HistoryPage() {
     confirmText: string,
     action: () => Promise<void>,
   ) => {
+    const runAction = async () => {
+      try {
+        await action();
+      } catch {
+        const title = generalTexts.assistantCaptureUi.galleryErrorTitle;
+        const message = generalTexts.assistantCaptureUi.locationErrorMessage;
+        if (Platform.OS === "web") window.alert(`${title}\n\n${message}`);
+        else Alert.alert(title, message);
+      }
+    };
     if (Platform.OS === "web") {
       if (window.confirm(`${title}\n\n${message}`)) {
-        void action();
+        void runAction();
       }
       return;
     }
@@ -393,7 +437,7 @@ export default function HistoryPage() {
       {
         text: confirmText,
         style: "destructive",
-        onPress: () => void action(),
+        onPress: () => void runAction(),
       },
     ]);
   };
@@ -446,8 +490,20 @@ export default function HistoryPage() {
       contentContainerStyle={styles.screenContent}
       showsVerticalScrollIndicator
     >
-      <NoIndexHead path="/history" title="Mis avisos | SOS Fauna España" />
-      <Stack.Screen options={{ title: generalTexts.historyUi.navigationTitle }} />
+      <NoIndexHead path={getLocalizedPath("history", locale)} title={`${generalTexts.historyUi.navigationTitle} | SOS Fauna España`} />
+      <Stack.Screen options={{
+        title: generalTexts.historyUi.navigationTitle,
+        ...(locale === "en" ? {
+          headerLeft: ({ tintColor }: { tintColor?: string }) => router.canGoBack() ? (
+            <HeaderBackButton
+              tintColor={tintColor}
+              displayMode="minimal"
+              accessibilityLabel={generalTexts.historyUi.back}
+              onPress={goBack}
+            />
+          ) : null,
+        } : {}),
+      }} />
 
       <View style={styles.header}>
         <View style={styles.headerInner}>
@@ -457,29 +513,36 @@ export default function HistoryPage() {
             <Text style={styles.description}>{generalTexts.historyUi.description}</Text>
           </View>
 
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Pressable style={styles.backButton} onPress={goBack}>
             <Text style={styles.backButtonText}>{generalTexts.historyUi.back}</Text>
           </Pressable>
         </View>
       </View>
 
       <View style={styles.content}>
+        {!loading && historyReadIssue ? (
+          <View style={styles.statusPanel}>
+            <Text accessibilityRole="alert" style={styles.statusText}>
+              {generalTexts.assistantCaptureUi.locationErrorMessage}
+            </Text>
+          </View>
+        ) : null}
         {loading ? (
           <View style={styles.statusPanel}>
             <ActivityIndicator size="large" />
             <Text style={styles.statusText}>{generalTexts.historyUi.loading}</Text>
           </View>
-        ) : history.length === 0 ? (
+        ) : history.length === 0 ? (historyReadIssue ? null : (
           <View style={styles.emptyPanel}>
             <Text style={styles.emptyIcon}>🗂️</Text>
             <Text style={styles.emptyTitle}>{generalTexts.historyUi.emptyTitle}</Text>
             <Text style={styles.emptyText}>{generalTexts.historyUi.emptyDescription}</Text>
 
-            <Pressable style={styles.primaryButton} onPress={() => router.back()}>
+            <Pressable style={styles.primaryButton} onPress={() => locale === "en" ? router.replace(homePath) : router.back()}>
               <Text style={styles.primaryButtonText}>{generalTexts.historyUi.home}</Text>
             </Pressable>
           </View>
-        ) : (
+        )) : (
           <>
             <View style={styles.list}>
               {history.map((rescueCase) => (

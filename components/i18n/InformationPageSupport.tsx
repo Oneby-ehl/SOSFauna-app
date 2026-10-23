@@ -62,7 +62,7 @@ export function SeoHead(props: ComponentProps<typeof PublicSeoHead>) {
     home: c.home.heroDescription, about: c.about.intro1, sources: c.sources.intro1,
     contact: c.contact.intro1, privacy: c.privacy.paragraph3, legal: c.legal.guidanceParagraph1,
     faq: c.faqUi.intro, swifts: c.faqTopics.vencejosIntro, bats: c.faqTopics.murcielagosIntro,
-    centers: c.centers.intro, guide: c.home.heroDescription,
+    centers: c.centers.intro, guide: c.home.heroDescription, history: c.historyUi.description,
   };
   return <Head>
     <title>{title}</title><meta name="description" content={metadata?.description ?? descriptions[page]} />

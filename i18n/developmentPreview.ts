@@ -15,6 +15,7 @@ const previewPages = {
   swifts: true,
   bats: true,
   centers: true,
+  history: true,
 } as const;
 
 export type InformationPageId = keyof typeof previewPages;

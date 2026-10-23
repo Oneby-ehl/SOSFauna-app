@@ -1,5 +1,6 @@
 import type { TranslationCatalog } from "../translate";
 import { homeEn } from "./home.en";
+import { historyEn } from "./history.en";
 import { informationEn } from "./information.en";
 import { assistantEn } from "./assistant.en";
 import { assistantDisplayEn } from "./assistant-display.en";
@@ -15,6 +16,7 @@ import { helpContactDescriptionsEn } from "./help-contact-descriptions.en";
 // Remaining untranslated keys retain explicit Spanish fallback.
 // Publication remains gated separately; this catalog does not enable English routes.
 export const en = {
+  ...historyEn,
   ...centersEn,
   ...helpContactDescriptionsEn,
   ...faqEn,

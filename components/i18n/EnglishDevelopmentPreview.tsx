@@ -30,7 +30,8 @@ const pages = {
 export default function EnglishDevelopmentPreview() {
   const pathname = usePathname();
   const page = getEnglishDevelopmentPage(pathname, "web");
-  if (!page) return null;
+  // History uses its generated route and shared component, not this fallback.
+  if (!page || page === "history") return null;
   const Page = pages[page];
   return <><Stack.Screen options={{ headerShown: page !== "home" }} /><Page /></>;
 }

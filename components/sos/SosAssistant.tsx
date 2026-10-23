@@ -2165,7 +2165,7 @@ export default function HomeScreen({
 
   const scrollViewRef = useRef<ScrollView>(null);
   const shouldConfirmExitRef = useRef(initialCase !== null);
-  const saveCurrentProgressRef = useRef<() => Promise<void>>(async () => {});
+  const saveCurrentProgressRef = useRef<() => Promise<boolean>>(async () => false);
   const flowCompletedRef = useRef(false);
   const isMountedRef = useRef(true);
   const reverseGeocodeCacheRef = useRef<Record<string, string | null>>({});
@@ -2817,28 +2817,36 @@ const saveCurrentProgress = async (
     >
   > = {},
 ) => {
-  const savedCase = await persistCurrentCase(
-    {
-      step: nextStep,
-      animalState,
-      animalType,
-      animalPlace,
-      animalPosition,
-      animalEnvironment,
-      flags,
-      locationText,
-      approximateLocation,
-      coords,
-      locationCaptured,
-      ...overrides,
-    },
-    currentCaseRef.current,
-  );
+  try {
+    const savedCase = await persistCurrentCase(
+      {
+        step: nextStep,
+        animalState,
+        animalType,
+        animalPlace,
+        animalPosition,
+        animalEnvironment,
+        flags,
+        locationText,
+        approximateLocation,
+        coords,
+        locationCaptured,
+        ...overrides,
+      },
+      currentCaseRef.current,
+    );
 
-  currentCaseRef.current = savedCase;
-  setCurrentCase(savedCase);
+    currentCaseRef.current = savedCase;
+    setCurrentCase(savedCase);
 
-  return savedCase;
+    return true;
+  } catch {
+    // Retain all in-memory input and media references; never report a save as
+    // successful or leave the guide after a blocked/failed storage operation.
+    showMessage(generalTexts.assistantCaptureUi.galleryErrorTitle,
+      generalTexts.assistantCaptureUi.locationErrorMessage);
+    return false;
+  }
 };
 
   const updateApproximateLocation = async (
@@ -2899,31 +2907,38 @@ const saveCurrentProgress = async (
 
   useEffect(() => {
     saveCurrentProgressRef.current = async () => {
-      await saveCurrentProgress();
+      return saveCurrentProgress();
     };
   });
 
   const completeAndReturnHome = async () => {
+    if (flowCompletedRef.current) return;
     flowCompletedRef.current = true;
 
-    await completeCurrentCase(
-      {
-        step,
-        animalState,
-        animalType,
-        animalPlace,
-        animalPosition,
-        animalEnvironment,
-        flags,
-        locationText,
-        approximateLocation,
-        coords,
-        locationCaptured,
-      },
-      currentCaseRef.current,
-    );
+    try {
+      await completeCurrentCase(
+        {
+          step,
+          animalState,
+          animalType,
+          animalPlace,
+          animalPosition,
+          animalEnvironment,
+          flags,
+          locationText,
+          approximateLocation,
+          coords,
+          locationCaptured,
+        },
+        currentCaseRef.current,
+      );
 
-    router.replace(homePath);
+      router.replace(homePath);
+    } catch {
+      flowCompletedRef.current = false;
+      showMessage(generalTexts.assistantCaptureUi.galleryErrorTitle,
+        generalTexts.assistantCaptureUi.locationErrorMessage);
+    }
   };
 
   const finishFlow = () => {
@@ -2966,9 +2981,7 @@ const saveCurrentProgress = async (
     if (step < 4) {
       const nextStep = (step + 1) as Step;
 
-      await saveCurrentProgress(nextStep);
-
-      setStep(nextStep);
+      if (await saveCurrentProgress(nextStep)) setStep(nextStep);
     }
   };
 
@@ -3051,11 +3064,13 @@ const saveCurrentProgress = async (
       );
 
       if (confirmed) {
-        allowNavigation = true;
-
         void (async () => {
-          await saveCurrentProgressRef.current();
-          router.replace(backNavigationRef.current.homePath);
+          if (await saveCurrentProgressRef.current()) {
+            allowNavigation = true;
+            router.replace(backNavigationRef.current.homePath);
+          } else {
+            addGuardEntry();
+          }
         })();
 
         return;

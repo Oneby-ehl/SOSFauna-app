@@ -42,6 +42,7 @@ export function createRescueCase(
   const now = new Date().toISOString();
 
   return {
+    ...existingCase,
     id: existingCase?.id ?? generateCaseId(),
     createdAt: existingCase?.createdAt ?? now,
     updatedAt: now,
@@ -65,8 +66,8 @@ export async function recoverCurrentCase(): Promise<RescueCase | null> {
   return loadCurrentCase();
 }
 
-export async function discardCurrentCase(): Promise<void> {
-  await clearCurrentCase();
+export async function discardCurrentCase(expectedId?: string | null): Promise<void> {
+  await clearCurrentCase(expectedId);
 }
 
 export async function completeCurrentCase(
@@ -81,7 +82,7 @@ export async function completeCurrentCase(
   };
 
   await saveCompletedCase(completedCase);
-  await clearCurrentCase();
+  await clearCurrentCase(completedCase.id);
 
   return completedCase;
 }

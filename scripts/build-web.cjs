@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { getBilingualRoutes } = require('./web-routes.cjs');
+const { getBilingualRoutes, getWebRoutes } = require('./web-routes.cjs');
 const root = path.resolve(__dirname, '..');
 const mode = process.argv[2];
 if (mode !== 'preview' && mode !== 'publication') throw new Error('Destino de compilación no válido.');
@@ -26,12 +26,13 @@ function prepareWebRoutes() {
   removeBuildDirectory(routerRoot);
   fs.mkdirSync(path.dirname(routerRoot), { recursive: true });
   fs.cpSync(path.join(root, 'app'), routerRoot, { recursive: true });
-  const pages = { home: 'LandingPage', about: 'AboutPage', sources: 'SourcesPage', contact: 'ContactPage', privacy: 'PrivacyPage', legal: 'LegalPage', guide: 'AvisoRoute', faq: 'FaqPage', swifts: 'TopicFaqPage', bats: 'TopicFaqPage', centers: 'CentrosRoute' };
-  for (const [id, routes] of getBilingualRoutes()) {
+  const pages = { home: 'LandingPage', about: 'AboutPage', sources: 'SourcesPage', contact: 'ContactPage', privacy: 'PrivacyPage', legal: 'LegalPage', guide: 'AvisoRoute', faq: 'FaqPage', swifts: 'TopicFaqPage', bats: 'TopicFaqPage', centers: 'CentrosRoute', history: 'HistoryPage' };
+  // History uses the shared page but remains private and outside the sitemap.
+  for (const [id, routes] of [...getBilingualRoutes(), ['history', getWebRoutes().history]]) {
     if (!pages[id] || !/^\/en\/(?:[a-z]+(?:\/[a-z]+)*)?$/.test(routes.en)) throw new Error('Ruta inglesa no reconocida: ' + id);
     const file = path.join(routerRoot, routes.en.replace(/^\//, '').replace(/\/$/, '/index') + '.tsx');
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    const modulePath = id === 'guide' ? '@/app/aviso' : id === 'centers' ? '@/app/centros' : id === 'faq' ? '@/components/faq/FaqPage' : `@/components/home/${pages[id]}`;
+    const modulePath = id === 'history' ? '@/app/history' : id === 'guide' ? '@/app/aviso' : id === 'centers' ? '@/app/centros' : id === 'faq' ? '@/components/faq/FaqPage' : `@/components/home/${pages[id]}`;
     if (id === 'swifts' || id === 'bats') {
       const topicId = id === 'swifts' ? 'vencejos' : 'murcielagos';
       fs.writeFileSync(file, `import TopicFaqPage from "@/components/faq/TopicFaqPage";\nexport default function TopicRoute() { return <TopicFaqPage topicId="${topicId}" />; }\n`);
