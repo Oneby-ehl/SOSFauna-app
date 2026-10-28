@@ -3,6 +3,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { Link, Stack, usePathname } from "expo-router";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { getEnglishDevelopmentPage } from "@/i18n/developmentPreview";
+import { getLocalizedPath } from "@/i18n/routes";
 
 import { SeoHead } from "@/components/seo/SeoHead";
 
@@ -18,8 +19,10 @@ export default function NotFoundPage() {
   return (
     <>
       <SeoHead
-        title="Página no encontrada | SOS Fauna España"
-        description="La dirección introducida no existe o ya no está disponible."
+        title={locale === "en" ? generalTexts.notFoundUi.navigationTitle : "Página no encontrada | SOS Fauna España"}
+        description={locale === "en" ? generalTexts.notFoundUi.message : "La dirección introducida no existe o ya no está disponible."}
+        locale={locale}
+        path={locale === "en" ? pathname : undefined}
         robots="noindex, nofollow"
         includeGlobalStructuredData={false}
       />
@@ -35,7 +38,7 @@ export default function NotFoundPage() {
           <Text style={styles.message}>{generalTexts.notFoundUi.message}</Text>
           <Text style={styles.secondary}>{generalTexts.notFoundUi.secondary}</Text>
 
-          <Link href="/" asChild>
+          <Link href={getLocalizedPath("home", locale)} asChild>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={generalTexts.notFoundUi.homeAccessibility}

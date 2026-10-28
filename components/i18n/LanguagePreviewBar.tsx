@@ -1,13 +1,15 @@
 import { Link, usePathname } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { useI18n } from "@/i18n/I18nProvider";
 import { getLocalizedPath, matchLocalizedRoute } from "@/i18n/routes";
 import { LanguageSelector } from "./LanguageSelector";
+import { SiteHeader } from "@/components/web/SiteMenu";
 
 export function LanguagePreviewBar() {
   const pathname = usePathname();
   const { locale, t, languageControlsEnabled } = useI18n();
   if (!languageControlsEnabled || matchLocalizedRoute(pathname) === "home") return null;
+  if (Platform.OS === "web") return <SiteHeader />;
   return <View style={styles.bar}>
     {matchLocalizedRoute(pathname) === "guide"
       ? <Text style={styles.brand}>{t("common", "brand")}</Text>

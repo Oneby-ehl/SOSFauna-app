@@ -1,4 +1,5 @@
 import { helpContactDescriptionsEs } from "./help-contact-descriptions.es";
+import { landingEditorialEs } from "./landing-editorial";
 import { assistantDisplayEs } from "./assistant-display.es";
 import { faqAnimalsEs } from "./faq-animals.es";
 import { faqCategoryEs } from "./faq-categories.es";
@@ -27,6 +28,7 @@ import { deadAnimalEs } from "./dead.es";
 import { supplementalEs } from "./supplemental.es";
 
 export const es = {
+  landingEditorial: landingEditorialEs,
   ...faqAnimalsEs,
   ...assistantDisplayEs,
   ...helpContactDescriptionsEs,
@@ -101,7 +103,7 @@ export const es = {
     processWarning: "Intervenir innecesariamente puede separarlas de sus padres o reducir sus posibilidades de supervivencia.",
     processConclusion: "Por eso SOS Fauna te ayuda primero a valorar la situación para decidir si realmente es necesario intervenir.",
     scopeTitle: "¿Qué animales incluye SOS Fauna España?",
-    scopeDescription: "SOS Fauna España se centra en cubrir las incidencias más habituales de fauna silvestre, incluyendo fauna terrestre, aves y fauna marina.",
+    scopeDescription: "SOS Fauna España ofrece orientación ante las situaciones más habituales que afectan a la fauna silvestre, incluyendo aves, mamíferos, reptiles, anfibios y fauna marina. Su objetivo es ayudarte a valorar cada situación y encontrar la forma más adecuada de actuar, respetando siempre el bienestar del animal.",
     birds: "Aves",
     mammals: "Mamíferos",
     reptiles: "Reptiles y anfibios",

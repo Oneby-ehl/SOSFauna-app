@@ -1,5 +1,7 @@
+import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
+import { InformationStyles, informationWebPart, informationStackOptions } from "./InformationPresentation";
 import { Link, Stack } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -29,69 +31,73 @@ export default function ContactPage() {
         path="/contact"
         structuredData={contactPageStructuredData}
       />
-      <Stack.Screen options={{ title: locale === "en" ? `${t("navigation", "contact")} | SOS Fauna España` : "Contacto | SOS Fauna España" }} />
+      <Stack.Screen options={{ ...informationStackOptions, title: locale === "en" ? `${t("navigation", "contact")} | SOS Fauna España` : "Contacto | SOS Fauna España" }} />
 
+      <InformationStyles />
       <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.container}
+        {...informationWebPart("screen")} style={styles.screen}
+        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
       >
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "contact")}</Text>
+        <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
+        <View {...informationWebPart("header")} style={styles.header}>
+          <Text {...informationWebPart("eyebrow")} style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} {...informationWebPart("title")} style={styles.title}>{t("navigation", "contact")}</Text>
 
-          <Text style={styles.intro}>
+          <Text {...informationWebPart("intro")} style={styles.intro}>
             {t("contact", "intro1")}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.sectionTitle}>{t("contact", "sectionTitle1")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("contact", "sectionTitle1")}</Text>
 
-          <Text style={styles.paragraph}>{t("contact", "paragraph1")}</Text>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>{t("contact", "paragraph1")}</Text>
 
-          <View style={styles.list}>
-            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem1")}</Text>
-            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem2")}</Text>
-            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem3")}</Text>
-            <Text style={styles.listItem}>{"\u2022"}{t("contact", "listItem4")}</Text>
+          <View {...informationWebPart("list")} style={styles.list}>
+            <Text {...informationWebPart("listItem")} style={styles.listItem}>{"\u2022"}{t("contact", "listItem1")}</Text>
+            <Text {...informationWebPart("listItem")} style={styles.listItem}>{"\u2022"}{t("contact", "listItem2")}</Text>
+            <Text {...informationWebPart("listItem")} style={styles.listItem}>{"\u2022"}{t("contact", "listItem3")}</Text>
+            <Text {...informationWebPart("listItem")} style={styles.listItem}>{"\u2022"}{t("contact", "listItem4")}</Text>
           </View>
 
           <Link href="mailto:contacto@sosfauna.es" asChild>
-            <Pressable style={styles.mailButton}>
-              <Text style={styles.mailButtonText}>contacto@sosfauna.es</Text>
+            <Pressable {...informationWebPart("mailButton")} style={styles.mailButton}>
+              <Text {...informationWebPart("mailButtonText")} style={styles.mailButtonText}>contacto@sosfauna.es</Text>
             </Pressable>
           </Link>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.sectionTitle}>{t("contact", "sectionTitle2")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("contact", "sectionTitle2")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("contact", "paragraph2")}
           </Text>
 
           <Link href="mailto:privacidad@sosfauna.es" asChild>
-            <Pressable style={styles.mailButton}>
-              <Text style={styles.mailButtonText}>privacidad@sosfauna.es</Text>
+            <Pressable {...informationWebPart("mailButton")} style={styles.mailButton}>
+              <Text {...informationWebPart("mailButtonText")} style={styles.mailButtonText}>privacidad@sosfauna.es</Text>
             </Pressable>
           </Link>
         </View>
 
-        <View style={styles.notice}>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.noticeTitle}>
+        <View {...informationWebPart("notice")} style={styles.notice}>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("noticeTitle")} style={styles.noticeTitle}>
             {t("contact", "noticeTitle1")}
           </Text>
 
-          <Text style={styles.noticeText}>
+          <Text {...informationWebPart("noticeText")} style={styles.noticeText}>
             {t("contact", "noticeText1")}
           </Text>
         </View>
 
-        <Link href={pagePath("home")} asChild>
-          <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
+        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+          <Pressable {...informationWebPart("backButton")} style={styles.backButton}>
+            <Text {...informationWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
-        </Link>
+        </Link> : null}
+        </FooterPageContent>
+        <SiteFooter />
       </ScrollView>
     </>
   );

@@ -162,6 +162,7 @@ export const informationEs = {
     "intellectualPropertyTitle": "6. Propiedad intelectual",
     "intellectualPropertyParagraph1": "Los textos, el diseño, la estructura, el logotipo y los demás elementos propios de SOS Fauna España están protegidos por la normativa aplicable en materia de propiedad intelectual.",
     "intellectualPropertyParagraph2": "No se permite su reproducción, modificación o utilización con fines comerciales sin autorización, salvo en los casos permitidos por la ley.",
+    "illustrativeImagesParagraph": "La portada web utiliza imágenes ilustrativas generadas mediante inteligencia artificial. No son fotografías documentales ni representan incidencias reales; pueden contener imprecisiones visuales y no deben utilizarse para identificar especies o decidir cómo actuar ante un animal.",
     "externalLinksTitle": "7. Enlaces externos",
     "externalLinksParagraph1": "La aplicación puede incluir enlaces a organismos públicos, centros de recuperación, entidades especializadas y otros recursos de información.",
     "externalLinksParagraph2": "Estos enlaces se facilitan únicamente para ayudar al usuario a localizar recursos adecuados. SOS Fauna España no controla ni se responsabiliza del contenido o funcionamiento de sitios externos.",

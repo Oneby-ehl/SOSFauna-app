@@ -1,5 +1,5 @@
 import { Link, Stack, useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { RescueCase } from "@/types/rescueCase";
 import {
   discardCurrentCase,
@@ -78,7 +78,22 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
   ]);
 }
 
-export default function LandingPage() {
+// Web supplies a presentation only; case recovery and storage stay here.
+export type LandingPresentationProps = {
+  checkingCase: boolean;
+  hasPendingCase: boolean;
+  pendingDialogOpen: boolean;
+  canInstall: boolean;
+  onStart: () => void;
+  onContinue: () => void;
+  onDiscard: () => Promise<void>;
+  onClosePending: () => void;
+  onInstall: () => Promise<void>;
+};
+
+export default function LandingPage({ renderWeb }: {
+  renderWeb?: (props: LandingPresentationProps) => ReactNode;
+} = {}) {
   const { t, locale, languageControlsEnabled } = useI18n();
   const pagePath = useInformationPagePath();
   const router = useRouter();
@@ -87,6 +102,7 @@ export default function LandingPage() {
   const isCompact = !hydrated || width < 760;
   const [pendingCase, setPendingCase] = useState<RescueCase | null>(null);
   const [hasHistory, setHasHistory] = useState(false);
+  const [pendingDialogOpen, setPendingDialogOpen] = useState(false);
   const [landingDataState, setLandingDataState] =
     useState<LandingDataState>("checking");
   const checkingCase = landingDataState === "checking";
@@ -182,6 +198,10 @@ export default function LandingPage() {
     const message = t("home", "pendingCaseConfirmation");
 
     if (Platform.OS === "web") {
+      if (renderWeb) {
+        setPendingDialogOpen(true);
+        return;
+      }
       if (window.confirm(message)) void openNewCase();
       return;
     }
@@ -220,6 +240,31 @@ export default function LandingPage() {
     setInstallPrompt(null);
   };
 
+  const metadata = <>
+    <SeoHead
+      title="SOS Fauna España | Qué hacer ante fauna silvestre herida o varada"
+      description="SOS Fauna España te orienta paso a paso si encuentras fauna silvestre herida, atrapada, debilitada, varada o en peligro, terrestre o marina."
+      path="/"
+      structuredData={homePageStructuredData}
+    />
+    <Stack.Screen options={{ title: locale === "en" ? t("common", "brand") : "SOS Fauna España | Qué hacer ante fauna silvestre herida o varada" }} />
+  </>;
+
+  if (Platform.OS === "web" && renderWeb) return <>
+    {metadata}
+    {renderWeb({
+      checkingCase,
+      hasPendingCase: Boolean(pendingCase),
+      pendingDialogOpen,
+      canInstall: Boolean(installPrompt),
+      onStart: handleStartNewCase,
+      onContinue: handleContinueCase,
+      onDiscard: openNewCase,
+      onClosePending: () => setPendingDialogOpen(false),
+      onInstall: handleInstallApp,
+    })}
+  </>;
+
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <ScrollView
@@ -227,18 +272,7 @@ export default function LandingPage() {
         contentContainerStyle={styles.screenContent}
         showsVerticalScrollIndicator
       >
-        <SeoHead
-          title="SOS Fauna España | Qué hacer ante fauna silvestre herida o varada"
-          description="SOS Fauna España te orienta paso a paso si encuentras fauna silvestre herida, atrapada, debilitada, varada o en peligro, terrestre o marina."
-          path="/"
-          structuredData={homePageStructuredData}
-        />
-        <Stack.Screen
-          options={{
-            title:
-              locale === "en" ? t("common", "brand") : "SOS Fauna España | Qué hacer ante fauna silvestre herida o varada",
-          }}
-        />
+        {metadata}
 
       <View style={styles.header}>
         <View style={styles.headerInner}>

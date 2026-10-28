@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import { Platform, StyleSheet, Text } from "react-native";
 import { useI18n } from "@/i18n/I18nProvider";
+import webVersion from "@/constants/web-version.json";
 
 function getPlatformName(): string {
   return Platform.select({
@@ -12,6 +13,7 @@ function getPlatformName(): string {
 }
 
 export function getAppVersion(): string {
+  if (Platform.OS === "web") return webVersion.version;
   return Constants.expoConfig?.version ?? "desconocida";
 }
 

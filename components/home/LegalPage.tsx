@@ -1,5 +1,7 @@
+import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
+import { InformationStyles, informationWebPart, informationStackOptions } from "./InformationPresentation";
 import { Link, Stack } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -90,39 +92,46 @@ export default function LegalPage() {
         description="Información legal, condiciones de uso y límites de responsabilidad de SOS Fauna España."
         path="/legal"
       />
-      <Stack.Screen options={{ title: locale === "en" ? `${t("navigation", "legal")} | SOS Fauna España` : "Aviso legal | SOS Fauna España" }} />
+      <Stack.Screen options={{ ...informationStackOptions, title: locale === "en" ? `${t("navigation", "legal")} | SOS Fauna España` : "Aviso legal | SOS Fauna España" }} />
 
+      <InformationStyles />
       <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.container}
+        {...informationWebPart("screen")} style={styles.screen}
+        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
       >
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "legal")}</Text>
-          <Text style={styles.updated}>{t("common", "informationUpdated")}</Text>
+        <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
+        <View {...informationWebPart("header")} style={styles.header}>
+          <Text {...informationWebPart("eyebrow")} style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} {...informationWebPart("title")} style={styles.title}>{t("navigation", "legal")}</Text>
+          <Text {...informationWebPart("updated")} style={styles.updated}>{t("common", "informationUpdated")}</Text>
         </View>
 
         {sections.map((section) => (
-          <View key={section.titleKey} style={styles.section}>
-            <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.sectionTitle}>{t("legal", section.titleKey)}</Text>
+          <View key={section.titleKey} {...informationWebPart("section")} style={styles.section}>
+            <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("legal", section.titleKey)}</Text>
             {section.paragraphKeys.map((paragraph) => (
-              <Text key={paragraph} style={styles.paragraph}>
+              <Text key={paragraph} {...informationWebPart("paragraph")} style={styles.paragraph}>
                 {t("legal", paragraph)}
               </Text>
             ))}
+            {Platform.OS === "web" && section.titleKey === "intellectualPropertyTitle" ? (
+              <Text {...informationWebPart("paragraph")} style={styles.paragraph}>{t("legal", "illustrativeImagesParagraph")}</Text>
+            ) : null}
             {"highlightedParagraphKey" in section ? (
-              <Text style={styles.highlightedParagraph}>
+              <Text {...informationWebPart("highlightedParagraph")} style={styles.highlightedParagraph}>
                 {t("legal", section.highlightedParagraphKey)}
               </Text>
             ) : null}
           </View>
         ))}
 
-        <Link href={pagePath("home")} asChild>
-          <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>{t("navigation", "backHome")}</Text>
+        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+          <Pressable {...informationWebPart("backButton")} style={styles.backButton}>
+            <Text {...informationWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backHome")}</Text>
           </Pressable>
-        </Link>
+        </Link> : null}
+        </FooterPageContent>
+        <SiteFooter />
       </ScrollView>
     </>
   );

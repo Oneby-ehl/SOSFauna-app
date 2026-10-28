@@ -56,6 +56,7 @@ type SeoHeadProps = {
   structuredData?: Record<string, unknown>;
   includeGlobalStructuredData?: boolean;
   alternates?: readonly { locale: string; path: string }[];
+  locale?: "es" | "en";
 };
 
 function absoluteUrl(path = "/") {
@@ -71,15 +72,27 @@ export function SeoHead({
   structuredData,
   includeGlobalStructuredData = robots === "index, follow",
   alternates,
+  locale = "es",
 }: SeoHeadProps) {
   if (Platform.OS !== "web") return null;
 
   const url = absoluteUrl(path);
+  const english = locale === "en";
+  const siteDescription = english
+    ? "SOS Fauna España offers step-by-step guidance if you find wildlife that is injured, trapped, weak, stranded or in danger."
+    : SITE_DESCRIPTION;
+  const siteHome = english ? `${SITE_URL}/en/` : `${SITE_URL}/`;
   const includeOrganizationStructuredData =
-    includeGlobalStructuredData && url === `${SITE_URL}/`;
+    includeGlobalStructuredData && url === siteHome;
+  const sharedData = english
+    ? globalStructuredData.map(item => ({ ...item, url: siteHome, inLanguage: "en", description: siteDescription }))
+    : globalStructuredData;
+  const organizationData = english
+    ? { ...organizationStructuredData, description: siteDescription }
+    : organizationStructuredData;
   const structuredDataItems = [
-    ...(includeGlobalStructuredData ? globalStructuredData : []),
-    ...(includeOrganizationStructuredData ? [organizationStructuredData] : []),
+    ...(includeGlobalStructuredData ? sharedData : []),
+    ...(includeOrganizationStructuredData ? [organizationData] : []),
     ...(structuredData ? [structuredData] : []),
   ];
 
@@ -98,11 +111,11 @@ export function SeoHead({
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
-      <meta property="og:locale" content="es_ES" />
+      <meta property="og:locale" content={english ? "en_GB" : "es_ES"} />
       <meta property="og:image" content={SOCIAL_IMAGE_URL} />
       <meta property="og:image:width" content={SOCIAL_IMAGE_WIDTH} />
       <meta property="og:image:height" content={SOCIAL_IMAGE_HEIGHT} />
-      <meta property="og:image:alt" content={SOCIAL_IMAGE_ALT} />
+      <meta property="og:image:alt" content={english ? "SOS Fauna España - Help for wildlife" : SOCIAL_IMAGE_ALT} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
@@ -121,16 +134,19 @@ export function SeoHead({
 type NoIndexHeadProps = {
   path: string;
   title?: string;
+  locale?: "es" | "en";
 };
 
 export function NoIndexHead({
   path,
   title = "SOS Fauna España",
+  locale = "es",
 }: NoIndexHeadProps) {
   return (
     <SeoHead
       title={title}
-      description="Pantalla interna de SOS Fauna España."
+      description={locale === "en" ? "Private SOS Fauna España page." : "Pantalla interna de SOS Fauna España."}
+      locale={locale}
       path={path}
       robots="noindex, nofollow"
       includeGlobalStructuredData={false}

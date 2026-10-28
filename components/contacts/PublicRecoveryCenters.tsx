@@ -12,3 +12,5 @@ export type PublicRecoveryCentersProps = {
 export default function PublicRecoveryCenters(_: PublicRecoveryCentersProps) {
   return null;
 }
+
+export function PublicCentersBackIcon() { return null; }

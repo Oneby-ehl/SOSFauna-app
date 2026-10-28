@@ -1,4 +1,3 @@
-import Head from "expo-router/head";
 import { usePathname } from "expo-router";
 import type { ComponentProps } from "react";
 import { Platform } from "react-native";
@@ -7,9 +6,8 @@ import { SeoHead as PublicSeoHead } from "@/components/seo/SeoHead";
 import { useI18n } from "@/i18n/I18nProvider";
 import { getEnglishDevelopmentPage, isLocalLanguagePreview, isWebLanguageEnabled, type InformationPageId } from "@/i18n/developmentPreview";
 import { getLocalizedPath, matchLocalizedRoute } from "@/i18n/routes";
-import { getCatalog } from "@/i18n/translate";
 
-const englishSeo: Partial<Record<InformationPageId, { title: string; description: string }>> = {
+const englishSeo: Record<InformationPageId, { title: string; description: string }> = {
   home: {
     title: "Injured Wildlife in Spain: What to Do | SOS Fauna España",
     description: "Found an injured or trapped wild animal in Spain? Get step-by-step guidance and find wildlife rescue centres and emergency contacts. Independent project.",
@@ -30,6 +28,34 @@ const englishSeo: Partial<Record<InformationPageId, { title: string; description
     title: "Wildlife Rescue Centres in Spain | SOS Fauna España",
     description: "Wildlife rescue centres and emergency contacts in Spain, organised by province. Independent directory; assistance in English is not guaranteed.",
   },
+  about: {
+    title: "About SOS Fauna España | Help for Wildlife",
+    description: "Learn about SOS Fauna España, an independent project offering guidance on wildlife incidents and helping people find the appropriate services in Spain.",
+  },
+  contact: {
+    title: "Contact | SOS Fauna España",
+    description: "Contact SOS Fauna España to report errors, suggest improvements or ask questions about how the project works.",
+  },
+  privacy: {
+    title: "Privacy Policy | SOS Fauna España",
+    description: "Find out how SOS Fauna España handles permissions, local storage and information used in the web and Android applications.",
+  },
+  legal: {
+    title: "Legal Notice | SOS Fauna España",
+    description: "Legal information, terms of use and limitations of liability for SOS Fauna España, an independent wildlife guidance application.",
+  },
+  sources: {
+    title: "Wildlife Information Sources | SOS Fauna España",
+    description: "Public bodies, legislation and useful resources for responding to incidents involving land and marine wildlife in Spain.",
+  },
+  guide: {
+    title: "Assisted Care Guide | SOS Fauna España",
+    description: "Step-by-step guidance for assessing a wildlife incident, gathering information and finding appropriate help in Spain.",
+  },
+  history: {
+    title: "My Reports | SOS Fauna España",
+    description: "View completed wildlife reports saved on this device.",
+  },
 };
 
 export function useInformationPagePath() {
@@ -38,11 +64,11 @@ export function useInformationPagePath() {
   return (id: InformationPageId) => getLocalizedPath(id, preview ? "en" : "es");
 }
 
-// Preview-only reciprocal metadata. Public Spanish SEO and Open Graph retain
-// their existing inputs. Both languages remain noindex until publication approval.
+// Keep Spanish metadata unchanged. English uses the same metadata renderer;
+// local previews remain noindex under the existing publication settings.
 export function SeoHead(props: ComponentProps<typeof PublicSeoHead>) {
   const pathname = usePathname();
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
   const platform = Platform.OS === "web" ? "web" : "native";
   const id = matchLocalizedRoute(pathname);
   const page = id && getEnglishDevelopmentPage(getLocalizedPath(id, "en"), platform);
@@ -52,24 +78,19 @@ export function SeoHead(props: ComponentProps<typeof PublicSeoHead>) {
   const es = getLocalizedPath(page, "es"), en = getLocalizedPath(page, "en");
   const alternates = [{ locale: "es", path: es }, { locale: "en", path: en }, { locale: "x-default", path: es }];
   if (locale === "es") return <PublicSeoHead {...props} robots={robots} alternates={alternates} />;
-  const metadata = englishSeo[page];
-  const title = metadata?.title ?? (page === "home" ? t("common", "brand")
-    : page === "swifts" ? t("faqTopics", "vencejosHeading")
-    : page === "bats" ? t("faqTopics", "murcielagosHeading")
-    : t("navigation", page));
-  const c = getCatalog("en");
-  const descriptions: Record<InformationPageId, string> = {
-    home: c.home.heroDescription, about: c.about.intro1, sources: c.sources.intro1,
-    contact: c.contact.intro1, privacy: c.privacy.paragraph3, legal: c.legal.guidanceParagraph1,
-    faq: c.faqUi.intro, swifts: c.faqTopics.vencejosIntro, bats: c.faqTopics.murcielagosIntro,
-    centers: c.centers.intro, guide: c.home.heroDescription, history: c.historyUi.description,
-  };
-  return <Head>
-    <title>{title}</title><meta name="description" content={metadata?.description ?? descriptions[page]} />
-    <meta name="robots" content={robots} />
-    <link rel="canonical" href={`https://sosfauna.es${en}`} />
-    {alternates.map(item => <link key={item.locale} rel="alternate" hrefLang={item.locale} href={`https://sosfauna.es${item.path}`} />)}
-  </Head>;
+  const { title, description } = englishSeo[page];
+  const data = props.structuredData;
+  const structuredData = data ? {
+    ...data,
+    inLanguage: "en",
+    ...(typeof data.url === "string" ? { url: `https://sosfauna.es${en}` } : {}),
+    ...(typeof data.description === "string" ? { description } : {}),
+    ...(typeof data.name === "string" && page !== "home" ? { name: title } : {}),
+    ...(data.isPartOf && typeof data.isPartOf === "object" && !Array.isArray(data.isPartOf)
+      ? { isPartOf: { ...data.isPartOf, url: "https://sosfauna.es/en/" } } : {}),
+  } : undefined;
+  return <PublicSeoHead {...props} title={title} description={description} path={en}
+    robots={robots} alternates={alternates} locale="en" structuredData={structuredData} />;
 }
 
 export function NoIndexHead({ path, title = "SOS Fauna España" }: { path: string; title?: string }) {

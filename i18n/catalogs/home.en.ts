@@ -45,7 +45,7 @@ export const homeEn = {
     processWarning: "Intervening unnecessarily can separate them from their parents or reduce their chances of survival.",
     processConclusion: "That is why SOS Fauna España first helps you assess the situation and decide whether intervention is really needed.",
     scopeTitle: "Which animals does SOS Fauna España cover?",
-    scopeDescription: "SOS Fauna España focuses on the most common wildlife incidents, covering land animals, birds and marine wildlife.",
+    scopeDescription: "SOS Fauna España offers guidance on the most common situations affecting wildlife, including birds, mammals, reptiles, amphibians and marine wildlife. Its aim is to help you assess each situation and find the most appropriate way to act, always respecting the animal’s welfare.",
     birds: "Birds",
     mammals: "Mammals",
     reptiles: "Reptiles and amphibians",

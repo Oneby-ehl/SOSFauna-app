@@ -26,7 +26,7 @@ function prepareWebRoutes() {
   removeBuildDirectory(routerRoot);
   fs.mkdirSync(path.dirname(routerRoot), { recursive: true });
   fs.cpSync(path.join(root, 'app'), routerRoot, { recursive: true });
-  const pages = { home: 'LandingPage', about: 'AboutPage', sources: 'SourcesPage', contact: 'ContactPage', privacy: 'PrivacyPage', legal: 'LegalPage', guide: 'AvisoRoute', faq: 'FaqPage', swifts: 'TopicFaqPage', bats: 'TopicFaqPage', centers: 'CentrosRoute', history: 'HistoryPage' };
+  const pages = { home: 'Home', about: 'AboutPage', sources: 'SourcesPage', contact: 'ContactPage', privacy: 'PrivacyPage', legal: 'LegalPage', guide: 'AvisoRoute', faq: 'FaqPage', swifts: 'TopicFaqPage', bats: 'TopicFaqPage', centers: 'CentrosRoute', history: 'HistoryPage' };
   // History uses the shared page but remains private and outside the sitemap.
   for (const [id, routes] of [...getBilingualRoutes(), ['history', getWebRoutes().history]]) {
     if (!pages[id] || !/^\/en\/(?:[a-z]+(?:\/[a-z]+)*)?$/.test(routes.en)) throw new Error('Ruta inglesa no reconocida: ' + id);
@@ -56,6 +56,7 @@ function finishHtml(directory) {
       const locale = relative === 'en.html' || relative.startsWith('en/') ? 'en' : 'es';
       const source = fs.readFileSync(file, 'utf8');
       let html = source.replace(/<html\b([^>]*)>/i, (tag, attributes) => /\blang=["'][^"']*["']/i.test(attributes) ? tag.replace(/\blang=["'][^"']*["']/i, `lang="${locale}"`) : `<html lang="${locale}"${attributes}>`);
+      if (locale === 'en') html = html.replace('href="/manifest.json"', 'href="/manifest.en.json"');
       // Expo's internal route listing is not the public XML sitemap and must
       // never become an indexable page exposing the application's internal routes.
       if (relative === '_sitemap.html') html = html.replace('</head>', '<meta name="robots" content="noindex, nofollow" /></head>');

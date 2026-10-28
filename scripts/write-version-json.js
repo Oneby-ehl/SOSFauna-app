@@ -2,14 +2,13 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const appConfigPath = path.join(root, "app.json");
+const webVersionPath = path.join(root, "constants", "web-version.json");
 const publicDirectory = path.join(root, "public");
 const versionFilePath = path.join(publicDirectory, "version.json");
-const appConfig = JSON.parse(fs.readFileSync(appConfigPath, "utf8"));
-const version = appConfig.expo && appConfig.expo.version;
+const { version } = JSON.parse(fs.readFileSync(webVersionPath, "utf8"));
 
 if (typeof version !== "string" || version.length === 0) {
-  throw new Error("No se ha encontrado expo.version en app.json.");
+  throw new Error("No se ha encontrado version en constants/web-version.json.");
 }
 
 fs.mkdirSync(publicDirectory, { recursive: true });

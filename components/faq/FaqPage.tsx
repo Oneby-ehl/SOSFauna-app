@@ -1,3 +1,4 @@
+import SiteFooter from "@/components/web/SiteFooter";
 import { getEffectiveCatalog } from "@/i18n/translate";
 import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
 import { getFaqSearchVocabulary } from "@/data/faqSearchVocabulary";
@@ -34,6 +35,8 @@ import { normalizeSearchText, searchFaqItems } from "@/utils/faqSearch";
 import { useI18n } from "@/i18n/I18nProvider";
 
 import { formatAdvice } from "@/utils/adviceComposition";
+import { FaqStyles, FaqIcon, FaqAnswer, faqWebPart } from "./FaqPresentation";
+import { interiorNavigationOptions } from "./TopicFaqHeader";
 
 const swiftFaqPriority = new Map<string, number>(
   swiftFaqPriorityIds.map((itemId, index) => [itemId, index]),
@@ -520,39 +523,39 @@ export default function FaqPage() {
   };
 
   const renderCreateNoticePrompt = () => (
-    <View style={styles.createNoticeBox}>
-      <Text style={styles.createNoticeTitle}>
+    <View {...faqWebPart("createNoticeBox")} style={styles.createNoticeBox}>
+      <Text {...faqWebPart("createNoticeTitle")} style={styles.createNoticeTitle}>
         {t("faqUi", "caseDoubtTitle")}
       </Text>
-      <Text style={styles.createNoticeText}>
+      <Text {...faqWebPart("createNoticeText")} style={styles.createNoticeText}>
         {t("faqUi", "caseDoubtText")}
       </Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t("navigation", "guide")}
-        style={styles.createNoticeButton}
+        {...faqWebPart("createNoticeButton")} style={styles.createNoticeButton}
         onPress={startNotice}
       >
-        <Text style={styles.createNoticeButtonText}>{t("navigation", "guide")}</Text>
+        <Text {...faqWebPart("createNoticeButtonText")} style={styles.createNoticeButtonText}>{t("navigation", "guide")}</Text>
       </Pressable>
     </View>
   );
 
   const renderRecoveryCentersPrompt = () => (
-    <View style={styles.recoveryCentersBox}>
-      <Text style={styles.recoveryCentersTitle}>
+    <View {...faqWebPart("recoveryCentersBox")} style={styles.recoveryCentersBox}>
+      <Text {...faqWebPart("recoveryCentersTitle")} style={styles.recoveryCentersTitle}>
         {t("faqUi", "centersPromptTitle")}
       </Text>
-      <Text style={styles.recoveryCentersText}>
+      <Text {...faqWebPart("recoveryCentersText")} style={styles.recoveryCentersText}>
         {t("faqUi", "centersPromptText")}
       </Text>
       <Link href={pagePath("centers")} asChild>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("navigation", "centers")}
-          style={styles.recoveryCentersButton}
+          {...faqWebPart("recoveryCentersButton")} style={styles.recoveryCentersButton}
         >
-          <Text style={styles.recoveryCentersButtonText}>
+          <Text {...faqWebPart("recoveryCentersButtonText")} style={styles.recoveryCentersButtonText}>
             {t("navigation", "centers")}
           </Text>
         </Pressable>
@@ -566,17 +569,25 @@ export default function FaqPage() {
         title="Preguntas frecuentes sobre fauna silvestre | SOS Fauna España"
         description="Respuestas sobre qué hacer ante fauna silvestre herida, atrapada o varada, incluidas aves, mamíferos, reptiles, anfibios y fauna marina."
         path="/faq"
-        structuredData={faqPageStructuredData}
+        structuredData={locale === "en" ? {
+          ...faqPageStructuredData,
+          mainEntity: filterFaqItemsBySelectedAnimal(faqItems, null).map(item => ({
+            "@type": "Question", name: item.question,
+            acceptedAnswer: { "@type": "Answer", text: item.answer },
+          })),
+        } : faqPageStructuredData}
       />
       <Stack.Screen
         options={{
+          ...interiorNavigationOptions,
           title: locale === "en" ? `${t("navigation", "faq")} | SOS Fauna España` : "Preguntas frecuentes sobre fauna silvestre | SOS Fauna España",
         }}
       />
 
+      <FaqStyles />
       <ScrollView
         ref={scrollViewRef}
-        style={styles.screen}
+        {...faqWebPart("screen")} style={styles.screen}
         contentContainerStyle={[
           styles.container,
           {
@@ -590,27 +601,29 @@ export default function FaqPage() {
         onLayout={(event) => setScrollViewHeight(event.nativeEvent.layout.height)}
         stickyHeaderIndices={[1]}
       >
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text accessibilityRole="header" aria-level={1} style={styles.title}>{t("navigation", "faq")}</Text>
-          <Text style={styles.intro}>
+        <View {...faqWebPart("header")} style={styles.header}>
+          <Text {...faqWebPart("eyebrow")} style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole="header" aria-level={1} {...faqWebPart("title")} style={styles.title}>{t("navigation", "faq")}</Text>
+          <Text {...faqWebPart("intro")} style={styles.intro}>
             {t("faqUi", "intro")}
           </Text>
         </View>
 
         <View
-          style={styles.searchSection}
+          {...faqWebPart("searchSection")} style={styles.searchSection}
           onLayout={(event) =>
             setStickyHeaderHeight(event.nativeEvent.layout.height)
           }
         >
-          <View style={styles.searchInputWrap}>
+          <View {...faqWebPart("searchInputWrap")} style={styles.searchInputWrap}>
+          <FaqIcon kind="search" />
           <TextInput
             ref={searchInputRef}
             accessibilityLabel={t("faqUi", "searchLabel")}
             placeholder={t("faqUi", "searchPlaceholder")}
             value={searchQuery}
             onChangeText={handleSearchQueryChange}
+            {...faqWebPart("searchInput")}
             style={[
               styles.searchInput,
               searchQuery.length > 0 && styles.searchInputWithClear,
@@ -622,35 +635,36 @@ export default function FaqPage() {
                 accessibilityRole="button"
                 accessibilityLabel={t("faqUi", "clearSearch")}
                 hitSlop={8}
-                style={styles.clearSearchButton}
+                {...faqWebPart("clearSearchButton")} style={styles.clearSearchButton}
                 onPress={clearSearch}
               >
-                <Text style={styles.clearSearchButtonText}>✕</Text>
+                {Platform.OS === "web" ? <FaqIcon kind="clear" /> : <Text {...faqWebPart("clearSearchButtonText")} style={styles.clearSearchButtonText}>✕</Text>}
               </Pressable>
             ) : null}
           </View>
 
           {animalSearchResults.length > 0 ? (
-            <View style={styles.categoryList}>
+            <View {...faqWebPart("categoryList")} style={styles.categoryList}>
               {animalSearchResults.map((animal) => (
                 <Pressable
                   key={animal.id}
                   accessibilityRole="button"
                   accessibilityLabel={`${t("faqUi", "selectPrefix")}${animal.name}`}
                   onPress={() => selectAnimalSearchResult(animal)}
+                  {...faqWebPart("categoryPill")}
                   style={({ pressed }) => [
                     styles.categoryPill,
                     pressed && styles.categoryPillPressed,
                   ]}
                 >
-                  <Text style={styles.categoryPillText}>{animal.name}</Text>
+                  <Text {...faqWebPart("categoryPillText")} style={styles.categoryPillText}>{animal.name}</Text>
                 </Pressable>
               ))}
             </View>
           ) : null}
 
           {shouldShowCategoryNavigation ? (
-            <View style={styles.categoryList}>
+            <View {...faqWebPart("categoryList")} style={styles.categoryList}>
               {visibleFaqCategories.map((category) => (
                 <Pressable
                   key={getFaqCategoryId(category)}
@@ -659,13 +673,14 @@ export default function FaqPage() {
                   onPress={() => handleCategoryPress(category)}
                   onFocus={() => setFocusedCategory(getFaqCategoryId(category as (typeof faqCategories)[number]))}
                   onBlur={() => setFocusedCategory(null)}
+                  {...faqWebPart("categoryPill", focusedCategory === getFaqCategoryId(category))}
                   style={({ pressed }) => [
                     styles.categoryPill,
                     pressed && styles.categoryPillPressed,
                     focusedCategory === getFaqCategoryId(category) && styles.categoryPillFocused,
                   ]}
                 >
-                  <Text style={styles.categoryPillText}>{categoryLabel(category)}</Text>
+                  <Text {...faqWebPart("categoryPillText")} style={styles.categoryPillText}>{categoryLabel(category)}</Text>
                 </Pressable>
               ))}
             </View>
@@ -674,7 +689,7 @@ export default function FaqPage() {
 
         {hasResults ? (
           <View
-            style={styles.content}
+            {...faqWebPart("content")} style={styles.content}
             onLayout={(event) => {
               contentOffsetRef.current = event.nativeEvent.layout.y;
             }}
@@ -682,34 +697,34 @@ export default function FaqPage() {
             {groupedItems.map((group) => (
               <View
                 key={getFaqCategoryId(group.category)}
-                style={styles.categorySection}
+                {...faqWebPart("categorySection")} style={styles.categorySection}
                 onLayout={(event) => {
                   categoryOffsetsRef.current[getFaqCategoryId(group.category)] =
                     event.nativeEvent.layout.y;
                 }}
               >
-                <Text accessibilityRole="header" aria-level={2} style={styles.categoryTitle}>{categoryLabel(group.category)}</Text>
+                <Text accessibilityRole="header" aria-level={2} {...faqWebPart("categoryTitle")} style={styles.categoryTitle}>{categoryLabel(group.category)}</Text>
 
-                <View style={styles.questionList}>
+                <View {...faqWebPart("questionList")} style={styles.questionList}>
                   {group.items.map((item) => {
                     const isOpen = openItemId === item.id;
                     const shouldRenderAnswer = isOpen || Platform.OS === "web";
 
                     return (
-                      <View key={item.id} style={styles.faqCard}>
+                      <View key={item.id} {...faqWebPart("faqCard")} style={styles.faqCard}>
                         <Pressable
                           accessibilityRole="button"
                           accessibilityLabel={`${isOpen ? t("faqUi", "closeQuestion") : t("faqUi", "openQuestion")}${t("faqUi", "questionLabelSeparator")}${item.question}`}
                           accessibilityState={{ expanded: isOpen }}
                           onPress={() => toggleItem(item.id)}
-                          style={styles.questionButton}
+                          {...faqWebPart("questionButton")} style={styles.questionButton}
                         >
-                          <Text accessibilityRole="header" aria-level={3} style={styles.questionText}>
+                          <Text accessibilityRole="header" aria-level={3} {...faqWebPart("questionText")} style={styles.questionText}>
                             {item.question}
                           </Text>
-                          <Text style={styles.questionIndicator}>
+                          {Platform.OS === "web" ? <FaqIcon kind="expand" expanded={isOpen} /> : <Text {...faqWebPart("questionIndicator")} style={styles.questionIndicator}>
                             {isOpen ? "−" : "+"}
-                          </Text>
+                          </Text>}
                         </Pressable>
 
                         {shouldRenderAnswer ? (
@@ -718,12 +733,13 @@ export default function FaqPage() {
                             importantForAccessibility={
                               isOpen ? "auto" : "no-hide-descendants"
                             }
+                            {...faqWebPart("answerContent")}
                             style={[
                               styles.answerContent,
                               !isOpen && styles.hiddenAnswerContent,
                             ]}
                           >
-                            <Text style={styles.answerText}>{item.answer}</Text>
+                            {Platform.OS === "web" ? <FaqAnswer text={item.answer} /> : <Text style={styles.answerText}>{item.answer}</Text>}
                             {item.showCreateNotice
                               ? renderCreateNoticePrompt()
                               : null}
@@ -740,32 +756,33 @@ export default function FaqPage() {
             ))}
           </View>
         ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>
+          <View {...faqWebPart("emptyState")} style={styles.emptyState}>
+            <Text {...faqWebPart("emptyText")} style={styles.emptyText}>
               {t("faqUi", "noResults")}
             </Text>
           </View>
         )}
 
-        <View style={styles.specializedSection}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.specializedTitle}>
+        {Platform.OS !== "web" ? <View {...faqWebPart("specializedSection")} style={styles.specializedSection}>
+          <Text accessibilityRole="header" aria-level={2} {...faqWebPart("specializedTitle")} style={styles.specializedTitle}>
             {t("faqUi", "specializedTitle")}
           </Text>
-          <View style={styles.specializedLinks}>
-            <Link href={pagePath("swifts")} style={styles.specializedLink}>
+          <View {...faqWebPart("specializedLinks")} style={styles.specializedLinks}>
+            <Link href={pagePath("swifts")} {...faqWebPart("specializedLink")} style={styles.specializedLink}>
               {t("faqUi", "swiftsLinkLabel")}
             </Link>
-            <Link href={pagePath("bats")} style={styles.specializedLink}>
+            <Link href={pagePath("bats")} {...faqWebPart("specializedLink")} style={styles.specializedLink}>
               {t("faqUi", "batsLinkLabel")}
             </Link>
           </View>
-        </View>
+        </View> : null}
 
-        <Link href={pagePath("home")} asChild>
-          <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
+        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+          <Pressable {...faqWebPart("backButton")} style={styles.backButton}>
+            <Text {...faqWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
-        </Link>
+        </Link> : null}
+        <SiteFooter />
       </ScrollView>
     </>
   );

@@ -11,7 +11,8 @@ import {
   View,
 } from "react-native";
 
-import PublicRecoveryCenters from "./PublicRecoveryCenters";
+import PublicRecoveryCenters, { PublicCentersBackIcon } from "./PublicRecoveryCenters";
+import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
 import { matchesProvinceHelpGroup } from "./contactSearch";
 import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 
@@ -52,6 +53,11 @@ const normalizeProvinceSearch = (value: string) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+
+// Styling hooks for the public web page only; assistant and native cards stay unchanged.
+function publicWebMarker(marker: "page" | "header" | "back" | "intro"): Record<string, unknown> {
+  return Platform.OS === "web" ? { dataSet: { [`centros${marker[0].toUpperCase()}${marker.slice(1)}`]: "true" } } : {};
+}
 
 const callNumber = async (phoneNumber: string) => {
   await Linking.openURL(`tel:${phoneNumber}`);
@@ -388,7 +394,7 @@ export function RecoveryCentersContent({
   );
 }
 
-export default function RecoveryCentersPage() {
+export default function RecoveryCentersPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t, locale } = useI18n();
   const pagePath = useInformationPagePath();
   const publicProvinceGroups = useMemo(getProvinceHelpGroups, []);
@@ -397,16 +403,19 @@ export default function RecoveryCentersPage() {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [provinceSearch, setProvinceSearch] = useState("");
 
-  return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
-      <View style={styles.header}>
+  const content = (
+    <>
+      <View {...publicWebMarker("header")} style={styles.header}>
         <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
         <Text accessibilityRole="header" aria-level={1} style={styles.title}>
           {t("navigation", "centers")}
         </Text>
-        <Text style={styles.intro}>
+        <Text {...publicWebMarker("intro")} style={styles.intro}>
           {t("centers", "intro")}
         </Text>
+        {Platform.OS === "web" ? <Text {...publicWebMarker("intro")} style={styles.intro}>
+          {t("centers", "geographicalScope")}
+        </Text> : null}
       </View>
 
       {Platform.OS === "web" ? (
@@ -431,11 +440,25 @@ export default function RecoveryCentersPage() {
       />
       )}
 
-      <Link href={pagePath("home")} asChild>
-        <Pressable style={styles.backButton}>
+      {!embedded && Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+        <Pressable {...publicWebMarker("back")} style={styles.backButton}>
+          <PublicCentersBackIcon />
           <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
         </Pressable>
-      </Link>
+      </Link> : null}
+    </>
+  );
+
+  // The guide already owns its scroll view and back arrow. Reuse this page's
+  // content there without nesting scroll views or leaving the current report.
+  return embedded ? (
+    <View {...publicWebMarker("page")}>
+      <View {...(Platform.OS === "web" ? { dataSet: { centrosContent: "true" } } : {})} style={styles.container}>{content}</View>
+    </View>
+  ) : (
+    <ScrollView {...publicWebMarker("page")} style={styles.screen} contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}>
+      <FooterPageContent {...(Platform.OS === "web" ? { dataSet: { centrosContent: "true" } } : {})} style={styles.container}>{content}</FooterPageContent>
+      <SiteFooter />
     </ScrollView>
   );
 }

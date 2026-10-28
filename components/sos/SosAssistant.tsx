@@ -1,4 +1,5 @@
 import { localiseAssistantLabel } from "@/i18n/assistantLabels";
+import { GREFA_WHATSAPP } from "@/data/grefa";
 import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 // Protocol catalog recommendationFragmentsEs resolves per invocation.
 import { getEffectiveCatalog, type Catalog } from "@/i18n/translate";
@@ -56,8 +57,13 @@ import {
 } from "react-native-safe-area-context";
 
 import { Stack, useRouter } from "expo-router";
-import { RecoveryCentersContent } from "@/components/contacts/RecoveryCentersPage";
+import RecoveryCentersPage, { RecoveryCentersContent } from "@/components/contacts/RecoveryCentersPage";
 import { SectionCard } from "@/components/SectionCard";
+import { StepOneCard, StepOneStyles, stepOneDataSet, guideQuestionTitle, guideSummaryText, GuideActionIcon, GuideAbsenceIndicator, GuideConfirmationCard, AdvicePresentation, StepThreeStatus, GuideSpeechLabel } from "./StepOnePresentation";
+import { useWebNavigation } from "@/components/web/WebNavigation";
+import SiteFooter from "@/components/web/SiteFooter";
+import FinishReportDialog from "./FinishReportDialog";
+import CopySummaryNotice, { type CopySummaryNoticeProps } from "./CopySummaryNotice";
 import { buildRescueShareMessage } from "@/utils/rescueShareMessage";
 
 const generalTexts = getEffectiveCatalog();
@@ -107,7 +113,6 @@ type AnimalEnvironment = NonNullable<RescueCase["animalEnvironment"]>;
 
 type Step = 1 | 2 | 3 | 4;
 
-const GREFA_WHATSAPP = "34648539901";
 
 export const COMMON_END =
   getEffectiveCatalog().supplementalAdvice.commonEnd;
@@ -2093,6 +2098,7 @@ export default function HomeScreen({
   initialAnimalType = null,
 }: SosAssistantProps) {
   const { t, locale } = useI18n();
+  const { registerLeaveGuard, requestExit } = useWebNavigation();
   const generalTexts = getEffectiveCatalog(locale);
   const pagePath = useInformationPagePath();
   const homePath = pagePath("home");
@@ -2111,6 +2117,8 @@ export default function HomeScreen({
   const [step, setStep] = useState<Step>(normalizeInitialStep(initialCase?.step));
 
   const [showContacts, setShowContacts] = useState(false);
+  const [finishDialogOpen, setFinishDialogOpen] = useState(false);
+  const [copyNotice, setCopyNotice] = useState<CopySummaryNoticeProps["notice"]>(null);
   const [showWhatsAppOptions, setShowWhatsAppOptions] = useState(false);
   const [showHelpSources, setShowHelpSources] = useState(false);
   const [showProvinces, setShowProvinces] = useState(false);
@@ -2474,6 +2482,15 @@ export default function HomeScreen({
     !showProvinces &&
     !selectedProvince;
 
+  // Presentation gate only: no change to steps, selection, persistence or routing.
+  const isEditorialStepOne = Platform.OS === "web" && step === 1 &&
+    !showContacts && !showProvinces && !selectedProvince &&
+    !showWhatsAppConfirmation && !showWhatsAppOptions && !showEmptyStep3Confirmation;
+
+  const isEditorialGuide = Platform.OS === "web" &&
+    !showContacts && !showProvinces && !selectedProvince &&
+    !showWhatsAppConfirmation && !showWhatsAppOptions && !showEmptyStep3Confirmation;
+
   const canShowStep1ScrollHint =
     step === 1 &&
     !showContacts &&
@@ -2732,6 +2749,22 @@ export default function HomeScreen({
     }
   };
 
+  const shareSummaryOnWhatsApp = () => {
+    const url = `https://wa.me/?text=${encodeURIComponent(generatedSummary)}`;
+    let target: Window | null = null;
+    try {
+      // Open synchronously from the user action, keeping the report in its tab.
+      // No recipient, send action, persistence or report-state updates.
+      target = window.open("about:blank", "_blank");
+      if (!target) throw new Error("WhatsApp window unavailable");
+      target.opener = null;
+      target.location.replace(url);
+    } catch {
+      target?.close();
+      showMessage(t("assistantUi", "whatsAppErrorTitle"), t("assistantUi", "whatsAppShareUnavailable"));
+    }
+  };
+
   const openWhatsAppWithNumber = async (number: string) => {
     const cleaned = normalizeWhatsAppNumber(number);
 
@@ -2795,6 +2828,17 @@ export default function HomeScreen({
   };
 
   const copySummary = async () => {
+    if (Platform.OS === "web") {
+      let kind: "success" | "error" = "error";
+      try {
+        // Retain Expo's clipboard implementation and its existing fallback.
+        if (await Clipboard.setStringAsync(generatedSummary)) kind = "success";
+      } catch {
+        // Rejection or a false result must never show a success acknowledgement.
+      }
+      setCopyNotice(previous => ({ kind, id: (previous?.id ?? 0) + 1 }));
+      return;
+    }
     await Clipboard.setStringAsync(generatedSummary);
     showMessage(t("assistantUi", "summaryCopiedTitle"), t("assistantUi", "summaryCopiedMessage"));
   };
@@ -2911,7 +2955,15 @@ const saveCurrentProgress = async (
     };
   });
 
-  const completeAndReturnHome = async () => {
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+    return registerLeaveGuard(async () => {
+      if (!shouldConfirmExitRef.current) return true;
+      return requestExit(() => saveCurrentProgressRef.current());
+    });
+  }, [registerLeaveGuard, requestExit]);
+
+  const completeAndReturnHome = async (onSaved?: () => void) => {
     if (flowCompletedRef.current) return;
     flowCompletedRef.current = true;
 
@@ -2933,7 +2985,12 @@ const saveCurrentProgress = async (
         currentCaseRef.current,
       );
 
-      router.replace(homePath);
+      if (onSaved) {
+        // While the saved acknowledgement is open, leaving must not save the
+        // completed report again as a new pending report.
+        shouldConfirmExitRef.current = false;
+        onSaved();
+      } else router.replace(homePath);
     } catch {
       flowCompletedRef.current = false;
       showMessage(generalTexts.assistantCaptureUi.galleryErrorTitle,
@@ -2948,13 +3005,7 @@ const saveCurrentProgress = async (
     const thankYouMessage = t("assistantUi", "thankYouMessage");
 
     if (Platform.OS === "web") {
-      const confirmed = window.confirm(confirmationMessage);
-
-      if (confirmed) {
-        window.alert(thankYouMessage);
-        void completeAndReturnHome();
-      }
-
+      setFinishDialogOpen(true);
       return;
     }
 
@@ -3043,6 +3094,7 @@ const saveCurrentProgress = async (
     if (Platform.OS !== "web") return;
 
     let allowNavigation = false;
+    let deciding = false;
 
     const addGuardEntry = () => {
       window.history.pushState({ sosFaunaBackGuard: true }, "", backNavigationRef.current.url);
@@ -3052,6 +3104,7 @@ const saveCurrentProgress = async (
 
     const handlePopState = () => {
       if (allowNavigation) return;
+      if (deciding) { addGuardEntry(); return; }
 
       if (!shouldConfirmExitRef.current) {
         allowNavigation = true;
@@ -3059,24 +3112,14 @@ const saveCurrentProgress = async (
         return;
       }
 
-      const confirmed = window.confirm(
-        backNavigationRef.current.t("assistantUi", "exitConfirmation"),
-      );
-
-      if (confirmed) {
-        void (async () => {
-          if (await saveCurrentProgressRef.current()) {
-            allowNavigation = true;
-            router.replace(backNavigationRef.current.homePath);
-          } else {
-            addGuardEntry();
-          }
-        })();
-
-        return;
-      }
-
-      addGuardEntry();
+      deciding = true;
+      void requestExit(() => saveCurrentProgressRef.current()).then(confirmed => {
+        deciding = false;
+        if (confirmed) {
+          allowNavigation = true;
+          router.replace(backNavigationRef.current.homePath);
+        } else addGuardEntry();
+      });
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -3085,7 +3128,7 @@ const saveCurrentProgress = async (
       window.clearTimeout(guardTimer);
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [router]);
+  }, [router, requestExit]);
 
   const handleOpenHelp = () => {
     setShowContacts(true);
@@ -3094,6 +3137,7 @@ const saveCurrentProgress = async (
   };
 
   const renderRecoveryCenters = () => (
+    Platform.OS === "web" ? <RecoveryCentersPage embedded /> :
     <RecoveryCentersContent
       provinceSearch={provinceSearch}
       selectedProvince={selectedProvince}
@@ -3144,14 +3188,14 @@ const saveCurrentProgress = async (
   );
 
   const renderEmptyStep3Confirmation = () => (
-    <SectionCard title={t("assistantUi", "emptyInformationTitle")}>
-      <View style={styles.sectionContent}>
-        <Text style={styles.sectionDescription}>
+    <GuideConfirmationCard title={t("assistantUi", "emptyInformationTitle")}>
+      <View {...stepOneDataSet(Platform.OS === "web", { sosConfirmUi: "content" })} style={styles.sectionContent}>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosConfirmUi: "description" })} style={styles.sectionDescription}>
           {t("assistantUi", "emptyInformationQuestion")}
         </Text>
 
         <Pressable
-          style={styles.secondaryButton}
+          {...stepOneDataSet(Platform.OS === "web", { sosConfirmUi: "secondary" })} style={styles.secondaryButton}
           onPress={() => setShowEmptyStep3Confirmation(false)}
         >
           <Text style={styles.secondaryButtonText}>
@@ -3160,7 +3204,7 @@ const saveCurrentProgress = async (
         </Pressable>
 
         <Pressable
-          style={styles.primaryButton}
+          {...stepOneDataSet(Platform.OS === "web", { sosConfirmUi: "primary" })} style={styles.primaryButton}
           onPress={() => {
             setShowEmptyStep3Confirmation(false);
             void advanceToNextStep();
@@ -3169,7 +3213,7 @@ const saveCurrentProgress = async (
           <Text style={styles.primaryButtonText}>{t("assistantUi", "continueWithoutInformation")}</Text>
         </Pressable>
       </View>
-    </SectionCard>
+    </GuideConfirmationCard>
   );
 
   const renderWhatsAppOptions = () => (
@@ -3242,65 +3286,65 @@ const saveCurrentProgress = async (
   );
 
   const renderSummaryPreview = () => (
-    <View style={[styles.summaryBox, styles.summaryPreview]}>
-      <Text style={styles.summaryPreviewTitle}>{generalTexts.summaryPreview.title}</Text>
+    <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreview" })} style={[styles.summaryBox, styles.summaryPreview]}>
+      <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewTitle" })} style={styles.summaryPreviewTitle}>{guideSummaryText(generalTexts.summaryPreview.title)}</Text>
 
-      <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.animal}</Text>
-        <Text style={styles.summaryPreviewValue}>{displayLabel(selectedAnimalLabel)}</Text>
+      <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{Platform.OS === "web" ? t("assistantUi", "summaryAnimalType") : generalTexts.summaryPreview.animal}</Text>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>{guideSummaryText(displayLabel(selectedAnimalLabel))}</Text>
       </View>
 
-      <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.state}</Text>
-        <Text style={styles.summaryPreviewValue}>
-          {displayLabel(selectedAnimalStateLabel)}
+      <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.state)}</Text>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
+          {guideSummaryText(displayLabel(selectedAnimalStateLabel))}
         </Text>
       </View>
 
       {animalPosition ? (
-        <View style={styles.summaryPreviewSection}>
-          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.position}</Text>
-          <Text style={styles.summaryPreviewValue}>
-            {displayLabel(selectedAnimalPositionLabel)}
+        <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.position)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
+            {guideSummaryText(displayLabel(selectedAnimalPositionLabel))}
           </Text>
         </View>
       ) : null}
 
       {animalEnvironment ? (
-        <View style={styles.summaryPreviewSection}>
-          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.environment}</Text>
-          <Text style={styles.summaryPreviewValue}>
-            {displayLabel(selectedAnimalEnvironmentLabel)}
+        <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.environment)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
+            {guideSummaryText(displayLabel(selectedAnimalEnvironmentLabel))}
           </Text>
         </View>
       ) : null}
 
       {!animalPosition && !animalEnvironment && animalPlace ? (
-        <View style={styles.summaryPreviewSection}>
-          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.legacyPlace}</Text>
-          <Text style={styles.summaryPreviewValue}>
-            {displayLabel(selectedAnimalPlaceLabel)}
+        <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.legacyPlace)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
+            {guideSummaryText(displayLabel(selectedAnimalPlaceLabel))}
           </Text>
         </View>
       ) : null}
 
-      <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.observedSituation}</Text>
+      <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.observedSituation)}</Text>
         {selectedFlagLabels.length > 0 ? (
           <View style={styles.summaryPreviewList}>
             {selectedFlagLabels.map((label) => (
-              <Text key={label} style={styles.summaryPreviewListItem}>
-                • {displayLabel(label)}
+              <Text key={label} {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewListItem" })} style={styles.summaryPreviewListItem}>
+                {Platform.OS === "web" ? "" : "• "}{guideSummaryText(displayLabel(label))}
               </Text>
             ))}
           </View>
         ) : (
-          <Text style={styles.summaryPreviewValue}>{generalTexts.summaryPreview.noFlags}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>{guideSummaryText(generalTexts.summaryPreview.noFlags)}</Text>
         )}
       </View>
 
-      <View style={styles.summaryPreviewSection}>
-        <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.location}</Text>
+      <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.location)}</Text>
         {locationSummaryLines.length > 0 ? (
           <View style={styles.summaryPreviewList}>
             {locationSummaryLines.map((entry) => {
@@ -3310,29 +3354,29 @@ const saveCurrentProgress = async (
                 : line;
 
               return (
-                <Text key={line} style={styles.summaryPreviewValue}>
-                  {displayLine}
+                <Text key={line} {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
+                  {guideSummaryText(displayLine)}
                 </Text>
               );
             })}
           </View>
         ) : (
-          <Text style={styles.summaryPreviewValue}>{generalTexts.summaryPreview.no}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}><GuideAbsenceIndicator text={generalTexts.summaryPreview.no} /></Text>
         )}
       </View>
 
-      <View style={styles.summaryPreviewMetaRow}>
-        <View style={styles.summaryPreviewMetaItem}>
-          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.photo}</Text>
-          <Text style={styles.summaryPreviewValue}>
-            {photoUri ? generalTexts.summaryPreview.yes : generalTexts.summaryPreview.no}
+      <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewMetaRow" })} style={styles.summaryPreviewMetaRow}>
+        <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewMetaItem" })} style={styles.summaryPreviewMetaItem}>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.photo)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
+            {photoUri ? guideSummaryText(generalTexts.summaryPreview.yes) : <GuideAbsenceIndicator text={generalTexts.summaryPreview.no} />}
           </Text>
         </View>
 
-        <View style={styles.summaryPreviewMetaItem}>
-          <Text style={styles.summaryPreviewLabel}>{generalTexts.summaryPreview.video}</Text>
-          <Text style={styles.summaryPreviewValue}>
-            {videoUri ? generalTexts.summaryPreview.yes : generalTexts.summaryPreview.no}
+        <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewMetaItem" })} style={styles.summaryPreviewMetaItem}>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.video)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
+            {videoUri ? guideSummaryText(generalTexts.summaryPreview.yes) : <GuideAbsenceIndicator text={generalTexts.summaryPreview.no} />}
           </Text>
         </View>
       </View>
@@ -3351,31 +3395,33 @@ const saveCurrentProgress = async (
     }
 
     return (
-      <View style={styles.summaryActionBar}>
+      <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryActionBar" })} style={styles.summaryActionBar}>
         <Pressable
+          {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuPrimary", sosGuideAction: "whatsapp" })}
           style={[styles.menuActionButton, styles.menuActionButtonPrimary]}
-          onPress={() => setShowWhatsAppOptions(true)}
+          onPress={Platform.OS === "web" ? shareSummaryOnWhatsApp : () => setShowWhatsAppOptions(true)}
         >
-          <Text style={styles.menuActionEmoji}>🟢</Text>
-          <Text style={styles.menuActionLabelPrimary}>WhatsApp</Text>
+          {Platform.OS === "web" ? <GuideActionIcon action="whatsapp" /> : <Text style={styles.menuActionEmoji}>🟢</Text>}
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabelPrimary" })} style={styles.menuActionLabelPrimary}>WhatsApp</Text>
         </Pressable>
 
-        <Pressable style={styles.menuActionButton} onPress={copySummary}>
-          <Text style={styles.menuActionEmoji}>📋</Text>
-          <Text style={styles.menuActionLabel}>{t("assistantUi", "copy")}</Text>
+        <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionButton", sosGuideAction: "copy" })} style={styles.menuActionButton} onPress={copySummary}>
+          {Platform.OS === "web" ? <GuideActionIcon action="copy" /> : <Text style={styles.menuActionEmoji}>📋</Text>}
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabel" })} style={styles.menuActionLabel}>{t("assistantUi", "copy")}</Text>
         </Pressable>
 
-        <Pressable style={styles.menuActionButton} onPress={handleOpenHelp}>
-          <Text style={styles.menuActionEmoji}>📞</Text>
-          <Text style={styles.menuActionLabel}>{t("assistantUi", "help")}</Text>
+        <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionButton", sosGuideAction: "help" })} style={styles.menuActionButton} onPress={handleOpenHelp}>
+          {Platform.OS === "web" ? <GuideActionIcon action="help" /> : <Text style={styles.menuActionEmoji}>📞</Text>}
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabel" })} style={styles.menuActionLabel}>{t("assistantUi", "help")}</Text>
         </Pressable>
 
         <Pressable
+          {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuPrimary", sosGuideAction: "finish" })}
           style={[styles.menuActionButton, styles.menuActionButtonPrimarySoft]}
           onPress={finishFlow}
         >
-          <Text style={styles.menuActionEmoji}>✅</Text>
-          <Text style={styles.menuActionLabelPrimary}>{t("assistantUi", "finish")}</Text>
+          {Platform.OS === "web" ? <GuideActionIcon action="finish" /> : <Text style={styles.menuActionEmoji}>✅</Text>}
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabelPrimary" })} style={styles.menuActionLabelPrimary}>{t("assistantUi", "finish")}</Text>
         </Pressable>
       </View>
     );
@@ -3398,6 +3444,7 @@ const saveCurrentProgress = async (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("assistantUi", "back")}
+            {...stepOneDataSet(Platform.OS === "web", { sosGuideArrow: "back" })}
             style={styles.sideArrowLeft}
             onPress={goBack}
           >
@@ -3409,6 +3456,7 @@ const saveCurrentProgress = async (
           <AnimatedPressable
             accessibilityRole="button"
             accessibilityLabel={t("assistantUi", "continue")}
+            {...stepOneDataSet(Platform.OS === "web", { sosGuideNext: "true", sosGuideArrow: "next" })}
             style={[
               styles.sideArrowRight,
               {
@@ -3442,20 +3490,23 @@ const saveCurrentProgress = async (
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={90}
         >
-          <SectionCard title={t("assistantUi", "step1Title")}>
-            <View style={styles.sectionContent}>
-              <Text style={styles.sectionDescription}>
+          <StepOneCard step={step} title={t("assistantUi", "step1Title")}>
+            <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionContent" })} style={styles.sectionContent}>
+              <Text {...stepOneDataSet(isEditorialStepOne, { sosStepIntro: "true" })} style={styles.sectionDescription}>
                 {t("assistantUi", "step1Intro")}
               </Text>
 
-              <View style={styles.sectionGroup}>
-                <Text style={styles.subheading}>{t("assistantUi", "animalStateQuestion")}</Text>
-                <View style={styles.flagGrid}>
+              <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
+                <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "animalStateQuestion"))}</Text>
+                <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                   {ANIMAL_STATE_OPTIONS.map((option) => {
                     const active = animalState === option.key;
 
                     return (
                       <Pressable
+                        {...stepOneDataSet(isEditorialStepOne, { sosOption: "true" })}
+                        accessibilityRole={isEditorialStepOne ? "button" : undefined}
+                        aria-pressed={isEditorialStepOne ? active : undefined}
                         key={option.key}
                         style={[styles.flag, active && styles.flagActive]}
                         onPress={() => {
@@ -3482,11 +3533,11 @@ const saveCurrentProgress = async (
               </View>
 
               <>
-                  <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>{t("assistantUi", "animalTypeQuestion")}</Text>
+                  <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "animalTypeQuestion"))}</Text>
                     {ANIMAL_OPTION_GROUPS.map((group) => (
                       <View
-                        key={displayLabel(group.title)}
+                        key={displayLabel(group.title)} {...stepOneDataSet(isEditorialStepOne, { sosAnimalGroup: group.kind })}
                         style={[
                           styles.optionGroup,
                           group.kind === "terrestrial" &&
@@ -3505,12 +3556,15 @@ const saveCurrentProgress = async (
                         >
                           {displayLabel(group.title)}
                         </Text>
-                        <View style={styles.flagGrid}>
+                        <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                           {group.options.map((option) => {
                             const active = animalType === option.key;
 
                             return (
                               <Pressable
+                                {...stepOneDataSet(isEditorialStepOne, { sosOption: "true" })}
+                                accessibilityRole={isEditorialStepOne ? "button" : undefined}
+                                aria-pressed={isEditorialStepOne ? active : undefined}
                                 key={option.key}
                                 style={[
                                   styles.flag,
@@ -3538,6 +3592,9 @@ const saveCurrentProgress = async (
                     ))}
                     <View style={styles.unknownAnimalRow}>
                       <Pressable
+                        {...stepOneDataSet(isEditorialStepOne, { sosOption: "true" })}
+                        accessibilityRole={isEditorialStepOne ? "button" : undefined}
+                        aria-pressed={isEditorialStepOne ? animalType === UNKNOWN_ANIMAL_OPTION.key : undefined}
                         style={[
                           styles.flag,
                           animalType === UNKNOWN_ANIMAL_OPTION.key &&
@@ -3559,14 +3616,17 @@ const saveCurrentProgress = async (
                   </View>
 
                   {animalState !== "dead" ? (
-                  <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>{t("assistantUi", "observedSignsQuestion")}</Text>
-                    <View style={styles.flagGrid}>
+                  <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "observedSignsQuestion"))}</Text>
+                    <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                       {visibleFlagLabels.map(({ key, label }) => {
                         const active = flags[key];
 
                         return (
                           <Pressable
+                            {...stepOneDataSet(isEditorialStepOne, { sosOption: "true" })}
+                            accessibilityRole={isEditorialStepOne ? "button" : undefined}
+                            aria-pressed={isEditorialStepOne ? active : undefined}
                             key={key}
                             style={[
                               styles.flag,
@@ -3591,14 +3651,17 @@ const saveCurrentProgress = async (
                   </View>
                   ) : null}
 
-                  <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>{t("assistantUi", "positionQuestion")}</Text>
-                    <View style={styles.flagGrid}>
+                  <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "positionQuestion"))}</Text>
+                    <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                       {visiblePositionOptions.map((option) => {
                         const active = animalPosition === option.key;
 
                         return (
                           <Pressable
+                            {...stepOneDataSet(isEditorialStepOne, { sosOption: "true" })}
+                            accessibilityRole={isEditorialStepOne ? "button" : undefined}
+                            aria-pressed={isEditorialStepOne ? active : undefined}
                             key={option.key}
                             style={[
                               styles.flag,
@@ -3622,14 +3685,17 @@ const saveCurrentProgress = async (
                     </View>
                   </View>
 
-                  <View style={styles.sectionGroup}>
-                    <Text style={styles.subheading}>{t("assistantUi", "environmentQuestion")}</Text>
-                    <View style={styles.flagGrid}>
+                  <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "environmentQuestion"))}</Text>
+                    <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                       {visibleEnvironmentOptions.map((option) => {
                         const active = animalEnvironment === option.key;
 
                         return (
                           <Pressable
+                            {...stepOneDataSet(isEditorialStepOne, { sosOption: "true" })}
+                            accessibilityRole={isEditorialStepOne ? "button" : undefined}
+                            aria-pressed={isEditorialStepOne ? active : undefined}
                             key={option.key}
                             style={[
                               styles.flag,
@@ -3654,16 +3720,16 @@ const saveCurrentProgress = async (
                   </View>
                 </>
             </View>
-          </SectionCard>
+          </StepOneCard>
         </KeyboardAvoidingView>
       );
     }
 
     if (step === 2) {
       return (
-        <SectionCard title={t("assistantUi", "step2Title")}>
-          <View style={styles.sectionContent}>
-            <Text style={styles.sectionDescription}>
+        <StepOneCard step={step} title={t("assistantUi", "step2Title")}>
+          <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionContent" })} style={styles.sectionContent}>
+            <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionDescription" })} style={styles.sectionDescription}>
               {t("assistantUi", "step2Intro")}
             </Text>
 
@@ -3675,64 +3741,68 @@ const saveCurrentProgress = async (
                     ? t("assistantUi", "stopSpeechLabel")
                     : t("assistantUi", "startSpeechLabel")
                 }
-                style={styles.speechButton}
+                {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "speechButton" })} style={styles.speechButton}
                 onPress={toggleAdviceSpeech}
               >
-                <Text style={styles.speechButtonText}>
-                  {isSpeaking
+                <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "speechButtonText" })} style={styles.speechButtonText}>
+                  <GuideSpeechLabel text={isSpeaking
                     ? t("assistantUi", "stopSpeech")
-                    : t("assistantUi", "startSpeech")}
+                    : t("assistantUi", "startSpeech")} />
                 </Text>
               </Pressable>
 
               {isSpeaking ? (
-                <Text style={styles.speechStatusText}>
+                <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "speechStatusText" })} style={styles.speechStatusText}>
                   {t("assistantUi", "speechStatus")}
                 </Text>
               ) : null}
             </View>
 
-            <Text
-              style={[
-                styles.summaryBox,
-                styles.adviceBox,
-                isMobileAdviceText && styles.adviceBoxMobile,
-              ]}
-            >
-              {advice}
-            </Text>
+            {Platform.OS === "web" ? <AdvicePresentation text={advice} /> : (
+              <Text
+                {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "advice" })}
+                style={[
+                  styles.summaryBox,
+                  styles.adviceBox,
+                  isMobileAdviceText && styles.adviceBoxMobile,
+                ]}
+              >
+                {advice}
+              </Text>
+            )}
           </View>
-        </SectionCard>
+        </StepOneCard>
       );
     }
 
     if (step === 3) {
       return (
-        <SectionCard title={t("assistantUi", "step3Title")}>
-          <View style={styles.sectionContent}>
-            <Text style={styles.sectionDescription}>
+        <StepOneCard step={step} title={t("assistantUi", "step3Title")}>
+          <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionContent" })} style={styles.sectionContent}>
+            <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionDescription" })} style={styles.sectionDescription}>
               {t("assistantUi", "step3Intro")}
             </Text>
 
-            <Text style={styles.sectionDescription}>
+            <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionDescription" })} style={styles.sectionDescription}>
               {t("assistantUi", "informationHelp")}
             </Text>
 
-            <Text style={styles.subheading}>{t("assistantUi", "contributionQuestion")}</Text>
+            <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "subheading" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "contributionQuestion"))}</Text>
 
-            <Pressable style={styles.primaryButton} onPress={pickPhoto}>
-              <Text style={styles.primaryButtonText}>
+            <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "primaryButton" })} style={styles.primaryButton} onPress={pickPhoto}>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "primaryButtonText" })} style={styles.primaryButtonText}>
                 {photoUri ? t("assistantUi", "repeatPhoto") : t("assistantUi", "takePhoto")}
               </Text>
             </Pressable>
 
-            <Pressable style={styles.primaryButton} onPress={pickVideo}>
-              <Text style={styles.primaryButtonText}>
+            <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "primaryButton" })} style={styles.primaryButton} onPress={pickVideo}>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "primaryButtonText" })} style={styles.primaryButtonText}>
                 {videoUri ? t("assistantUi", "repeatVideo") : t("assistantUi", "recordVideo")}
               </Text>
             </Pressable>
 
             <Pressable
+              {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "secondaryButton" })}
               style={[
                 styles.secondaryButton,
                 locationLoading && styles.disabledButton,
@@ -3740,65 +3810,65 @@ const saveCurrentProgress = async (
               onPress={captureLocation}
               disabled={locationLoading}
             >
-              <Text style={styles.secondaryButtonText}>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "secondaryButtonText" })} style={styles.secondaryButtonText}>
                 {locationLoading
                   ? generalTexts.assistantCaptureUi.capturing
                   : generalTexts.assistantCaptureUi.capture}
               </Text>
             </Pressable>
 
-            <View style={styles.sectionGroup}>
-              <Text style={styles.subheading}>{t("assistantUi", "informationStatus")}</Text>
-              <Text style={styles.helperText}>
-                {photoUri ? t("assistantUi", "photoAdded") : t("assistantUi", "photoMissing")}
+            <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionGroup" })} style={styles.sectionGroup}>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "subheading" })} style={styles.subheading}>{t("assistantUi", "informationStatus")}</Text>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "helperText" })} style={styles.helperText}>
+                <StepThreeStatus kind="photo" text={photoUri ? t("assistantUi", "photoAdded") : t("assistantUi", "photoMissing")} />
               </Text>
-              <Text style={styles.helperText}>
-                {videoUri ? t("assistantUi", "videoAdded") : t("assistantUi", "videoMissing")}
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "helperText" })} style={styles.helperText}>
+                <StepThreeStatus kind="video" text={videoUri ? t("assistantUi", "videoAdded") : t("assistantUi", "videoMissing")} />
               </Text>
-              <Text style={styles.helperText}>
-                {locationCaptured
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "helperText" })} style={styles.helperText}>
+                <StepThreeStatus kind="location" text={locationCaptured
                   ? generalTexts.assistantCaptureUi.capturedStatus
-                  : generalTexts.assistantCaptureUi.notCapturedStatus}
+                  : generalTexts.assistantCaptureUi.notCapturedStatus} />
               </Text>
             </View>
 
-            <View style={styles.mapCard}>
-              <Text style={styles.mapTitle}>{generalTexts.assistantCaptureUi.mapTitle}</Text>
+            <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapCard" })} style={styles.mapCard}>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapTitle" })} style={styles.mapTitle}>{generalTexts.assistantCaptureUi.mapTitle}</Text>
 
               {coords ? (
                 <>
-                  <View style={styles.mapLocationBox}>
-                    <Text style={styles.mapLocationTitle}>{generalTexts.assistantCaptureUi.mapCapturedTitle}</Text>
+                  <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapLocationBox" })} style={styles.mapLocationBox}>
+                    <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapLocationTitle" })} style={styles.mapLocationTitle}><StepThreeStatus kind="location" text={generalTexts.assistantCaptureUi.mapCapturedTitle} /></Text>
 
                     {approximateLocation ? (
                       <>
-                        <Text style={styles.mapLocationLabel}>{generalTexts.assistantCaptureUi.mapReference}</Text>
-                        <Text style={styles.mapLocationText}>
+                        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapLocationLabel" })} style={styles.mapLocationLabel}>{generalTexts.assistantCaptureUi.mapReference}</Text>
+                        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapLocationText" })} style={styles.mapLocationText}>
                           {approximateLocation}
                         </Text>
                       </>
                     ) : null}
 
-                    <Text style={styles.mapLocationLabel}>{generalTexts.assistantCaptureUi.mapCoordinates}</Text>
-                    <Text style={styles.mapCoords}>
+                    <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapLocationLabel" })} style={styles.mapLocationLabel}>{generalTexts.assistantCaptureUi.mapCoordinates}</Text>
+                    <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapCoords" })} style={styles.mapCoords}>
                       {formatCoordinates(coords)}
                     </Text>
-                    <Text style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapAccuracyNotice}</Text>
-                    <Text style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapOpenNotice}</Text>
+                    <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapEmptyText" })} style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapAccuracyNotice}</Text>
+                    <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapEmptyText" })} style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapOpenNotice}</Text>
                   </View>
 
-                  <Pressable style={styles.mapOpenButton} onPress={openMaps}>
-                    <Text style={styles.mapOpenButtonText}>{generalTexts.assistantCaptureUi.mapOpenButton}</Text>
+                  <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapOpenButton" })} style={styles.mapOpenButton} onPress={openMaps}>
+                    <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapOpenButtonText" })} style={styles.mapOpenButtonText}>{generalTexts.assistantCaptureUi.mapOpenButton}</Text>
                   </Pressable>
                 </>
               ) : (
-                <View style={styles.mapEmptyBox}>
-                  <Text style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapEmpty}</Text>
+                <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapEmptyBox" })} style={styles.mapEmptyBox}>
+                  <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "mapEmptyText" })} style={styles.mapEmptyText}>{generalTexts.assistantCaptureUi.mapEmpty}</Text>
                 </View>
               )}
             </View>
           </View>
-        </SectionCard>
+        </StepOneCard>
       );
     }
 
@@ -3809,9 +3879,9 @@ const saveCurrentProgress = async (
           style={styles.keyboardAvoid}
           keyboardVerticalOffset={90}
         >
-          <SectionCard title={t("assistantUi", "step4Title")}>
-            <View style={styles.sectionContent}>
-              <Text style={styles.sectionDescription}>
+          <StepOneCard step={step} title={t("assistantUi", "step4Title")}>
+            <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionContent" })} style={styles.sectionContent}>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionDescription" })} style={styles.sectionDescription}>
                 {generalTexts.assistantExtraUi.deadSummaryIntro}
               </Text>
 
@@ -3823,7 +3893,7 @@ const saveCurrentProgress = async (
                 </Text>
               </View>
             </View>
-          </SectionCard>
+          </StepOneCard>
         </KeyboardAvoidingView>
       );
     }
@@ -3834,29 +3904,33 @@ const saveCurrentProgress = async (
         style={styles.keyboardAvoid}
         keyboardVerticalOffset={90}
       >
-        <SectionCard title={t("assistantUi", "step4Title")}>
-          <View style={styles.sectionContent}>
-            <View style={styles.summaryInstructions}>
-              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.review}</Text>
-              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.whatsappPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.whatsappName}</Text>{generalTexts.summaryInstructions.whatsappSuffix}</Text>
-              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.copyPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.copyName}</Text>{generalTexts.summaryInstructions.copySuffix}</Text>
-              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.helpPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.helpName}</Text>{generalTexts.summaryInstructions.helpSuffix}</Text>
-              <Text style={styles.bulletText}>{generalTexts.summaryInstructions.finishPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.finishName}</Text>{generalTexts.summaryInstructions.finishSuffix}</Text>
+        <StepOneCard step={step} title={t("assistantUi", "step4Title")}>
+          <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "sectionContent" })} style={styles.sectionContent}>
+            <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryInstructions" })} style={styles.summaryInstructions}>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "bulletText" })} style={styles.bulletText}>{generalTexts.summaryInstructions.review}</Text>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "bulletText" })} style={styles.bulletText}>{generalTexts.summaryInstructions.whatsappPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.whatsappName}</Text>{generalTexts.summaryInstructions.whatsappSuffix}</Text>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "bulletText" })} style={styles.bulletText}>{generalTexts.summaryInstructions.copyPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.copyName}</Text>{generalTexts.summaryInstructions.copySuffix}</Text>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "bulletText" })} style={styles.bulletText}>{generalTexts.summaryInstructions.helpPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.helpName}</Text>{generalTexts.summaryInstructions.helpSuffix}</Text>
+              <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "bulletText" })} style={styles.bulletText}>{generalTexts.summaryInstructions.finishPrefix}<Text style={styles.bulletStrong}>{generalTexts.summaryInstructions.finishName}</Text>{generalTexts.summaryInstructions.finishSuffix}</Text>
             </View>
 
             {renderSummaryPreview()}
           </View>
-        </SectionCard>
+        </StepOneCard>
       </KeyboardAvoidingView>
     );
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={["bottom"]}>
+    <SafeAreaView style={styles.screen} edges={["bottom"]} {...stepOneDataSet(Platform.OS === "web", { sosGuideStep: String(step), sosGuideVisual: String(isEditorialGuide) })}>
+      <StepOneStyles active={Platform.OS === "web"} />
       <Stack.Screen
         options={{
           title: generalTexts.assistantExtraUi.navigationTitle,
           headerLeft: Platform.OS === "web" ? () => null : undefined,
+          ...(Platform.OS === "web" ? {
+            headerShown: false,
+          } : {}),
         }}
       />
 
@@ -3864,8 +3938,9 @@ const saveCurrentProgress = async (
 
       <ScrollView
         ref={scrollViewRef}
+        {...stepOneDataSet(Platform.OS === "web", { sosGuideScroll: "true" })}
         style={styles.scrollView}
-        contentContainerStyle={[
+        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : [
           styles.container,
           {
             paddingTop: showSummaryActionBar ? 84 : 12,
@@ -3880,18 +3955,26 @@ const saveCurrentProgress = async (
         }
         scrollEventThrottle={16}
       >
-        {renderStep()}
+        {Platform.OS === "web" ? <>
+          <View {...stepOneDataSet(true, { sosGuideContent: "true" })} style={[
+            styles.container,
+            { paddingTop: showSummaryActionBar ? 84 : 12, paddingBottom: Math.max(48, insets.bottom + 32) },
+            (showContacts || showProvinces || selectedProvince) ? { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 } : null,
+          ]}>{renderStep()}</View>
+          <SiteFooter />
+        </> : renderStep()}
       </ScrollView>
 
       {canShowStep1ScrollHint ? (
         <Pressable
           style={styles.floatingScrollHint}
+          {...stepOneDataSet(isEditorialStepOne, { sosGuideScrollHint: "true" })}
           onPress={() =>
             scrollViewRef.current?.scrollTo({
               y: isNearBottom
                 ? 0
                 : Math.max(0, scrollContentHeight - scrollLayoutHeight),
-              animated: true,
+              animated: !(isEditorialStepOne && window.matchMedia("(prefers-reduced-motion: reduce)").matches),
             })
           }
         >
@@ -3902,6 +3985,9 @@ const saveCurrentProgress = async (
       ) : null}
 
       {renderNavigationArrows()}
+      <FinishReportDialog open={finishDialogOpen} onCancel={() => setFinishDialogOpen(false)}
+        onFinish={onSaved => completeAndReturnHome(onSaved)} onHome={() => router.replace(homePath)} />
+      <CopySummaryNotice notice={copyNotice} />
     </SafeAreaView>
   );
 }

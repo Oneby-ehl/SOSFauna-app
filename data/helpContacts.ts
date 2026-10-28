@@ -50,7 +50,7 @@ export const MADRID_PROVINCE_CONTACTS = [
 
 export const getHelpContactsLegalNotice = (locale: Locale = DEFAULT_LOCALE): string =>
   getEffectiveCatalog(locale).helpContactDescriptions.sourcesHeading +
-  "• Emergencias 112: www.proteccioncivil.es/catalogo/info112/\n" +
+  (locale === "en" ? "• Emergencies 112: www.proteccioncivil.es/catalogo/info112/\n" : "• Emergencias 112: www.proteccioncivil.es/catalogo/info112/\n") +
   "• Guardia Civil (SEPRONA): www.guardiacivil.es\n" +
   "• Policía Nacional: www.policia.es\n" +
   "• Agentes Forestales de la Comunidad de Madrid:\n" +

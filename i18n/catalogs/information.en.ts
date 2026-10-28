@@ -164,6 +164,7 @@ export const informationEn = {
     intellectualPropertyTitle: "6. Intellectual property",
     intellectualPropertyParagraph1: "The texts, design, structure, logo and other original elements of SOS Fauna España are protected by applicable intellectual property law.",
     intellectualPropertyParagraph2: "They may not be reproduced, modified or used for commercial purposes without permission, except where permitted by law.",
+    illustrativeImagesParagraph: "The website homepage uses illustrative images generated with artificial intelligence. These are not documentary photographs and do not depict real incidents; they may contain visual inaccuracies and should not be used to identify species or decide how to respond to an animal.",
     externalLinksTitle: "7. External links",
     externalLinksParagraph1: "The app may include links to public bodies, wildlife rescue centres, specialist organisations and other information resources.",
     externalLinksParagraph2: "These links are provided solely to help the user find appropriate resources. SOS Fauna España does not control, and is not responsible for, the content or operation of external websites.",

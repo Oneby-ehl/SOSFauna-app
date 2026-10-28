@@ -1,5 +1,7 @@
+import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
+import { InformationStyles, informationWebPart, informationStackOptions } from "./InformationPresentation";
 import { Link, Stack } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ExternalLink } from "@/components/external-link";
 import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
@@ -140,34 +142,36 @@ export default function SourcesPage() {
         path="/sources"
       />
       <Stack.Screen
-        options={{ title: locale === "en" ? `${t("navigation", "sources")} | SOS Fauna España` : "Recursos de información | SOS Fauna España" }}
+        options={{ ...informationStackOptions, title: locale === "en" ? `${t("navigation", "sources")} | SOS Fauna España` : "Recursos de información | SOS Fauna España" }}
       />
 
+      <InformationStyles />
       <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.container}
+        {...informationWebPart("screen")} style={styles.screen}
+        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
       >
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text accessibilityRole="header" aria-level={1} style={styles.title}>{t("navigation", "sources")}</Text>
+        <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
+        <View {...informationWebPart("header")} style={styles.header}>
+          <Text {...informationWebPart("eyebrow")} style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole="header" aria-level={1} {...informationWebPart("title")} style={styles.title}>{t("navigation", "sources")}</Text>
 
-          <Text style={styles.intro}>
+          <Text {...informationWebPart("intro")} style={styles.intro}>
             {t("sources", "intro1")}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("navigation", "sources")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("navigation", "sources")}</Text>
 
           {institutionalSources.map((source) => (
-            <View key={source.nameKey} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
+            <View key={source.nameKey} {...informationWebPart("card")} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} {...informationWebPart("cardTitle")} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
+              <Text {...informationWebPart("cardText")} style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
-                <Pressable style={styles.linkButton}>
-                  <Text style={styles.linkButtonText}>
+                <Pressable {...informationWebPart("linkButton")} style={styles.linkButton}>
+                  <Text {...informationWebPart("linkButtonText")} style={styles.linkButtonText}>
                     {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
@@ -176,48 +180,48 @@ export default function SourcesPage() {
           ))}
         </View>
 
-        <View style={styles.notice}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}>
+        <View {...informationWebPart("notice")} style={styles.notice}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("noticeTitle")} style={styles.noticeTitle}>
             {t("sources", "noticeTitle1")}
           </Text>
         
-          <Text style={styles.noticeText}>
+          <Text {...informationWebPart("noticeText")} style={styles.noticeText}>
             {t("sources", "noticeText1")}
           </Text>
         
-          <Text style={styles.noticeText}>
+          <Text {...informationWebPart("noticeText")} style={styles.noticeText}>
             {t("sources", "noticeText2")}
           </Text>
         </View>
 
-        <View style={styles.notice}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.noticeTitle}><Link href={pagePath("centers")}>{t("sources", "text1")}</Link></Text>
+        <View {...informationWebPart("notice")} style={styles.notice}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("noticeTitle")} style={styles.noticeTitle}><Link href={pagePath("centers")}>{t("sources", "text1")}</Link></Text>
 
-          <Text style={styles.noticeText}>
+          <Text {...informationWebPart("noticeText")} style={styles.noticeText}>
             {t("sources", "noticeText3")}
           </Text>
 
-          <Text style={styles.noticeText}>
+          <Text {...informationWebPart("noticeText")} style={styles.noticeText}>
             {t("sources", "noticeText4")}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("sources", "sectionTitle1")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("sources", "sectionTitle1")}</Text>
 
-          <Text style={styles.sectionIntro}>
+          <Text {...informationWebPart("sectionIntro")} style={styles.sectionIntro}>
             {t("sources", "sectionIntro1")}
           </Text>
 
           {terrestrialSources.map((source) => (
-            <View key={source.nameKey} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
+            <View key={source.nameKey} {...informationWebPart("card")} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} {...informationWebPart("cardTitle")} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
+              <Text {...informationWebPart("cardText")} style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
-                <Pressable style={styles.linkButton}>
-                  <Text style={styles.linkButtonText}>
+                <Pressable {...informationWebPart("linkButton")} style={styles.linkButton}>
+                  <Text {...informationWebPart("linkButtonText")} style={styles.linkButtonText}>
                     {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
@@ -226,18 +230,18 @@ export default function SourcesPage() {
           ))}
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("sources", "sectionTitle2")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("sources", "sectionTitle2")}</Text>
 
           {marineSources.map((source) => (
-            <View key={source.nameKey} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
+            <View key={source.nameKey} {...informationWebPart("card")} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} {...informationWebPart("cardTitle")} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
+              <Text {...informationWebPart("cardText")} style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
-                <Pressable style={styles.linkButton}>
-                  <Text style={styles.linkButtonText}>
+                <Pressable {...informationWebPart("linkButton")} style={styles.linkButton}>
+                  <Text {...informationWebPart("linkButtonText")} style={styles.linkButtonText}>
                     {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
@@ -246,27 +250,27 @@ export default function SourcesPage() {
           ))}
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeadingRow}>
-            <Text style={styles.sectionIcon}>⚖️</Text>
-            <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <View {...informationWebPart("sectionHeadingRow")} style={styles.sectionHeadingRow}>
+            {Platform.OS !== "web" ? <Text {...informationWebPart("sectionIcon")} style={styles.sectionIcon}>⚖️</Text> : null}
+            <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>
               {t("sources", "sectionTitle3")}
             </Text>
           </View>
 
-          <Text style={styles.sectionIntro}>
+          <Text {...informationWebPart("sectionIntro")} style={styles.sectionIntro}>
             {t("sources", "sectionIntro2")}
           </Text>
 
           {legalSources.map((source) => (
-            <View key={source.nameKey} style={styles.card}>
-              <Text accessibilityRole="header" aria-level={3} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
+            <View key={source.nameKey} {...informationWebPart("card")} style={styles.card}>
+              <Text accessibilityRole="header" aria-level={3} {...informationWebPart("cardTitle")} style={styles.cardTitle}>{t("sources", source.nameKey)}</Text>
 
-              <Text style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
+              <Text {...informationWebPart("cardText")} style={styles.cardText}>{t("sources", source.descriptionKey)}</Text>
 
               <ExternalLink href={source.url} asChild>
-                <Pressable style={styles.linkButton}>
-                  <Text style={styles.linkButtonText}>
+                <Pressable {...informationWebPart("linkButton")} style={styles.linkButton}>
+                  <Text {...informationWebPart("linkButtonText")} style={styles.linkButtonText}>
                     {t("sources", "visitPrefix")}{t("sources", source.displayUrlKey)}
                   </Text>
                 </Pressable>
@@ -274,16 +278,18 @@ export default function SourcesPage() {
             </View>
           ))}
 
-          <Text style={styles.orientationNote}>
+          <Text {...informationWebPart("orientationNote")} style={styles.orientationNote}>
             {t("sources", "orientationNote1")}
           </Text>
         </View>
 
-        <Link href={pagePath("home")} asChild>
-          <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
+        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+          <Pressable {...informationWebPart("backButton")} style={styles.backButton}>
+            <Text {...informationWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
-        </Link>
+        </Link> : null}
+        </FooterPageContent>
+        <SiteFooter />
       </ScrollView>
     </>
   );

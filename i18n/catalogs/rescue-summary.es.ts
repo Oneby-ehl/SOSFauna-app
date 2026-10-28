@@ -127,9 +127,9 @@ export const rescueSummaryEs = {
   },
   "summaryInstructions": {
     "review": "• Revisa si el resumen es correcto o retrocede para corregir.",
-    "whatsappPrefix": "• Usa ",
+    "whatsappPrefix": "• Utiliza ",
     "whatsappName": "WhatsApp",
-    "whatsappSuffix": " para enviarlo a GREFA Madrid o a otro contacto que elijas.",
+    "whatsappSuffix": " para compartir el resumen con el contacto que elijas",
     "copyPrefix": "• Usa ",
     "copyName": "Copiar",
     "copySuffix": " para guardar el resumen en el portapapeles y compartirlo mediante cualquier aplicación.",

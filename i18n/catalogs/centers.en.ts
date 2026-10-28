@@ -1,7 +1,9 @@
 import type { Catalog } from "../translate";
 
 export const centersEn = { centers: {
+  geographicalScope: "The rescue centres and contact numbers in this directory are for Spain only.",
   info: "Info",
+  grefaWhatsAppLabel: "Open a WhatsApp conversation with GREFA",
   helpTitle: "Help and contact numbers",
   chooseServicePrefix: "Read the ",
   appropriateService: "wildlife help FAQs",
@@ -12,10 +14,10 @@ export const centersEn = { centers: {
   provinceHelp: "Help by province",
   openProvinceDirectory: "📍 Find help in my province",
   selectProvince: "Select a province to view the available resources.",
-  searchProvince: "Search by province, town or centre",
+  searchProvince: "Search provinces",
   clearSearch: "Clear directory search",
   noScriptHelp: "Without JavaScript, you can expand each province to view its contacts. Filtering requires JavaScript.",
-  noResults: "No provinces or contacts match your search.",
+  noResults: "No provinces match that name.",
   contactCountNoun: " telephone contact",
   pluralSuffix: "s",
   contactCountAdjective: "",
@@ -30,7 +32,7 @@ export const centersEn = { centers: {
   marineIntro: "Cetaceans, sea turtles, seals, sharks, rays and other marine animals that are stranded or in difficulty.",
   sourcesAndLegal: "Sources and legal notice",
   // Keep the official names of Spanish services; their descriptions are translated.
-  nationalEmergency: "🚨 Emergencias",
+  nationalEmergency: "🚨 Emergencies",
   nationalSeprona: "🌿 SEPRONA",
   nationalLocalPolice: "🚓 Policía Municipal / Local",
   nationalPolice: "👮 Policía Nacional",
@@ -43,5 +45,5 @@ export const centersEn = { centers: {
   provincePhonesTitle: "Contact numbers by province",
   backToPhones: "Back to contact numbers",
   chooseService: "Choose the appropriate service according to the urgency and the animal's location.",
-  intro: "Find emergency contact numbers, wildlife rescue centres, networks and specialist resources by province. These contacts are in Spain; assistance in English is not guaranteed. SOS Fauna España is an independent project, not an official service.",
+  intro: "Find emergency contact numbers, wildlife rescue centres, networks and specialist resources by province.",
 } } satisfies Pick<Catalog, "centers">;

@@ -226,6 +226,9 @@ export function getHelpContactName(
   contact: ContactTextSource,
   locale: Locale = DEFAULT_LOCALE,
 ): string {
+  if (locale === "en" && contact.name === "Emergencias") {
+    return getEffectiveCatalog(locale).centers.nationalEmergency.replace(/^🚨\s*/u, "");
+  }
   const noteKey = keys.get(identity(domain, contact.name, contact.phone ?? ""));
   const nameKey = noteKey && descriptiveNameKeys[noteKey];
   return nameKey ? getEffectiveCatalog(locale).helpContactDescriptions[nameKey] : contact.name;

@@ -112,20 +112,26 @@ export const SOS_FAUNA_SHARE_TITLE = t("common", "brand");
 export const SOS_FAUNA_SHARE_URL = "https://sosfauna.es";
 export const SOS_FAUNA_SHARE_TEXT = t("appSharing", "description");
 
-export function buildSosFaunaShareMessage() {
+export function buildSosFaunaShareMessage(locale: Locale = DEFAULT_LOCALE) {
+  const shareTexts = getEffectiveCatalog(locale, Platform.OS === "web" ? "web" : "native");
   return [
-    SOS_FAUNA_SHARE_TITLE,
-    SOS_FAUNA_SHARE_TEXT,
+    shareTexts.common.brand,
+    shareTexts.appSharing.description,
     SOS_FAUNA_SHARE_URL,
   ].join("\n");
 }
 
-export async function shareSosFaunaApp() {
+export function shareSosFaunaApp(): Promise<void>;
+export function shareSosFaunaApp(locale: Locale): Promise<void>;
+export async function shareSosFaunaApp(locale: Locale = DEFAULT_LOCALE) {
+  // Existing Pressable callbacks may supply their event; retain their default ES behaviour.
+  const selectedLocale = locale === "en" ? "en" : DEFAULT_LOCALE;
+  const shareTexts = getEffectiveCatalog(selectedLocale, Platform.OS === "web" ? "web" : "native");
   if (Platform.OS !== "web") {
     try {
       await Share.share({
         title: SOS_FAUNA_SHARE_TITLE,
-        message: buildSosFaunaShareMessage(),
+        message: buildSosFaunaShareMessage(selectedLocale),
       });
     } catch (error) {
       console.warn("No se pudo abrir el diálogo nativo de compartir.", error);
@@ -139,8 +145,8 @@ export async function shareSosFaunaApp() {
   ) {
     try {
       await navigator.share({
-        title: SOS_FAUNA_SHARE_TITLE,
-        text: SOS_FAUNA_SHARE_TEXT,
+        title: shareTexts.common.brand,
+        text: shareTexts.appSharing.description,
         url: SOS_FAUNA_SHARE_URL,
       });
       return;
@@ -151,10 +157,10 @@ export async function shareSosFaunaApp() {
     }
   }
 
-  await Clipboard.setStringAsync(buildSosFaunaShareMessage());
+  await Clipboard.setStringAsync(buildSosFaunaShareMessage(selectedLocale));
 
   if (Platform.OS === "web") {
-    window.alert(t("appSharing", "copiedAlert"));
+    window.alert(shareTexts.appSharing.copiedAlert);
     return;
   }
 

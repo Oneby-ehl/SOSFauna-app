@@ -3,11 +3,13 @@ import AppVersionGate from "@/components/AppVersionGate";
 import { TopicFaqBackButton, TopicFaqHeaderTitle } from "@/components/faq/TopicFaqHeader";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { LanguagePreviewBar } from "@/components/i18n/LanguagePreviewBar";
+import { WebNavigationProvider } from "@/components/web/WebNavigation";
 
 export default function RootLayout() {
   return (
     <I18nProvider>
     <AppVersionGate>
+      <WebNavigationProvider>
       <LanguagePreviewBar />
       <Stack
         screenOptions={({ route }) => ({
@@ -72,6 +74,7 @@ export default function RootLayout() {
           }}
         />
       </Stack>
+      </WebNavigationProvider>
     </AppVersionGate>
     </I18nProvider>
   );

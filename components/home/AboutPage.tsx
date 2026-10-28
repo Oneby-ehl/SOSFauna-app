@@ -1,5 +1,7 @@
+import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
+import { InformationStyles, informationWebPart, informationStackOptions } from "./InformationPresentation";
 import { Link, Stack } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -28,120 +30,126 @@ export default function AboutPage() {
         path="/about"
         structuredData={aboutPageStructuredData}
       />
-      <Stack.Screen options={{ title: locale === "en" ? t("navigation", "about") : "Sobre SOS Fauna España" }} />
+      <Stack.Screen options={{ ...informationStackOptions, title: locale === "en" ? t("navigation", "about") : "Sobre SOS Fauna España" }} />
 
+      <InformationStyles />
       <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.container}
+        {...informationWebPart("screen")} style={styles.screen}
+        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
       >
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "about")}</Text>
+        <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
+        <View {...informationWebPart("header")} style={styles.header}>
+          <Text {...informationWebPart("eyebrow")} style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} {...informationWebPart("title")} style={styles.title}>{t("navigation", "about")}</Text>
 
-          <Text style={styles.intro}>
+          <Text {...informationWebPart("intro")} style={styles.intro}>
             {t("about", "intro1")}
           </Text>
 
-          <Text style={styles.intro}>
+          <Text {...informationWebPart("intro")} style={styles.intro}>
             {t("about", "intro2")}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("about", "sectionTitle1")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("about", "sectionTitle1")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph1")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph2")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph3")}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("about", "sectionTitle2")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("about", "sectionTitle2")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph4")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph5")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph6")}
           </Text>
 
-          <View style={styles.principles}>
+          <View {...informationWebPart("principles")} style={styles.principles}>
             {principles.map((principle) => (
-              <View key={principle} style={styles.principle}>
-                <Text style={styles.principleText}>{t("about", principle)}</Text>
+              <View key={principle} {...informationWebPart("principle")} style={styles.principle}>
+                <Text {...informationWebPart("principleText")} style={styles.principleText}>{t("about", principle)}</Text>
               </View>
             ))}
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}><Link href={pagePath("sources")}>{t("about", "text1")}</Link></Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}><Link href={pagePath("sources")}>{t("about", "text1")}</Link></Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph7")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph8")}
           </Text>
         </View>
 
-        <View style={styles.disclaimer}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.disclaimerTitle}>{t("about", "disclaimerTitle1")}</Text>
+        <View {...informationWebPart("disclaimer")} style={styles.disclaimer}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("disclaimerTitle")} style={styles.disclaimerTitle}>{t("about", "disclaimerTitle1")}</Text>
 
-          <Text style={styles.disclaimerText}>
+          <Text {...informationWebPart("disclaimerText")} style={styles.disclaimerText}>
             {t("about", "disclaimerText1")}
           </Text>
 
-          <Text style={styles.disclaimerText}>
+          <Text {...informationWebPart("disclaimerText")} style={styles.disclaimerText}>
             {t("about", "disclaimerText2")}
           </Text>
 
-          <Text style={styles.disclaimerText}>
+          <Text {...informationWebPart("disclaimerText")} style={styles.disclaimerText}>
             {t("about", "disclaimerText3")}
           </Text>
 
-          <Text style={styles.disclaimerText}>
+          <Text {...informationWebPart("disclaimerText")} style={styles.disclaimerText}>
             {t("about", "disclaimerText4")}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} style={styles.sectionTitle}>{t("about", "sectionTitle3")}</Text>
+        <View {...informationWebPart("section")} style={styles.section}>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("about", "sectionTitle3")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("about", "paragraph9")}
           </Text>
         </View>
 
-        <View style={styles.quote}>
-          <Text style={styles.quoteText}>
+        <View {...informationWebPart("quote")} style={styles.quote}>
+          <Text {...informationWebPart("quoteText")} style={styles.quoteText}>
             {t("about", "quoteText1")}
           </Text>
         </View>
 
-        <Pressable style={styles.shareButton} onPress={shareSosFaunaApp}>
-          <Text style={styles.shareButtonText}>{t("navigation", "shareApp")}</Text>
+        {Platform.OS !== "web" ? <>
+        <Pressable {...informationWebPart("shareButton")} style={styles.shareButton} onPress={shareSosFaunaApp}>
+          <Text {...informationWebPart("shareButtonText")} style={styles.shareButtonText}>{t("navigation", "shareApp")}</Text>
         </Pressable>
 
         <Link href={pagePath("home")} asChild>
-          <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
+          <Pressable {...informationWebPart("backButton")} style={styles.backButton}>
+            <Text {...informationWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
         </Link>
+        </> : null}
+        </FooterPageContent>
+        <SiteFooter />
       </ScrollView>
     </>
   );

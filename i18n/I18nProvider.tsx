@@ -57,15 +57,20 @@ export function I18nProvider({ children }: PropsWithChildren) {
     const suffix = route && available ? window.location.search + window.location.hash : "";
     const target = targetPath + suffix;
     if (route === "guide") {
-      // Keep the mounted assistant, hooks and device-only media references. No router
-      // navigation or recovery cycle is needed for a presentation-only language change.
-      window.history.replaceState(window.history.state, "", target);
+      // Locale is presentation state while a report is open. Rewriting even the
+      // browser URL desynchronises Expo's active route from its guide alias and
+      // can replace the mounted assistant. Keep its route, query and media intact;
+      // subsequent navigation already uses the selected locale's existing paths.
       setGuideOverride({ pathname, locale: selected });
     } else if (target !== currentUrl) router.replace(target);
   }, [pathname, preview, router]);
 
   useEffect(() => {
-    if (preview && typeof document !== "undefined") document.documentElement.lang = locale;
+    if (preview && typeof document !== "undefined") {
+      document.documentElement.lang = locale;
+      const manifest = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+      if (manifest) manifest.href = locale === "en" ? "/manifest.en.json" : "/manifest.json";
+    }
   }, [locale, preview]);
   const value = useMemo(() => ({ locale, t: createTranslator(locale), languageControlsEnabled: preview, selectLocale }), [locale, preview, selectLocale]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

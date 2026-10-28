@@ -14,7 +14,7 @@ export const rescueSummaryEn = {
     mapIncluded: "Map included in the report", no: "❌ No", photo: "📷 Photograph", yes: "✅ Yes", video: "🎥 Video",
   },
   summaryInstructions: {
-    review: "• Check the summary, or go back to make corrections.", whatsappPrefix: "• Use ", whatsappName: "WhatsApp", whatsappSuffix: " to send it to GREFA Madrid or another contact of your choice.",
+    review: "• Check the summary, or go back to make corrections.", whatsappPrefix: "• Use ", whatsappName: "WhatsApp", whatsappSuffix: " to share the summary with a contact of your choice.",
     copyPrefix: "• Use ", copyName: "Copy", copySuffix: " to save the summary to the clipboard and share it through any app.",
     helpPrefix: "• Use ", helpName: "Help", helpSuffix: " to find the nearest centre in your province or emergency services.",
     finishPrefix: "• Use ", finishName: "Finish", finishSuffix: " once you have informed a specialist, or to close the report.",

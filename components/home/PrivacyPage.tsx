@@ -1,5 +1,7 @@
+import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
+import { InformationStyles, informationWebPart, informationStackOptions } from "./InformationPresentation";
 import { Link, Stack } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { SeoHead, useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -22,145 +24,149 @@ export default function PrivacyPage() {
         path="/privacy"
       />
       <Stack.Screen
-        options={{ title: locale === "en" ? `${t("navigation", "privacy")} | SOS Fauna España` : "Política de privacidad | SOS Fauna España" }}
+        options={{ ...informationStackOptions, title: locale === "en" ? `${t("navigation", "privacy")} | SOS Fauna España` : "Política de privacidad | SOS Fauna España" }}
       />
 
+      <InformationStyles />
       <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.container}
+        {...informationWebPart("screen")} style={styles.screen}
+        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
       >
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} style={styles.title}>{t("navigation", "privacy")}</Text>
-          <Text style={styles.updated}>
+        <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
+        <View {...informationWebPart("header")} style={styles.header}>
+          <Text {...informationWebPart("eyebrow")} style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 1 : undefined} {...informationWebPart("title")} style={styles.title}>{t("navigation", "privacy")}</Text>
+          <Text {...informationWebPart("updated")} style={styles.updated}>
             {t("common", "informationUpdated")}
           </Text>
         </View>
 
-        <View style={styles.content}>
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading1")}</Text>
+        <View {...informationWebPart("content")} style={styles.content}>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading1")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph1")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph2")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading2")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading2")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph3")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph4")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph5")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading3")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading3")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph6")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph7")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph8")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading4")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading4")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph9")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph10")}
           </Text>
 
-          <View style={styles.list}>
+          <View {...informationWebPart("list")} style={styles.list}>
             {storageUses.map((item) => (
-              <View key={item} style={styles.listItem}>
-                <Text style={styles.bullet}>•</Text>
-                <Text style={styles.listText}>{t("privacy", item)}</Text>
+              <View key={item} {...informationWebPart("listItem")} style={styles.listItem}>
+                <Text {...informationWebPart("bullet")} style={styles.bullet}>•</Text>
+                <Text {...informationWebPart("listText")} style={styles.listText}>{t("privacy", item)}</Text>
               </View>
             ))}
           </View>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph11")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>
             {t("privacy", "heading5")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph12")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph13")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph14")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading6")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading6")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph15")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph16")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading7")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading7")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph17")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph18")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph19")}
           </Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph20")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading8")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading8")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph21")}
           </Text>
 
-          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} style={styles.heading}>{t("privacy", "heading9")}</Text>
+          <Text accessibilityRole={locale === "en" ? "header" : undefined} aria-level={locale === "en" ? 2 : undefined} {...informationWebPart("heading")} style={styles.heading}>{t("privacy", "heading9")}</Text>
 
-          <Text style={styles.paragraph}>
+          <Text {...informationWebPart("paragraph")} style={styles.paragraph}>
             {t("privacy", "paragraph22")}
           </Text>
         </View>
 
-        <Link href={pagePath("home")} asChild>
-          <Pressable style={styles.backButton}>
-            <Text style={styles.backButtonText}>{t("navigation", "backHome")}</Text>
+        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+          <Pressable {...informationWebPart("backButton")} style={styles.backButton}>
+            <Text {...informationWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backHome")}</Text>
           </Pressable>
-        </Link>
+        </Link> : null}
+        </FooterPageContent>
+        <SiteFooter />
       </ScrollView>
     </>
   );

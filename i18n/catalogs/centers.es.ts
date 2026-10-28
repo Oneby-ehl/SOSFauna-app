@@ -1,6 +1,8 @@
 // Directory interface only. Contact records and identifiers remain in their original data modules.
 export const centersEs = { centers: {
+  "geographicalScope": "Los centros y teléfonos de ayuda de este directorio corresponden exclusivamente a España",
   "info": "Info",
+  "grefaWhatsAppLabel": "Abrir una conversación de WhatsApp con GREFA",
   "helpTitle": "Teléfonos de ayuda",
   "chooseServicePrefix": "Elige el ",
   "appropriateService": "servicio adecuado",

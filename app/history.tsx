@@ -1,4 +1,7 @@
+import SiteFooter from "@/components/web/SiteFooter";
+import ClearHistoryDialog from "@/components/history/ClearHistoryDialog";
 import { getEffectiveCatalog } from "@/i18n/translate";
+import { interiorNavigationOptions } from "@/components/faq/TopicFaqHeader";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Locale } from "@/i18n/types";
 import { getLocalizedPath, resolveRouteLocale } from "@/i18n/routes";
@@ -25,6 +28,7 @@ import {
 } from "@/services/rescueStorage";
 import { NoIndexHead } from "@/components/seo/SeoHead";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { HistoryStyles, historyWebPart, HistoryStateIndicator, HistoryExpansionIcon, HistoryLocationLine, HistoryEmptyIcon } from "@/components/history/HistoryPresentation";
 import { buildRescueShareMessage } from "@/utils/rescueShareMessage";
 import type {
   RescueAnimalState,
@@ -291,72 +295,72 @@ function HistoryCard({
   const animalPlaceLabel = getAnimalPlaceLabel(rescueCase);
 
   return (
-    <View style={styles.card}>
-      <Pressable style={styles.cardHeader} onPress={onToggle}>
-        <View style={styles.cardHeaderText}>
-          <Text style={styles.cardTitle}>
+    <View {...historyWebPart("card")} style={styles.card}>
+      <Pressable {...(Platform.OS === "web" ? { accessibilityRole: "button" as const, accessibilityState: { expanded } } : {})} {...historyWebPart("cardHeader")} style={styles.cardHeader} onPress={onToggle}>
+        <View {...historyWebPart("cardHeaderText")} style={styles.cardHeaderText}>
+          <Text {...historyWebPart("cardTitle")} style={styles.cardTitle}>
             {ANIMAL_TYPE_LABELS[rescueCase.animalType]}
           </Text>
 
-          <Text style={styles.cardDate}>
+          <Text {...historyWebPart("cardDate")} style={styles.cardDate}>
             {formatDate(rescueCase.completedAt ?? rescueCase.updatedAt)}
           </Text>
 
-          <Text style={styles.cardState}>
-            {ANIMAL_STATE_ICONS[rescueCase.animalState]}{" "}
+          <Text {...historyWebPart("cardState")} style={styles.cardState}>
+            {Platform.OS === "web" ? <HistoryStateIndicator state={rescueCase.animalState} /> : <>{ANIMAL_STATE_ICONS[rescueCase.animalState]}{" "}</>}
             {ANIMAL_STATE_LABELS[rescueCase.animalState]}
           </Text>
         </View>
 
-        <Text style={styles.expandIcon}>{expanded ? "−" : "+"}</Text>
+        {Platform.OS === "web" ? <HistoryExpansionIcon expanded={expanded} /> : <Text {...historyWebPart("expandIcon")} style={styles.expandIcon}>{expanded ? "−" : "+"}</Text>}
       </Pressable>
 
-      <View style={styles.cardSummary}>
+      <View {...historyWebPart("cardSummary")} style={styles.cardSummary}>
         {locationFields.map((field) => (
-          <Text key={field} style={styles.summaryValue}>
-            {field}
+          <Text key={field} {...historyWebPart("summaryValue")} style={styles.summaryValue}>
+            <HistoryLocationLine text={field} />
           </Text>
         ))}
 
         {animalPositionLabel ? (
           <>
-            <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.position}</Text>
-            <Text style={styles.summaryValue}>{animalPositionLabel}</Text>
+            <Text {...historyWebPart("summaryLabel")} style={styles.summaryLabel}>{generalTexts.summaryHistory.position}</Text>
+            <Text {...historyWebPart("summaryValue")} style={styles.summaryValue}>{animalPositionLabel}</Text>
           </>
         ) : null}
 
         {animalEnvironmentLabel ? (
           <>
-            <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.environment}</Text>
-            <Text style={styles.summaryValue}>{animalEnvironmentLabel}</Text>
+            <Text {...historyWebPart("summaryLabel")} style={styles.summaryLabel}>{generalTexts.summaryHistory.environment}</Text>
+            <Text {...historyWebPart("summaryValue")} style={styles.summaryValue}>{animalEnvironmentLabel}</Text>
           </>
         ) : null}
 
         {!animalPositionLabel && !animalEnvironmentLabel && animalPlaceLabel ? (
           <>
-            <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.legacyPlace}</Text>
-            <Text style={styles.summaryValue}>{animalPlaceLabel}</Text>
+            <Text {...historyWebPart("summaryLabel")} style={styles.summaryLabel}>{generalTexts.summaryHistory.legacyPlace}</Text>
+            <Text {...historyWebPart("summaryValue")} style={styles.summaryValue}>{animalPlaceLabel}</Text>
           </>
         ) : null}
 
-        <Text style={styles.summaryLabel}>{generalTexts.summaryHistory.situation}</Text>
-        <Text style={styles.summaryValue}>{observedSituation}</Text>
+        <Text {...historyWebPart("summaryLabel")} style={styles.summaryLabel}>{generalTexts.summaryHistory.situation}</Text>
+        <Text {...historyWebPart("summaryValue")} style={styles.summaryValue}>{observedSituation}</Text>
       </View>
 
       {expanded ? (
-        <View style={styles.details}>
-          <View style={styles.detailActions}>
-            <Pressable style={styles.copyButton} onPress={onCopy}>
-              <View style={styles.buttonContent}>
+        <View {...historyWebPart("details")} style={styles.details}>
+          <View {...historyWebPart("detailActions")} style={styles.detailActions}>
+            <Pressable {...historyWebPart("copyButton")} style={styles.copyButton} onPress={onCopy}>
+              <View {...historyWebPart("buttonContent")} style={styles.buttonContent}>
                 <IconSymbol name="doc.on.doc" size={16} color="#ffffff" />
-                <Text style={styles.copyButtonText}>{generalTexts.summaryHistory.copySummary}</Text>
+                <Text {...historyWebPart("copyButtonText")} style={styles.copyButtonText}>{generalTexts.summaryHistory.copySummary}</Text>
               </View>
             </Pressable>
 
-            <Pressable style={styles.deleteButton} onPress={onDelete}>
-              <View style={styles.buttonContent}>
+            <Pressable {...historyWebPart("deleteButton")} style={styles.deleteButton} onPress={onDelete}>
+              <View {...historyWebPart("buttonContent")} style={styles.buttonContent}>
                 <IconSymbol name="trash" size={16} color="#9b1c1c" />
-                <Text style={styles.deleteButtonText}>{generalTexts.historyUi.deleteButton}</Text>
+                <Text {...historyWebPart("deleteButtonText")} style={styles.deleteButtonText}>{generalTexts.historyUi.deleteButton}</Text>
               </View>
             </Pressable>
           </View>
@@ -374,6 +378,10 @@ export default function HistoryPage() {
   const { buildCaseSummary } = useMemo(() => createHistoryPresentation(locale), [locale]);
   const homePath = getLocalizedPath("home", locale);
   const goBack = () => {
+    if (Platform.OS === "web") {
+      router.replace(homePath);
+      return;
+    }
     if (locale === "es") {
       router.back();
       return;
@@ -388,6 +396,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [historyReadIssue, setHistoryReadIssue] = useState(false);
   const [expandedCaseId, setExpandedCaseId] = useState<string | null>(null);
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -409,22 +418,26 @@ export default function HistoryPage() {
     }, [loadHistory]),
   );
 
+  const executeHistoryAction = async (action: () => Promise<void>) => {
+    try {
+      await action();
+      return true;
+    } catch {
+      const title = generalTexts.assistantCaptureUi.galleryErrorTitle;
+      const message = generalTexts.assistantCaptureUi.locationErrorMessage;
+      if (Platform.OS === "web") window.alert(`${title}\n\n${message}`);
+      else Alert.alert(title, message);
+      return false;
+    }
+  };
+
   const confirmAction = (
     title: string,
     message: string,
     confirmText: string,
     action: () => Promise<void>,
   ) => {
-    const runAction = async () => {
-      try {
-        await action();
-      } catch {
-        const title = generalTexts.assistantCaptureUi.galleryErrorTitle;
-        const message = generalTexts.assistantCaptureUi.locationErrorMessage;
-        if (Platform.OS === "web") window.alert(`${title}\n\n${message}`);
-        else Alert.alert(title, message);
-      }
-    };
+    const runAction = () => executeHistoryAction(action);
     if (Platform.OS === "web") {
       if (window.confirm(`${title}\n\n${message}`)) {
         void runAction();
@@ -471,29 +484,37 @@ export default function HistoryPage() {
     );
   };
 
+  const clearAllHistory = async () => {
+    await clearHistory();
+    setHistory([]);
+    setExpandedCaseId(null);
+  };
+
   const handleClearHistory = () => {
+    if (Platform.OS === "web") {
+      setClearDialogOpen(true);
+      return;
+    }
     confirmAction(
       generalTexts.historyUi.clearTitle,
       generalTexts.historyUi.clearMessage,
       generalTexts.historyUi.clearConfirm,
-      async () => {
-        await clearHistory();
-        setHistory([]);
-        setExpandedCaseId(null);
-      },
+      clearAllHistory,
     );
   };
 
   return (
     <ScrollView
-      style={styles.screen}
+      {...historyWebPart("screen")} style={styles.screen}
       contentContainerStyle={styles.screenContent}
       showsVerticalScrollIndicator
     >
-      <NoIndexHead path={getLocalizedPath("history", locale)} title={`${generalTexts.historyUi.navigationTitle} | SOS Fauna España`} />
+      <NoIndexHead path={getLocalizedPath("history", locale)} title={`${generalTexts.historyUi.navigationTitle} | SOS Fauna España`} locale={locale} />
+      <HistoryStyles />
       <Stack.Screen options={{
+        ...interiorNavigationOptions,
         title: generalTexts.historyUi.navigationTitle,
-        ...(locale === "en" ? {
+        ...(Platform.OS !== "web" && locale === "en" ? {
           headerLeft: ({ tintColor }: { tintColor?: string }) => router.canGoBack() ? (
             <HeaderBackButton
               tintColor={tintColor}
@@ -505,46 +526,46 @@ export default function HistoryPage() {
         } : {}),
       }} />
 
-      <View style={styles.header}>
-        <View style={styles.headerInner}>
-          <View style={styles.headerText}>
-            <Text style={styles.eyebrow}>SOS Fauna España</Text>
-            <Text style={styles.title}>{generalTexts.historyUi.heading}</Text>
-            <Text style={styles.description}>{generalTexts.historyUi.description}</Text>
+      <View {...historyWebPart("header")} style={styles.header}>
+        <View {...historyWebPart("headerInner")} style={styles.headerInner}>
+          <View {...historyWebPart("headerText")} style={styles.headerText}>
+            <Text {...historyWebPart("eyebrow")} style={styles.eyebrow}>SOS Fauna España</Text>
+            <Text {...historyWebPart("title")} style={styles.title}>{generalTexts.historyUi.heading}</Text>
+            <Text {...historyWebPart("description")} style={styles.description}>{generalTexts.historyUi.description}</Text>
           </View>
 
-          <Pressable style={styles.backButton} onPress={goBack}>
-            <Text style={styles.backButtonText}>{generalTexts.historyUi.back}</Text>
-          </Pressable>
+          {Platform.OS !== "web" ? <Pressable {...historyWebPart("backButton")} style={styles.backButton} onPress={goBack}>
+            <Text {...historyWebPart("backButtonText")} style={styles.backButtonText}>{generalTexts.historyUi.back}</Text>
+          </Pressable> : null}
         </View>
       </View>
 
-      <View style={styles.content}>
+      <View {...historyWebPart("content")} style={styles.content}>
         {!loading && historyReadIssue ? (
-          <View style={styles.statusPanel}>
-            <Text accessibilityRole="alert" style={styles.statusText}>
+          <View {...historyWebPart("statusPanel")} style={styles.statusPanel}>
+            <Text accessibilityRole="alert" {...historyWebPart("statusText")} style={styles.statusText}>
               {generalTexts.assistantCaptureUi.locationErrorMessage}
             </Text>
           </View>
         ) : null}
         {loading ? (
-          <View style={styles.statusPanel}>
+          <View {...historyWebPart("statusPanel")} style={styles.statusPanel}>
             <ActivityIndicator size="large" />
-            <Text style={styles.statusText}>{generalTexts.historyUi.loading}</Text>
+            <Text {...historyWebPart("statusText")} style={styles.statusText}>{generalTexts.historyUi.loading}</Text>
           </View>
         ) : history.length === 0 ? (historyReadIssue ? null : (
-          <View style={styles.emptyPanel}>
-            <Text style={styles.emptyIcon}>🗂️</Text>
-            <Text style={styles.emptyTitle}>{generalTexts.historyUi.emptyTitle}</Text>
-            <Text style={styles.emptyText}>{generalTexts.historyUi.emptyDescription}</Text>
+          <View {...historyWebPart("emptyPanel")} style={styles.emptyPanel}>
+            {Platform.OS === "web" ? <HistoryEmptyIcon /> : <Text style={styles.emptyIcon}>🗂️</Text>}
+            <Text {...historyWebPart("emptyTitle")} style={styles.emptyTitle}>{generalTexts.historyUi.emptyTitle}</Text>
+            <Text {...historyWebPart("emptyText")} style={styles.emptyText}>{generalTexts.historyUi.emptyDescription}</Text>
 
-            <Pressable style={styles.primaryButton} onPress={() => locale === "en" ? router.replace(homePath) : router.back()}>
-              <Text style={styles.primaryButtonText}>{generalTexts.historyUi.home}</Text>
+            <Pressable {...historyWebPart("primaryButton")} style={styles.primaryButton} onPress={() => Platform.OS === "web" || locale === "en" ? router.replace(homePath) : router.back()}>
+              <Text {...historyWebPart("primaryButtonText")} style={styles.primaryButtonText}>{generalTexts.historyUi.home}</Text>
             </Pressable>
           </View>
         )) : (
           <>
-            <View style={styles.list}>
+            <View {...historyWebPart("list")} style={styles.list}>
               {history.map((rescueCase) => (
                 <HistoryCard
                   key={rescueCase.id}
@@ -562,14 +583,21 @@ export default function HistoryPage() {
             </View>
 
             <Pressable
-              style={styles.clearHistoryButton}
+              {...historyWebPart("clearHistoryButton")} style={styles.clearHistoryButton}
               onPress={handleClearHistory}
             >
-              <Text style={styles.clearHistoryButtonText}>{generalTexts.historyUi.clearButton}</Text>
+              <Text {...historyWebPart("clearHistoryButtonText")} style={styles.clearHistoryButtonText}>{generalTexts.historyUi.clearButton}</Text>
             </Pressable>
           </>
         )}
       </View>
+      <ClearHistoryDialog open={clearDialogOpen} onCancel={() => setClearDialogOpen(false)}
+        onConfirm={async () => {
+          const cleared = await executeHistoryAction(clearAllHistory);
+          if (cleared) setClearDialogOpen(false);
+          return cleared;
+        }} />
+      <SiteFooter />
     </ScrollView>
   );
 }

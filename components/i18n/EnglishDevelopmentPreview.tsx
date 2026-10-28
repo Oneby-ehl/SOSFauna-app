@@ -2,7 +2,8 @@ import { Stack, usePathname } from "expo-router";
 
 import AboutPage from "@/components/home/AboutPage";
 import ContactPage from "@/components/home/ContactPage";
-import LandingPage from "@/components/home/LandingPage";
+import Home from "@/components/home/Home";
+import HistoryPage from "@/app/history";
 import LegalPage from "@/components/home/LegalPage";
 import PrivacyPage from "@/components/home/PrivacyPage";
 import SourcesPage from "@/components/home/SourcesPage";
@@ -13,7 +14,8 @@ import TopicFaqPage from "@/components/faq/TopicFaqPage";
 import { getEnglishDevelopmentPage } from "@/i18n/developmentPreview";
 
 const pages = {
-  home: LandingPage,
+  home: Home,
+  history: HistoryPage,
   about: AboutPage,
   sources: SourcesPage,
   contact: ContactPage,
@@ -30,8 +32,7 @@ const pages = {
 export default function EnglishDevelopmentPreview() {
   const pathname = usePathname();
   const page = getEnglishDevelopmentPage(pathname, "web");
-  // History uses its generated route and shared component, not this fallback.
-  if (!page || page === "history") return null;
+  if (!page) return null;
   const Page = pages[page];
   return <><Stack.Screen options={{ headerShown: page !== "home" }} /><Page /></>;
 }
