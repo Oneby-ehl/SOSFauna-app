@@ -77,7 +77,7 @@ div:has(> [data-testid="sos-navigation-title"]) { flex-shrink:1; min-width:0; }
       <Text testID="sos-navigation-title" numberOfLines={1} style={shortSection
         ? { color: "#426351", fontFamily: "Arial, Helvetica, sans-serif", fontSize: 14, fontWeight: "400" }
         : { color: "#1f2937", fontSize: 18, fontWeight: "500" }}>
-        {shortSection ?? title}
+        {Platform.OS === "android" ? "SOS Fauna España" : shortSection ?? title}
       </Text>
     </>
   );

@@ -377,13 +377,13 @@ export default function HistoryPage() {
   const router = useRouter();
   const navigation = useNavigation();
   const { buildCaseSummary } = useMemo(() => createHistoryPresentation(locale), [locale]);
-  const homePath = getLocalizedPath("home", locale);
+  const homePath = getLocalizedPath("home", Platform.OS === "android" ? "es" : locale);
   const goBack = () => {
     if (Platform.OS === "web") {
       router.replace(homePath);
       return;
     }
-    if (locale === "es") {
+    if (Platform.OS === "android" || locale === "es") {
       router.back();
       return;
     }
@@ -515,7 +515,7 @@ export default function HistoryPage() {
       <Stack.Screen options={{
         ...interiorNavigationOptions,
         title: generalTexts.historyUi.navigationTitle,
-        ...(Platform.OS !== "web" && locale === "en" ? {
+        ...(Platform.OS !== "web" && Platform.OS !== "android" && locale === "en" ? {
           headerLeft: ({ tintColor }: { tintColor?: string }) => router.canGoBack() ? (
             <HeaderBackButton
               tintColor={tintColor}
@@ -560,7 +560,7 @@ export default function HistoryPage() {
             <Text {...historyWebPart("emptyTitle")} style={styles.emptyTitle}>{generalTexts.historyUi.emptyTitle}</Text>
             <Text {...historyWebPart("emptyText")} style={styles.emptyText}>{generalTexts.historyUi.emptyDescription}</Text>
 
-            <Pressable {...historyWebPart("primaryButton")} style={styles.primaryButton} onPress={() => Platform.OS === "web" || locale === "en" ? router.replace(homePath) : router.back()}>
+            <Pressable {...historyWebPart("primaryButton")} style={styles.primaryButton} onPress={() => Platform.OS === "web" || (Platform.OS !== "android" && locale === "en") ? router.replace(homePath) : router.back()}>
               <Text {...historyWebPart("primaryButtonText")} style={styles.primaryButtonText}>{generalTexts.historyUi.home}</Text>
             </Pressable>
           </View>

@@ -38,7 +38,7 @@ export default function NotFoundPage() {
           <Text style={styles.message}>{generalTexts.notFoundUi.message}</Text>
           <Text style={styles.secondary}>{generalTexts.notFoundUi.secondary}</Text>
 
-          <Link href={getLocalizedPath("home", locale)} asChild>
+          <Link href={getLocalizedPath("home", Platform.OS === "android" ? "es" : locale)} asChild>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={generalTexts.notFoundUi.homeAccessibility}

@@ -138,7 +138,7 @@ export default function AboutPage() {
         </View>
 
         {Platform.OS !== "web" ? <>
-        <Pressable {...informationWebPart("shareButton")} style={styles.shareButton} onPress={shareSosFaunaApp}>
+        <Pressable {...informationWebPart("shareButton")} style={styles.shareButton} onPress={Platform.OS === "android" ? () => shareSosFaunaApp(locale) : shareSosFaunaApp}>
           <Text {...informationWebPart("shareButtonText")} style={styles.shareButtonText}>{t("navigation", "shareApp")}</Text>
         </Pressable>
 

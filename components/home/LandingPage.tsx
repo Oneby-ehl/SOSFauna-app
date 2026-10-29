@@ -266,66 +266,76 @@ export default function LandingPage({ renderWeb }: {
     })}
   </>;
 
+  const header = (
+    <View style={styles.header}>
+      <View style={styles.headerInner}>
+        <Link href={pagePath("home")}>
+          <Text style={styles.brand}>{t("common", "brand")}</Text>
+        </Link>
+
+        {Platform.OS === "android" || languageControlsEnabled ? <LanguageSelector /> : <Pressable
+          style={styles.headerButton}
+          onPress={handleStartNewCase}
+          disabled={checkingCase}
+        >
+          <Text style={styles.headerButtonText}>{t("navigation", "guide")}</Text>
+        </Pressable>}
+      </View>
+    </View>
+  );
+
+  const heroCopy = (
+    <>
+      <Text style={styles.badge}>{t("home", "badge")}</Text>
+
+      <Text
+        accessibilityRole="header"
+        aria-level={1}
+        style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}
+      >
+        {t("home", "heroTitle")}
+      </Text>
+
+      <Text style={styles.heroDescription}>
+        {t("home", "heroDescription")}
+      </Text>
+      {Platform.OS === "android" ? <Text style={styles.heroCredit}>{t("landingEditorial", "aiImagesCredit")}</Text> : null}
+
+      {!isCompact ? (
+        <View style={styles.heroGuidance}>
+          <Text style={styles.heroGuidanceTitle}>{t("home", "calmTitle")}</Text>
+          <Text style={styles.heroGuidanceText}>
+            {t("home", "calmDesktop")}
+          </Text>
+        </View>
+      ) : null}
+    </>
+  );
+
   return (
-    <SafeAreaView style={styles.screen} edges={["top"]}>
+    <SafeAreaView style={styles.screen} edges={Platform.OS === "android" ? ["top", "bottom"] : ["top"]}>
+      {Platform.OS === "android" ? header : null}
       <ScrollView
         style={styles.screen}
         contentContainerStyle={styles.screenContent}
         showsVerticalScrollIndicator
       >
         {metadata}
-
-      <View style={styles.header}>
-        <View style={styles.headerInner}>
-          <Link href={pagePath("home")}>
-            <Text style={styles.brand}>{t("common", "brand")}</Text>
-          </Link>
-
-          {languageControlsEnabled ? <LanguageSelector /> : <Pressable
-            style={styles.headerButton}
-            onPress={handleStartNewCase}
-            disabled={checkingCase}
-          >
-            <Text style={styles.headerButtonText}>{t("navigation", "guide")}</Text>
-          </Pressable>}
-        </View>
-      </View>
+        {Platform.OS !== "android" ? header : null}
 
       <View style={[styles.main, isCompact && styles.mainCompact]}>
         <View style={[styles.hero, isCompact && styles.heroCompact]}>
           <View style={[styles.heroContent, isCompact && styles.heroContentCompact]}>
-            {Platform.OS === "android" ? <View pointerEvents="none" style={styles.heroArtwork}>
-              <Image source={require("../../public/wildlife/lince-iberico.webp")} style={styles.heroPhoto} resizeMode="cover" accessible={false} />
-              <View style={styles.heroShade} />
-            </View> : null}
-            <Text style={styles.badge}>{t("home", "badge")}</Text>
-
-            <Text
-              accessibilityRole="header"
-              aria-level={1}
-              style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}
-            >
-              {t("home", "heroTitle")}
-            </Text>
-
-            <Text style={styles.heroDescription}>
-              {t("home", "heroDescription")}
-            </Text>
-            {Platform.OS === "android" ? <Text style={styles.heroCredit}>{t("landingEditorial", "aiImagesCredit")}</Text> : null}
-
-            {!isCompact ? (
-            <View style={styles.heroGuidance}>
-              <Text style={styles.heroGuidanceTitle}>{t("home", "calmTitle")}</Text>
-              <Text style={styles.heroGuidanceText}>
-                {t("home", "calmDesktop")}
-              </Text>
-            </View>
-            ) : null}
-
+            {Platform.OS === "android" ? <>
+              <View pointerEvents="none" style={styles.heroArtwork}>
+                <Image source={require("../../public/wildlife/lince-iberico.webp")} style={styles.heroPhoto} resizeMode="cover" accessible={false} />
+              </View>
+              <View style={styles.heroCopy}>{heroCopy}</View>
+            </> : heroCopy}
           </View>
 
           <View style={[styles.heroPanel, isCompact && styles.heroPanelCompact]}>
-            <View
+            {Platform.OS !== "android" ? <View
               style={[
                 styles.heroOwlGroup,
                 isCompact && styles.heroOwlGroupCompact,
@@ -337,7 +347,7 @@ export default function LandingPage({ renderWeb }: {
                 <View style={styles.owlStone} />
                 <Text style={styles.owlBaseText}>🍃</Text>
               </View>
-            </View>
+            </View> : null}
 
             <View style={[styles.heroActions, isCompact && styles.heroActionsCompact]}>
               <Pressable
@@ -592,7 +602,7 @@ export default function LandingPage({ renderWeb }: {
 
              <Pressable
                accessibilityRole="button"
-               onPress={shareSosFaunaApp}
+               onPress={Platform.OS === "android" ? () => shareSosFaunaApp(locale) : shareSosFaunaApp}
              >
                <Text style={styles.footerLink}>{t("navigation", "shareApp")}</Text>
              </Pressable>
@@ -619,9 +629,9 @@ export default function LandingPage({ renderWeb }: {
 }
 
 const styles = androidPresentation(StyleSheet.create({
-  heroArtwork: { ...StyleSheet.absoluteFillObject, overflow: "hidden" },
+  heroArtwork: { width: "100%", aspectRatio: 16 / 9, overflow: "hidden" },
   heroPhoto: { width: "100%", height: "100%" },
-  heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(5,21,16,0.65)" },
+  heroCopy: { padding: 20, gap: 16 },
   heroCredit: { color: "#d9e1d8", fontSize: 11, lineHeight: 17 },
   screen: {
     flex: 1,
@@ -1144,8 +1154,8 @@ const styles = androidPresentation(StyleSheet.create({
   main: { paddingHorizontal: 16, paddingVertical: 24, gap: 28 },
   mainCompact: { paddingVertical: 16, gap: 28 },
   hero: { flexDirection: "column", gap: 16 },
-  heroContent: { flex: 0, minHeight: 340, justifyContent: "flex-end", backgroundColor: fauna.forest, padding: 24, borderWidth: 0, overflow: "hidden", borderTopLeftRadius: 28, borderBottomRightRadius: 28, borderTopRightRadius: 8, borderBottomLeftRadius: 8 },
-  heroContentCompact: { backgroundColor: fauna.forest, padding: 24, borderRadius: 0, borderTopLeftRadius: 28, borderBottomRightRadius: 28, borderTopRightRadius: 8, borderBottomLeftRadius: 8, gap: 16 },
+  heroContent: { flex: 0, minHeight: 0, backgroundColor: fauna.forest, padding: 0, gap: 0, borderWidth: 0, overflow: "hidden", borderTopLeftRadius: 28, borderBottomRightRadius: 28, borderTopRightRadius: 8, borderBottomLeftRadius: 8 },
+  heroContentCompact: { backgroundColor: fauna.forest, padding: 0, borderRadius: 0, borderTopLeftRadius: 28, borderBottomRightRadius: 28, borderTopRightRadius: 8, borderBottomLeftRadius: 8, gap: 0 },
   badge: { color: "#ffffff", backgroundColor: "transparent", paddingHorizontal: 0, paddingVertical: 0, fontSize: 11, lineHeight: 18, letterSpacing: 1.4 },
   heroTitle: { ...editorialTitle, color: "#ffffff", fontSize: 36, lineHeight: 43 },
   heroTitleCompact: { fontSize: 32, lineHeight: 39 },

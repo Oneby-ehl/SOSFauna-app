@@ -18,6 +18,7 @@ export default function RootLayout() {
           headerStyle: { backgroundColor: '#f5f7f8' },
           headerTintColor: '#1f2937',
           contentStyle: { backgroundColor: '#ffffff' },
+          ...(Platform.OS === 'android' ? { headerTitle: TopicFaqHeaderTitle } : {}),
           ...(Platform.OS === 'android' && ['index', 'aviso', 'faq', 'faq/vencejos', 'faq/murcielagos', 'centros', 'history'].includes(route.name)
             ? {
                 headerStyle: { backgroundColor: fauna.paper },

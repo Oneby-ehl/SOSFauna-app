@@ -3945,7 +3945,8 @@ const saveCurrentProgress = async (
           styles.container,
           {
             paddingTop: showSummaryActionBar ? 84 : 12,
-            paddingBottom: Math.max(220, insets.bottom + 180),
+            // The enclosing SafeAreaView already reserves the system's bottom inset.
+            paddingBottom: Platform.OS === "android" ? 32 : Math.max(220, insets.bottom + 180),
           },
         ]}
         keyboardShouldPersistTaps="handled"
