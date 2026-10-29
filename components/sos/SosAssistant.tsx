@@ -58,7 +58,8 @@ import {
 
 import { Stack, useRouter } from "expo-router";
 import RecoveryCentersPage, { RecoveryCentersContent } from "@/components/contacts/RecoveryCentersPage";
-import { SectionCard } from "@/components/SectionCard";
+import { SectionCard } from "@/components/AndroidSectionCard";
+import { androidPresentation, editorialTitle, editorialEyebrow, fauna } from "@/constants/androidPresentation";
 import { StepOneCard, StepOneStyles, stepOneDataSet, guideQuestionTitle, guideSummaryText, GuideActionIcon, GuideAbsenceIndicator, GuideConfirmationCard, AdvicePresentation, StepThreeStatus, GuideSpeechLabel } from "./StepOnePresentation";
 import { useWebNavigation } from "@/components/web/WebNavigation";
 import SiteFooter from "@/components/web/SiteFooter";
@@ -3992,7 +3993,7 @@ const saveCurrentProgress = async (
   );
 }
 
-const styles = StyleSheet.create({
+const styles = androidPresentation(StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#f3f7f4",
@@ -4691,4 +4692,39 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
+}), {
+  container: { width: "100%", maxWidth: 760, alignSelf: "center", paddingHorizontal: 32, gap: 16 },
+  hero: { backgroundColor: fauna.paper, borderWidth: 0, paddingHorizontal: 0, gap: 10 },
+  badge: { ...editorialEyebrow, color: fauna.forest, backgroundColor: "transparent", paddingHorizontal: 0, paddingVertical: 0 },
+  heroText: { fontSize: 16, lineHeight: 26 },
+  welcomeTitle: { ...editorialTitle, fontSize: 26, lineHeight: 34 },
+  sectionGroup: { borderRadius: 12, padding: 14 },
+  subheading: { color: "#294b3c", fontSize: 17, lineHeight: 25, fontWeight: "500" },
+  input: { minHeight: 48, color: fauna.ink, borderRadius: 10, fontSize: 16 },
+  primaryButton: { minHeight: 48, justifyContent: "center", paddingHorizontal: 14, borderRadius: 10 },
+  primaryButtonText: { textAlign: "center" },
+  secondaryButton: { minHeight: 48, justifyContent: "center", paddingHorizontal: 14, borderRadius: 10 },
+  secondaryButtonSmall: { minHeight: 48, justifyContent: "center", borderRadius: 10 },
+  speechButton: { minHeight: 48, borderRadius: 10 },
+  flag: { minHeight: 48, justifyContent: "center", borderRadius: 10, backgroundColor: "#f5f6f1" },
+  flagActive: { backgroundColor: fauna.forest, borderColor: fauna.forest },
+  flagText: { fontSize: 15, lineHeight: 23, fontWeight: "400" },
+  flagTextActive: { color: "#ffffff" },
+  adviceBox: { backgroundColor: fauna.sage, color: fauna.ink, borderRadius: 12, minHeight: 0, fontSize: 16, lineHeight: 26 },
+  adviceBoxMobile: { fontSize: 16, lineHeight: 26 },
+  summaryPreviewValue: { fontWeight: "500" },
+  summaryPreviewListItem: { fontWeight: "500" },
+  summaryActionBar: { backgroundColor: fauna.paper, elevation: 0 },
+  menuActionButton: { borderRadius: 10 },
+  iconActionButton: { borderRadius: 10, paddingHorizontal: 12 },
+  contactRow: { flexWrap: "wrap", borderRadius: 10 },
+  contactTextBlock: { flexBasis: 170, flexGrow: 1, minWidth: 0 },
+  contactName: { lineHeight: 23, fontWeight: "500" },
+  contactNote: { lineHeight: 20 },
+  contactPhonePill: { minHeight: 48, justifyContent: "center", borderRadius: 8 },
+  mapOpenButton: { height: "auto", minHeight: 48, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 10 },
+  mapOpenButtonText: { textAlign: "center" },
+  sideArrowLeft: { backgroundColor: fauna.gold },
+  sideArrowRight: { backgroundColor: fauna.gold },
+  sideArrowText: { color: fauna.forest },
 });

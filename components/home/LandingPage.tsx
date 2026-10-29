@@ -23,6 +23,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { androidPresentation, editorialTitle, fauna } from "@/constants/androidPresentation";
 
 type AnimalScopeGroupProps = {
   icon: string;
@@ -293,6 +294,10 @@ export default function LandingPage({ renderWeb }: {
       <View style={[styles.main, isCompact && styles.mainCompact]}>
         <View style={[styles.hero, isCompact && styles.heroCompact]}>
           <View style={[styles.heroContent, isCompact && styles.heroContentCompact]}>
+            {Platform.OS === "android" ? <View pointerEvents="none" style={styles.heroArtwork}>
+              <Image source={require("../../public/wildlife/lince-iberico.webp")} style={styles.heroPhoto} resizeMode="cover" accessible={false} />
+              <View style={styles.heroShade} />
+            </View> : null}
             <Text style={styles.badge}>{t("home", "badge")}</Text>
 
             <Text
@@ -306,6 +311,7 @@ export default function LandingPage({ renderWeb }: {
             <Text style={styles.heroDescription}>
               {t("home", "heroDescription")}
             </Text>
+            {Platform.OS === "android" ? <Text style={styles.heroCredit}>{t("landingEditorial", "aiImagesCredit")}</Text> : null}
 
             {!isCompact ? (
             <View style={styles.heroGuidance}>
@@ -612,7 +618,11 @@ export default function LandingPage({ renderWeb }: {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = androidPresentation(StyleSheet.create({
+  heroArtwork: { ...StyleSheet.absoluteFillObject, overflow: "hidden" },
+  heroPhoto: { width: "100%", height: "100%" },
+  heroShade: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(5,21,16,0.65)" },
+  heroCredit: { color: "#d9e1d8", fontSize: 11, lineHeight: 17 },
   screen: {
     flex: 1,
     backgroundColor: "#f4f7f4",
@@ -1124,4 +1134,38 @@ const styles = StyleSheet.create({
     color: "#e2eee4",
     fontSize: 14,
   },
+}), {
+  screen: { backgroundColor: fauna.paper },
+  header: { backgroundColor: fauna.forest, borderBottomWidth: 0 },
+  headerInner: { paddingHorizontal: 16, paddingVertical: 12, minHeight: 64, flexWrap: "wrap", gap: 12 },
+  brand: { color: "#ffffff", fontSize: 14, letterSpacing: 1.2, flexShrink: 1 },
+  headerButton: { backgroundColor: fauna.gold, minHeight: 48, justifyContent: "center", borderRadius: 24 },
+  headerButtonText: { color: fauna.forest },
+  main: { paddingHorizontal: 16, paddingVertical: 24, gap: 28 },
+  mainCompact: { paddingVertical: 16, gap: 28 },
+  hero: { flexDirection: "column", gap: 16 },
+  heroContent: { flex: 0, minHeight: 340, justifyContent: "flex-end", backgroundColor: fauna.forest, padding: 24, borderWidth: 0, overflow: "hidden", borderTopLeftRadius: 28, borderBottomRightRadius: 28, borderTopRightRadius: 8, borderBottomLeftRadius: 8 },
+  heroContentCompact: { backgroundColor: fauna.forest, padding: 24, borderRadius: 0, borderTopLeftRadius: 28, borderBottomRightRadius: 28, borderTopRightRadius: 8, borderBottomLeftRadius: 8, gap: 16 },
+  badge: { color: "#ffffff", backgroundColor: "transparent", paddingHorizontal: 0, paddingVertical: 0, fontSize: 11, lineHeight: 18, letterSpacing: 1.4 },
+  heroTitle: { ...editorialTitle, color: "#ffffff", fontSize: 36, lineHeight: 43 },
+  heroTitleCompact: { fontSize: 32, lineHeight: 39 },
+  heroDescription: { color: "#f2f2e9", fontSize: 16, lineHeight: 26 },
+  heroPanel: { flex: 0, minWidth: 0, padding: 16, borderRadius: 12, backgroundColor: fauna.surface, borderWidth: 1, borderColor: fauna.border },
+  heroPanelCompact: { padding: 16, borderRadius: 12, gap: 16 },
+  heroOwlGroup: { display: "none" },
+  heroOwlGroupCompact: { display: "none" },
+  caseButton: { minHeight: 48, borderRadius: 10, paddingHorizontal: 16 },
+  caseButtonCompact: { minHeight: 48, borderRadius: 10 },
+  primaryButton: { backgroundColor: fauna.gold },
+  primaryButtonText: { color: fauna.forest, textAlign: "center" },
+  heroGuidance: { maxWidth: "100%", padding: 16, borderRadius: 12 },
+  heroGuidanceTitle: { fontSize: 20, fontFamily: "serif", fontWeight: "400" },
+  sectionTitle: { ...editorialTitle, fontSize: 28, lineHeight: 36 },
+  sectionDescription: { fontSize: 16, lineHeight: 26 },
+  processSection: { padding: 18, borderRadius: 12 },
+  animalScopeSection: { paddingHorizontal: 18, borderRadius: 12 },
+  animalScopeGroup: { minWidth: 100, flexBasis: "40%" },
+  footer: { backgroundColor: fauna.forest },
+  footerInner: { paddingHorizontal: 20, paddingVertical: 28 },
+  footerBrand: { fontSize: 14, letterSpacing: 1.2 },
 });

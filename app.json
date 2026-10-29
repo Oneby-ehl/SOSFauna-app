@@ -23,7 +23,7 @@
       "package": "com.onebyehl.sosfauna"
     },
     "web": {
-      "favicon": "./assets/icon.png",
+      "favicon": "./assets/favicon.png",
       "output": "static"
     },
     "experiments": {

@@ -36,6 +36,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 
 import { formatAdvice } from "@/utils/adviceComposition";
 import { FaqStyles, FaqIcon, FaqAnswer, faqWebPart } from "./FaqPresentation";
+import { androidPresentation, editorialTitle, editorialEyebrow, fauna } from "@/constants/androidPresentation";
 import { interiorNavigationOptions } from "./TopicFaqHeader";
 
 const swiftFaqPriority = new Map<string, number>(
@@ -788,7 +789,7 @@ export default function FaqPage() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = androidPresentation(StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#f3f7f4",
@@ -1082,4 +1083,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "800",
   },
+}), {
+  container: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 24 },
+  header: { gap: 8 },
+  eyebrow: editorialEyebrow,
+  title: editorialTitle,
+  intro: { fontSize: 16, lineHeight: 26 },
+  searchSection: { marginHorizontal: -16, paddingHorizontal: 16, gap: 12 },
+  searchInput: { minHeight: 48, borderRadius: 10, paddingLeft: 40 },
+  clearSearchButton: { width: 48, height: 48, top: 2, right: 2, backgroundColor: "transparent" },
+  categoryPill: { minHeight: 48, justifyContent: "center", borderRadius: 8, backgroundColor: "#f5f6f1", maxWidth: "100%" },
+  categoryPillPressed: { backgroundColor: fauna.sage, borderColor: fauna.forest },
+  categoryPillFocused: { borderColor: fauna.forest, borderWidth: 2 },
+  categoryPillText: { fontWeight: "500", lineHeight: 20, flexShrink: 1 },
+  categoryTitle: { fontSize: 20, fontWeight: "500" },
+  faqCard: { borderRadius: 10 },
+  questionButton: { paddingHorizontal: 14, paddingVertical: 12 },
+  questionText: { color: fauna.ink, fontWeight: "500" },
+  answerContent: { paddingHorizontal: 14, gap: 12 },
+  answerText: { color: fauna.ink, lineHeight: 26 },
+  createNoticeBox: { borderRadius: 10 },
+  recoveryCentersBox: { borderRadius: 10 },
+  createNoticeButton: { minHeight: 48, paddingVertical: 10, maxWidth: "100%", borderRadius: 8 },
+  recoveryCentersButton: { minHeight: 48, paddingVertical: 10, maxWidth: "100%", borderRadius: 8 },
+  createNoticeButtonText: { textAlign: "center" },
+  recoveryCentersButtonText: { textAlign: "center" },
+  backButton: { minHeight: 48, justifyContent: "center", borderRadius: 8, backgroundColor: fauna.surface, borderWidth: 1, borderColor: fauna.outline },
+  backButtonText: { color: fauna.forest },
 });

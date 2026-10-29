@@ -16,7 +16,8 @@ import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
 import { matchesProvinceHelpGroup } from "./contactSearch";
 import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 
-import { SectionCard } from "@/components/SectionCard";
+import { SectionCard } from "@/components/AndroidSectionCard";
+import { androidPresentation, editorialTitle, editorialEyebrow, fauna } from "@/constants/androidPresentation";
 import {
   getRecoveryCenterProvinceContacts,
   getHelpContactsLegalNotice,
@@ -463,7 +464,7 @@ export default function RecoveryCentersPage({ embedded = false }: { embedded?: b
   );
 }
 
-const publicSectionStyles = StyleSheet.create({
+const publicSectionStyles = androidPresentation(StyleSheet.create({
   card: {
     backgroundColor: "#f8fafc",
     borderRadius: 18,
@@ -474,9 +475,9 @@ const publicSectionStyles = StyleSheet.create({
   },
   title: { fontSize: 18, fontWeight: "700", color: "#111827" },
   content: { gap: 10 },
-});
+}), { title: { fontSize: 20, lineHeight: 28, fontWeight: "500" }, card: { borderRadius: 12 } });
 
-const styles = StyleSheet.create({
+const styles = androidPresentation(StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#f3f7f4",
@@ -685,4 +686,24 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "800",
   },
+}), {
+  container: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 20 },
+  header: { gap: 8 },
+  eyebrow: editorialEyebrow,
+  title: editorialTitle,
+  intro: { fontSize: 16, lineHeight: 26 },
+  subheading: { fontSize: 17, lineHeight: 25, fontWeight: "500" },
+  input: { minHeight: 48, borderRadius: 10, color: fauna.ink, fontSize: 16 },
+  primaryButton: { minHeight: 48, borderRadius: 10, paddingHorizontal: 14, justifyContent: "center" },
+  primaryButtonText: { textAlign: "center" },
+  secondaryButton: { minHeight: 48, borderRadius: 10, paddingHorizontal: 14, justifyContent: "center" },
+  contactRow: { borderRadius: 10, minHeight: 48, flexWrap: "wrap", gap: 10 },
+  contactTextBlock: { flexBasis: 170, flexGrow: 1 },
+  contactName: { fontWeight: "500", lineHeight: 23 },
+  contactNote: { lineHeight: 20 },
+  contactPhone: { fontWeight: "500", maxWidth: "100%" },
+  contactPhonePill: { minHeight: 48, borderRadius: 8, justifyContent: "center", backgroundColor: fauna.sage, maxWidth: "100%" },
+  contactPhonePillText: { color: fauna.forest, textAlign: "center" },
+  backButton: { minHeight: 48, justifyContent: "center", borderRadius: 8, backgroundColor: fauna.surface, borderWidth: 1, borderColor: fauna.outline },
+  backButtonText: { color: fauna.forest },
 });

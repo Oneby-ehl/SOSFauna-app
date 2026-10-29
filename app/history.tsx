@@ -29,6 +29,7 @@ import {
 import { NoIndexHead } from "@/components/seo/SeoHead";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { HistoryStyles, historyWebPart, HistoryStateIndicator, HistoryExpansionIcon, HistoryLocationLine, HistoryEmptyIcon } from "@/components/history/HistoryPresentation";
+import { androidPresentation, editorialTitle, editorialEyebrow, fauna } from "@/constants/androidPresentation";
 import { buildRescueShareMessage } from "@/utils/rescueShareMessage";
 import type {
   RescueAnimalState,
@@ -602,7 +603,7 @@ export default function HistoryPage() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = androidPresentation(StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#f4f7f4",
@@ -864,4 +865,27 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "900",
   },
+}), {
+  header: { backgroundColor: fauna.paper, borderBottomWidth: 0 },
+  headerInner: { paddingHorizontal: 16, paddingVertical: 24, gap: 16, alignItems: "flex-start" },
+  headerText: { minWidth: 0, flexBasis: "100%" },
+  eyebrow: editorialEyebrow,
+  title: editorialTitle,
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 20 },
+  backButton: { minHeight: 48, borderRadius: 8, backgroundColor: fauna.surface },
+  list: { gap: 12 },
+  card: { borderRadius: 12 },
+  cardHeader: { paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
+  cardTitle: { fontSize: 18, lineHeight: 26, fontWeight: "500" },
+  cardState: { fontWeight: "400" },
+  cardSummary: { paddingHorizontal: 16, paddingVertical: 12 },
+  details: { padding: 16, gap: 12 },
+  statusPanel: { borderRadius: 12, padding: 24 },
+  emptyPanel: { borderRadius: 12, padding: 24 },
+  emptyTitle: { fontSize: 22, fontFamily: "serif", fontWeight: "400" },
+  primaryButton: { minHeight: 48, borderRadius: 10, paddingVertical: 10 },
+  primaryButtonText: { textAlign: "center" },
+  copyButton: { minHeight: 48, borderRadius: 10, paddingVertical: 10, maxWidth: "100%" },
+  deleteButton: { minHeight: 48, borderRadius: 10, paddingVertical: 10, maxWidth: "100%" },
+  clearHistoryButton: { minHeight: 48, borderRadius: 10, paddingVertical: 10, maxWidth: "100%" },
 });

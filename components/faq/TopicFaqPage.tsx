@@ -1,4 +1,5 @@
 import { FaqStyles, FaqIcon, faqWebPart } from "./FaqPresentation";
+import { androidPresentation, editorialTitle, editorialEyebrow, fauna } from "@/constants/androidPresentation";
 import SiteFooter from "@/components/web/SiteFooter";
 import { Link, Stack } from "expo-router";
 import { useMemo, useRef, useState } from "react";
@@ -128,7 +129,7 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = androidPresentation(StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#f3f7f4" },
   container: { width: "100%", maxWidth: 960, alignSelf: "center", paddingHorizontal: 24, paddingTop: 48, paddingBottom: 64, gap: 28 },
   header: { gap: 12 },
@@ -152,4 +153,19 @@ const styles = StyleSheet.create({
   navigation: { gap: 16, paddingTop: 8 },
   backButton: { alignSelf: "flex-start", backgroundColor: "#14532d", borderRadius: 14, paddingHorizontal: 20, paddingVertical: 12 },
   backButtonText: { color: "#ffffff", fontSize: 15, fontWeight: "800" },
+}), {
+  container: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 24 },
+  header: { gap: 8 },
+  eyebrow: editorialEyebrow,
+  title: editorialTitle,
+  intro: { fontSize: 16, lineHeight: 26 },
+  search: { marginHorizontal: -16, paddingHorizontal: 16 },
+  input: { minHeight: 48, borderRadius: 10, paddingLeft: 40 },
+  clear: { width: 48, height: 48, top: 2, right: 2, backgroundColor: "transparent" },
+  createNoticeBox: { borderRadius: 10 },
+  recoveryCentersBox: { borderRadius: 10 },
+  helpButton: { minHeight: 48, borderRadius: 8, paddingVertical: 10, maxWidth: "100%" },
+  helpButtonText: { textAlign: "center" },
+  backButton: { minHeight: 48, justifyContent: "center", borderRadius: 8, backgroundColor: fauna.surface, borderWidth: 1, borderColor: fauna.outline },
+  backButtonText: { color: fauna.forest },
 });

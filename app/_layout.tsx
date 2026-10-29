@@ -1,4 +1,6 @@
 import { Stack } from 'expo-router';
+import { Platform } from 'react-native';
+import { fauna } from '@/constants/androidPresentation';
 import AppVersionGate from "@/components/AppVersionGate";
 import { TopicFaqBackButton, TopicFaqHeaderTitle } from "@/components/faq/TopicFaqHeader";
 import { I18nProvider } from "@/i18n/I18nProvider";
@@ -16,6 +18,14 @@ export default function RootLayout() {
           headerStyle: { backgroundColor: '#f5f7f8' },
           headerTintColor: '#1f2937',
           contentStyle: { backgroundColor: '#ffffff' },
+          ...(Platform.OS === 'android' && ['index', 'aviso', 'faq', 'faq/vencejos', 'faq/murcielagos', 'centros', 'history'].includes(route.name)
+            ? {
+                headerStyle: { backgroundColor: fauna.paper },
+                headerTintColor: fauna.forest,
+                headerShadowVisible: false,
+                contentStyle: { backgroundColor: fauna.paper },
+              }
+            : {}),
           ...(route.name.startsWith("en/") && route.name !== "en/guide"
             ? { headerTitle: TopicFaqHeaderTitle }
             : {}),
