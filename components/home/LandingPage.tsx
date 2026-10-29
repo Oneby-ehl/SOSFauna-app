@@ -24,6 +24,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { androidPresentation, editorialTitle, fauna } from "@/constants/androidPresentation";
+import { HomeMenu, HomeFooter } from "./HomeChrome";
 
 type AnimalScopeGroupProps = {
   icon: string;
@@ -269,7 +270,9 @@ export default function LandingPage({ renderWeb }: {
   const header = (
     <View style={styles.header}>
       <View style={styles.headerInner}>
-        <Link href={pagePath("home")}>
+        {Platform.OS === "android" ? <HomeMenu checkingCase={checkingCase} onGuide={handleStartNewCase}
+          onContinue={pendingCase ? handleContinueCase : undefined} /> : null}
+        <Link href={pagePath("home")} style={Platform.OS === "android" ? styles.brandLink : undefined}>
           <Text style={styles.brand}>{t("common", "brand")}</Text>
         </Link>
 
@@ -301,7 +304,7 @@ export default function LandingPage({ renderWeb }: {
       </Text>
       {Platform.OS === "android" ? <Text style={styles.heroCredit}>{t("landingEditorial", "aiImagesCredit")}</Text> : null}
 
-      {!isCompact ? (
+      {Platform.OS !== "android" && !isCompact ? (
         <View style={styles.heroGuidance}>
           <Text style={styles.heroGuidanceTitle}>{t("home", "calmTitle")}</Text>
           <Text style={styles.heroGuidanceText}>
@@ -310,6 +313,27 @@ export default function LandingPage({ renderWeb }: {
         </View>
       ) : null}
     </>
+  );
+
+  const startButton = (
+    <Pressable
+      style={[
+        styles.caseButton,
+        isCompact && styles.caseButtonCompact,
+        styles.primaryButton,
+      ]}
+      onPress={handleStartNewCase}
+      disabled={checkingCase}
+    >
+      <Text
+        style={[
+          styles.primaryButtonText,
+          isCompact && styles.caseButtonTextCompact,
+        ]}
+      >
+        {checkingCase ? t("home", "checking") : t("navigation", "guide")}
+      </Text>
+    </Pressable>
   );
 
   return (
@@ -325,6 +349,7 @@ export default function LandingPage({ renderWeb }: {
 
       <View style={[styles.main, isCompact && styles.mainCompact]}>
         <View style={[styles.hero, isCompact && styles.heroCompact]}>
+          {Platform.OS === "android" ? startButton : null}
           <View style={[styles.heroContent, isCompact && styles.heroContentCompact]}>
             {Platform.OS === "android" ? <>
               <View pointerEvents="none" style={styles.heroArtwork}>
@@ -349,25 +374,8 @@ export default function LandingPage({ renderWeb }: {
               </View>
             </View> : null}
 
-            <View style={[styles.heroActions, isCompact && styles.heroActionsCompact]}>
-              <Pressable
-                style={[
-                  styles.caseButton,
-                  isCompact && styles.caseButtonCompact,
-                  styles.primaryButton,
-                ]}
-                onPress={handleStartNewCase}
-                disabled={checkingCase}
-              >
-                <Text
-                  style={[
-                    styles.primaryButtonText,
-                    isCompact && styles.caseButtonTextCompact,
-                  ]}
-                >
-                  {checkingCase ? t("home", "checking") : t("navigation", "guide")}
-                </Text>
-              </Pressable>
+            {Platform.OS !== "android" ? <View style={[styles.heroActions, isCompact && styles.heroActionsCompact]}>
+              {startButton}
 
               {pendingCase ? (
                 <View style={styles.pendingBlock}>
@@ -420,7 +428,7 @@ export default function LandingPage({ renderWeb }: {
                 </View>
               ) : null}
 
-            </View>
+            </View> : null}
 
             <View
               style={[
@@ -477,7 +485,7 @@ export default function LandingPage({ renderWeb }: {
             </View>
           </View>
 
-          {isCompact ? (
+          {Platform.OS !== "android" && isCompact ? (
             <View style={[styles.heroGuidance, styles.heroGuidanceCompact]}>
               <Text style={styles.heroGuidanceTitle}>{t("home", "calmTitle")}</Text>
               <Text style={styles.heroGuidanceText}>
@@ -552,6 +560,7 @@ export default function LandingPage({ renderWeb }: {
         ) : null}
       </View>
 
+      {Platform.OS === "android" ? <HomeFooter /> : <>
       <View style={styles.footer}>
         <View style={styles.footerInner}>
           <View>
@@ -623,12 +632,14 @@ export default function LandingPage({ renderWeb }: {
         <View style={styles.versionFooter}>
           <AppVersionFooter />
         </View>
+      </>}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = androidPresentation(StyleSheet.create({
+  brandLink: { flex: 1, minWidth: 0 },
   heroArtwork: { width: "100%", aspectRatio: 16 / 9, overflow: "hidden" },
   heroPhoto: { width: "100%", height: "100%" },
   heroCopy: { padding: 20, gap: 16 },
@@ -1147,8 +1158,8 @@ const styles = androidPresentation(StyleSheet.create({
 }), {
   screen: { backgroundColor: fauna.paper },
   header: { backgroundColor: fauna.forest, borderBottomWidth: 0 },
-  headerInner: { paddingHorizontal: 16, paddingVertical: 12, minHeight: 64, flexWrap: "wrap", gap: 12 },
-  brand: { color: "#ffffff", fontSize: 14, letterSpacing: 1.2, flexShrink: 1 },
+  headerInner: { paddingHorizontal: 12, paddingVertical: 12, minHeight: 64, flexWrap: "nowrap", gap: 8 },
+  brand: { color: "#ffffff", fontSize: 14, lineHeight: 20, letterSpacing: 0.6, flexShrink: 1 },
   headerButton: { backgroundColor: fauna.gold, minHeight: 48, justifyContent: "center", borderRadius: 24 },
   headerButtonText: { color: fauna.forest },
   main: { paddingHorizontal: 16, paddingVertical: 24, gap: 28 },
