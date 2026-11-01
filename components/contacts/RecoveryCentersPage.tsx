@@ -1,3 +1,4 @@
+import { InterfaceLabel } from "@/components/ui/InterfaceLabel";
 import { Link } from "expo-router";
 import * as Linking from "expo-linking";
 import { useMemo, useState, type PropsWithChildren } from "react";
@@ -253,7 +254,7 @@ export function RecoveryCentersContent({
                   styles.contactGroupLabelTerrestrial,
                 ]}
               >
-                {t("centers", "terrestrialHeading")}
+                <InterfaceLabel text={t("centers", "terrestrialHeading")} />
               </Text>
               {province.terrestrialContacts.map(renderTerrestrialContact)}
             </View>
@@ -264,7 +265,7 @@ export function RecoveryCentersContent({
               <Text
                 accessibilityRole={publicHeadings ? "header" : undefined} aria-level={publicHeadings ? 3 : undefined} style={[styles.contactGroupLabel, styles.contactGroupLabelMarine]}
               >
-                {t("centers", "marineHeading")}
+                <InterfaceLabel text={t("centers", "marineHeading")} />
               </Text>
               <Text style={styles.contactGroupDescription}>
                 {t("centers", "marineIntro")}
@@ -360,7 +361,7 @@ export function RecoveryCentersContent({
           >
             <View style={styles.contactTextBlock}>
               <Text style={styles.contactName}>
-                {getNationalContactLabel(contact.phone, locale)}
+                <InterfaceLabel text={getNationalContactLabel(contact.phone, locale)} />
               </Text>
               <Text style={styles.contactNote}>{getHelpContactNote("national", contact, locale)}</Text>
             </View>
@@ -374,7 +375,7 @@ export function RecoveryCentersContent({
 
         <Pressable style={styles.primaryButton} onPress={openProvinceList}>
           <Text style={styles.primaryButtonText}>
-            {t("centers", "openProvinceDirectory")}
+            <InterfaceLabel text={t("centers", "openProvinceDirectory")} color="#ffffff" />
           </Text>
         </Pressable>
 
@@ -441,7 +442,7 @@ export default function RecoveryCentersPage({ embedded = false }: { embedded?: b
       />
       )}
 
-      {!embedded && Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+      {!embedded && Platform.OS !== "web" && Platform.OS !== "android" ? <Link href={pagePath("home")} asChild>
         <Pressable {...publicWebMarker("back")} style={styles.backButton}>
           <PublicCentersBackIcon />
           <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
@@ -457,7 +458,7 @@ export default function RecoveryCentersPage({ embedded = false }: { embedded?: b
       <View {...(Platform.OS === "web" ? { dataSet: { centrosContent: "true" } } : {})} style={styles.container}>{content}</View>
     </View>
   ) : (
-    <ScrollView {...publicWebMarker("page")} style={styles.screen} contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}>
+    <ScrollView {...publicWebMarker("page")} style={styles.screen} contentContainerStyle={Platform.OS === "web" || Platform.OS === "android" ? { flexGrow: 1 } : styles.container}>
       <FooterPageContent {...(Platform.OS === "web" ? { dataSet: { centrosContent: "true" } } : {})} style={styles.container}>{content}</FooterPageContent>
       <SiteFooter />
     </ScrollView>

@@ -1,3 +1,4 @@
+import { InterfaceIcon, InterfaceLabel } from "@/components/ui/InterfaceLabel";
 import SiteFooter, { FooterPageContent } from "@/components/web/SiteFooter";
 import { InformationStyles, informationWebPart, informationStackOptions } from "./InformationPresentation";
 import { Link, Stack } from "expo-router";
@@ -148,7 +149,7 @@ export default function SourcesPage() {
       <InformationStyles />
       <ScrollView
         {...informationWebPart("screen")} style={styles.screen}
-        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
+        contentContainerStyle={Platform.OS === "web" || Platform.OS === "android" ? { flexGrow: 1 } : styles.container}
       >
         <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
         <View {...informationWebPart("header")} style={styles.header}>
@@ -207,7 +208,7 @@ export default function SourcesPage() {
         </View>
 
         <View {...informationWebPart("section")} style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("sources", "sectionTitle1")}</Text>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}><InterfaceLabel text={t("sources", "sectionTitle1")} /></Text>
 
           <Text {...informationWebPart("sectionIntro")} style={styles.sectionIntro}>
             {t("sources", "sectionIntro1")}
@@ -231,7 +232,7 @@ export default function SourcesPage() {
         </View>
 
         <View {...informationWebPart("section")} style={styles.section}>
-          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>{t("sources", "sectionTitle2")}</Text>
+          <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}><InterfaceLabel text={t("sources", "sectionTitle2")} /></Text>
 
           {marineSources.map((source) => (
             <View key={source.nameKey} {...informationWebPart("card")} style={styles.card}>
@@ -252,7 +253,7 @@ export default function SourcesPage() {
 
         <View {...informationWebPart("section")} style={styles.section}>
           <View {...informationWebPart("sectionHeadingRow")} style={styles.sectionHeadingRow}>
-            {Platform.OS !== "web" ? <Text {...informationWebPart("sectionIcon")} style={styles.sectionIcon}>⚖️</Text> : null}
+            {Platform.OS === "android" ? <InterfaceIcon name="scale-balance" size={28} /> : Platform.OS !== "web" ? <Text {...informationWebPart("sectionIcon")} style={styles.sectionIcon}>⚖️</Text> : null}
             <Text accessibilityRole="header" aria-level={2} {...informationWebPart("sectionTitle")} style={styles.sectionTitle}>
               {t("sources", "sectionTitle3")}
             </Text>
@@ -283,7 +284,7 @@ export default function SourcesPage() {
           </Text>
         </View>
 
-        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+        {Platform.OS !== "web" && Platform.OS !== "android" ? <Link href={pagePath("home")} asChild>
           <Pressable {...informationWebPart("backButton")} style={styles.backButton}>
             <Text {...informationWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>

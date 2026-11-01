@@ -1,9 +1,8 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { getAppVersion } from "@/components/AppVersionFooter";
 import { useInformationPagePath } from "@/components/i18n/InformationPageSupport";
 import { fauna } from "@/constants/androidPresentation";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -91,26 +90,7 @@ export function HomeMenu({ checkingCase, onGuide, onContinue }: HomeMenuProps) {
   </>;
 }
 
-export function HomeFooter() {
-  const { t } = useI18n();
-  const path = useInformationPagePath();
-  return <View style={styles.footer}>
-    <Text style={styles.footerBrand}>{t("common", "brand")}</Text>
-    <Text style={styles.footerDescription}>{t("home", "footerDescription")}</Text>
-    <View style={styles.legalLinks}>
-      <Link href={path("privacy")} asChild>
-        <Pressable accessibilityRole="link" style={styles.legalLink}><Text style={styles.legalText}>{t("navigation", "privacy")}</Text></Pressable>
-      </Link>
-      <Link href={path("legal")} asChild>
-        <Pressable accessibilityRole="link" style={styles.legalLink}><Text style={styles.legalText}>{t("navigation", "legal")}</Text></Pressable>
-      </Link>
-    </View>
-    <View style={styles.footerMeta}>
-      <Text style={styles.metaText}>{t("versionFooter", "copyright")}</Text>
-      <Text style={styles.metaText}>Android{t("versionFooter", "versionSeparator")}{getAppVersion()}</Text>
-    </View>
-  </View>;
-}
+export { default as HomeFooter } from "@/components/AndroidFooter";
 
 const styles = StyleSheet.create({
   trigger: { width: 48, height: 48, alignItems: "center", justifyContent: "center", flexShrink: 0 },
@@ -128,12 +108,4 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.5 },
   pressed: { backgroundColor: "#e1e6d9" },
   itemText: { color: fauna.ink, fontSize: 16, lineHeight: 24, flexShrink: 1 },
-  footer: { backgroundColor: fauna.forest, paddingHorizontal: 20, paddingVertical: 20, gap: 8 },
-  footerBrand: { color: fauna.paper, fontSize: 14, lineHeight: 22, fontWeight: "600", letterSpacing: 0.6 },
-  footerDescription: { color: "#e0e8e0", fontSize: 13, lineHeight: 20 },
-  legalLinks: { flexDirection: "row", flexWrap: "wrap", columnGap: 16 },
-  legalLink: { minHeight: 48, maxWidth: "100%", justifyContent: "center", paddingVertical: 10 },
-  legalText: { color: fauna.paper, fontSize: 14, lineHeight: 22, textDecorationLine: "underline" },
-  footerMeta: { borderTopWidth: 1, borderTopColor: "#ffffff25", paddingTop: 12, flexDirection: "row", flexWrap: "wrap", columnGap: 16, rowGap: 4 },
-  metaText: { color: "#c2d0c7", fontSize: 12, lineHeight: 18 },
 });

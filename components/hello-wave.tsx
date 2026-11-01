@@ -1,4 +1,6 @@
 import Animated from 'react-native-reanimated';
+import { Platform } from 'react-native';
+import { InterfaceIcon } from '@/components/ui/InterfaceLabel';
 
 export function HelloWave() {
   return (
@@ -13,7 +15,7 @@ export function HelloWave() {
         animationIterationCount: 4,
         animationDuration: '300ms',
       }}>
-      👋
+      {Platform.OS === 'android' ? <InterfaceIcon name="hand-wave-outline" size={28} /> : '👋'}
     </Animated.Text>
   );
 }

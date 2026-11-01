@@ -308,7 +308,7 @@ function HistoryCard({
           </Text>
 
           <Text {...historyWebPart("cardState")} style={styles.cardState}>
-            {Platform.OS === "web" ? <HistoryStateIndicator state={rescueCase.animalState} /> : <>{ANIMAL_STATE_ICONS[rescueCase.animalState]}{" "}</>}
+            {Platform.OS === "web" || Platform.OS === "android" ? <HistoryStateIndicator state={rescueCase.animalState} /> : <>{ANIMAL_STATE_ICONS[rescueCase.animalState]}{" "}</>}
             {ANIMAL_STATE_LABELS[rescueCase.animalState]}
           </Text>
         </View>
@@ -535,7 +535,7 @@ export default function HistoryPage() {
             <Text {...historyWebPart("description")} style={styles.description}>{generalTexts.historyUi.description}</Text>
           </View>
 
-          {Platform.OS !== "web" ? <Pressable {...historyWebPart("backButton")} style={styles.backButton} onPress={goBack}>
+          {Platform.OS !== "web" && Platform.OS !== "android" ? <Pressable {...historyWebPart("backButton")} style={styles.backButton} onPress={goBack}>
             <Text {...historyWebPart("backButtonText")} style={styles.backButtonText}>{generalTexts.historyUi.back}</Text>
           </Pressable> : null}
         </View>
@@ -556,13 +556,13 @@ export default function HistoryPage() {
           </View>
         ) : history.length === 0 ? (historyReadIssue ? null : (
           <View {...historyWebPart("emptyPanel")} style={styles.emptyPanel}>
-            {Platform.OS === "web" ? <HistoryEmptyIcon /> : <Text style={styles.emptyIcon}>🗂️</Text>}
+            {Platform.OS === "web" || Platform.OS === "android" ? <HistoryEmptyIcon /> : <Text style={styles.emptyIcon}>🗂️</Text>}
             <Text {...historyWebPart("emptyTitle")} style={styles.emptyTitle}>{generalTexts.historyUi.emptyTitle}</Text>
             <Text {...historyWebPart("emptyText")} style={styles.emptyText}>{generalTexts.historyUi.emptyDescription}</Text>
 
-            <Pressable {...historyWebPart("primaryButton")} style={styles.primaryButton} onPress={() => Platform.OS === "web" || (Platform.OS !== "android" && locale === "en") ? router.replace(homePath) : router.back()}>
+            {Platform.OS !== "android" ? <Pressable {...historyWebPart("primaryButton")} style={styles.primaryButton} onPress={() => Platform.OS === "web" || (Platform.OS !== "android" && locale === "en") ? router.replace(homePath) : router.back()}>
               <Text {...historyWebPart("primaryButtonText")} style={styles.primaryButtonText}>{generalTexts.historyUi.home}</Text>
-            </Pressable>
+            </Pressable> : null}
           </View>
         )) : (
           <>
@@ -871,7 +871,7 @@ const styles = androidPresentation(StyleSheet.create({
   headerText: { minWidth: 0, flexBasis: "100%" },
   eyebrow: editorialEyebrow,
   title: editorialTitle,
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 20 },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 20, flexGrow: 1 },
   backButton: { minHeight: 48, borderRadius: 8, backgroundColor: fauna.surface },
   list: { gap: 12 },
   card: { borderRadius: 12 },

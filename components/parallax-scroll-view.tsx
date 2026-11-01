@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
+import AndroidFooter from '@/components/AndroidFooter';
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -58,6 +59,7 @@ export default function ParallaxScrollView({
         {headerImage}
       </Animated.View>
       <ThemedView style={styles.content}>{children}</ThemedView>
+      {Platform.OS === 'android' ? <AndroidFooter /> : null}
     </Animated.ScrollView>
   );
 }

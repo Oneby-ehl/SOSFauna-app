@@ -1,5 +1,8 @@
+import NativeAdvice from "@/components/sos/NativeAdvice";
+import { InterfaceLabel } from "@/components/ui/InterfaceLabel";
+import { FaqIcon } from "./FaqPresentation";
 import { useState, type ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { androidPresentation, fauna } from "@/constants/androidPresentation";
 
 export type TopicFaqAccordionProps = {
@@ -24,12 +27,12 @@ export default function TopicFaqAccordion({ id, question, answer, children }: To
         onPress={() => setOpen((current) => !current)}
         style={styles.question}
       >
-        <Text accessibilityRole="header" aria-level={2} style={styles.questionText}>{question}</Text>
-        <Text style={styles.indicator}>{open ? "−" : "+"}</Text>
+        <Text accessibilityRole="header" aria-level={2} style={styles.questionText}><InterfaceLabel text={question} /></Text>
+        {Platform.OS === "android" ? <FaqIcon kind="expand" expanded={open} /> : <Text style={styles.indicator}>{open ? "−" : "+"}</Text>}
       </Pressable>
       {open ? (
         <View nativeID={id + "-answer"} style={styles.answer}>
-          <Text style={styles.answerText}>{answer}</Text>
+          {Platform.OS === "android" ? <NativeAdvice text={answer} /> : <Text style={styles.answerText}>{answer}</Text>}
           {children}
         </View>
       ) : null}

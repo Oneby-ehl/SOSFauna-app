@@ -35,7 +35,7 @@ export default function AboutPage() {
       <InformationStyles />
       <ScrollView
         {...informationWebPart("screen")} style={styles.screen}
-        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
+        contentContainerStyle={Platform.OS === "web" || Platform.OS === "android" ? { flexGrow: 1 } : styles.container}
       >
         <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
         <View {...informationWebPart("header")} style={styles.header}>
@@ -137,7 +137,7 @@ export default function AboutPage() {
           </Text>
         </View>
 
-        {Platform.OS !== "web" ? <>
+        {Platform.OS !== "web" && Platform.OS !== "android" ? <>
         <Pressable {...informationWebPart("shareButton")} style={styles.shareButton} onPress={Platform.OS === "android" ? () => shareSosFaunaApp(locale) : shareSosFaunaApp}>
           <Text {...informationWebPart("shareButtonText")} style={styles.shareButtonText}>{t("navigation", "shareApp")}</Text>
         </Pressable>

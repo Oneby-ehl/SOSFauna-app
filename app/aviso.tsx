@@ -4,9 +4,10 @@ import { useInformationPagePath } from "@/components/i18n/InformationPageSupport
 import type { RescueAnimalType, RescueCase } from "@/types/rescueCase";
 import { recoverCurrentCase } from "@/services/rescueCaseService";
 import SosAssistant from "@/components/sos/SosAssistant";
+import FooterScreen from "@/components/FooterScreen";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 
 import { NoIndexHead } from "@/components/i18n/InformationPageSupport";
 
@@ -76,17 +77,17 @@ export default function AvisoRoute() {
     <>
       <NoIndexHead path="/aviso" title="Aviso | SOS Fauna España" />
       {!currentPreparation ? (
-        <View style={styles.loadingScreen}>
+        <FooterScreen style={styles.loadingScreen}>
           <ActivityIndicator size="large" />
           <Text style={styles.loadingText}>{generalTexts.guidePreparationUi.loading}</Text>
-        </View>
+        </FooterScreen>
       ) : currentPreparation.status === "error" ? (
-        <View style={styles.loadingScreen}>
+        <FooterScreen style={styles.loadingScreen}>
           <Text style={styles.loadingText} accessibilityRole="alert">{generalTexts.guidePreparationUi.error}</Text>
           <Pressable accessibilityRole="button" style={styles.backButton} onPress={() => router.replace(homePath)}>
             <Text style={styles.backButtonText}>{generalTexts.guidePreparationUi.home}</Text>
           </Pressable>
-        </View>
+        </FooterScreen>
       ) : (
         <SosAssistant
           key={currentPreparation.requestKey}

@@ -63,6 +63,9 @@ import { androidPresentation, editorialTitle, editorialEyebrow, fauna } from "@/
 import { StepOneCard, StepOneStyles, stepOneDataSet, guideQuestionTitle, guideSummaryText, GuideActionIcon, GuideAbsenceIndicator, GuideConfirmationCard, AdvicePresentation, StepThreeStatus, GuideSpeechLabel } from "./StepOnePresentation";
 import { useWebNavigation } from "@/components/web/WebNavigation";
 import SiteFooter from "@/components/web/SiteFooter";
+import AndroidFooter from "@/components/AndroidFooter";
+import NativeAdvice from "./NativeAdvice";
+import { InterfaceIcon, InterfaceLabel } from "@/components/ui/InterfaceLabel";
 import FinishReportDialog from "./FinishReportDialog";
 import CopySummaryNotice, { type CopySummaryNoticeProps } from "./CopySummaryNotice";
 import { buildRescueShareMessage } from "@/utils/rescueShareMessage";
@@ -3288,15 +3291,15 @@ const saveCurrentProgress = async (
 
   const renderSummaryPreview = () => (
     <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreview" })} style={[styles.summaryBox, styles.summaryPreview]}>
-      <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewTitle" })} style={styles.summaryPreviewTitle}>{guideSummaryText(generalTexts.summaryPreview.title)}</Text>
+      <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewTitle" })} style={styles.summaryPreviewTitle}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.title)} /></Text>
 
       <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
-        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{Platform.OS === "web" ? t("assistantUi", "summaryAnimalType") : generalTexts.summaryPreview.animal}</Text>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{Platform.OS === "web" ? t("assistantUi", "summaryAnimalType") : <InterfaceLabel text={generalTexts.summaryPreview.animal} />}</Text>
         <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>{guideSummaryText(displayLabel(selectedAnimalLabel))}</Text>
       </View>
 
       <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
-        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.state)}</Text>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.state)} /></Text>
         <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
           {guideSummaryText(displayLabel(selectedAnimalStateLabel))}
         </Text>
@@ -3304,7 +3307,7 @@ const saveCurrentProgress = async (
 
       {animalPosition ? (
         <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
-          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.position)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.position)} /></Text>
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
             {guideSummaryText(displayLabel(selectedAnimalPositionLabel))}
           </Text>
@@ -3313,7 +3316,7 @@ const saveCurrentProgress = async (
 
       {animalEnvironment ? (
         <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
-          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.environment)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.environment)} /></Text>
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
             {guideSummaryText(displayLabel(selectedAnimalEnvironmentLabel))}
           </Text>
@@ -3322,7 +3325,7 @@ const saveCurrentProgress = async (
 
       {!animalPosition && !animalEnvironment && animalPlace ? (
         <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
-          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.legacyPlace)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.legacyPlace)} /></Text>
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
             {guideSummaryText(displayLabel(selectedAnimalPlaceLabel))}
           </Text>
@@ -3330,7 +3333,7 @@ const saveCurrentProgress = async (
       ) : null}
 
       <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
-        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.observedSituation)}</Text>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.observedSituation)} /></Text>
         {selectedFlagLabels.length > 0 ? (
           <View style={styles.summaryPreviewList}>
             {selectedFlagLabels.map((label) => (
@@ -3340,12 +3343,12 @@ const saveCurrentProgress = async (
             ))}
           </View>
         ) : (
-          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>{guideSummaryText(generalTexts.summaryPreview.noFlags)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.noFlags)} /></Text>
         )}
       </View>
 
       <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewSection" })} style={styles.summaryPreviewSection}>
-        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.location)}</Text>
+        <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.location)} /></Text>
         {locationSummaryLines.length > 0 ? (
           <View style={styles.summaryPreviewList}>
             {locationSummaryLines.map((entry) => {
@@ -3368,16 +3371,16 @@ const saveCurrentProgress = async (
 
       <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewMetaRow" })} style={styles.summaryPreviewMetaRow}>
         <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewMetaItem" })} style={styles.summaryPreviewMetaItem}>
-          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.photo)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.photo)} /></Text>
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
-            {photoUri ? guideSummaryText(generalTexts.summaryPreview.yes) : <GuideAbsenceIndicator text={generalTexts.summaryPreview.no} />}
+            {photoUri ? <InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.yes)} /> : <GuideAbsenceIndicator text={generalTexts.summaryPreview.no} />}
           </Text>
         </View>
 
         <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewMetaItem" })} style={styles.summaryPreviewMetaItem}>
-          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}>{guideSummaryText(generalTexts.summaryPreview.video)}</Text>
+          <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewLabel" })} style={styles.summaryPreviewLabel}><InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.video)} /></Text>
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "summaryPreviewValue" })} style={styles.summaryPreviewValue}>
-            {videoUri ? guideSummaryText(generalTexts.summaryPreview.yes) : <GuideAbsenceIndicator text={generalTexts.summaryPreview.no} />}
+            {videoUri ? <InterfaceLabel text={guideSummaryText(generalTexts.summaryPreview.yes)} /> : <GuideAbsenceIndicator text={generalTexts.summaryPreview.no} />}
           </Text>
         </View>
       </View>
@@ -3402,17 +3405,17 @@ const saveCurrentProgress = async (
           style={[styles.menuActionButton, styles.menuActionButtonPrimary]}
           onPress={Platform.OS === "web" ? shareSummaryOnWhatsApp : () => setShowWhatsAppOptions(true)}
         >
-          {Platform.OS === "web" ? <GuideActionIcon action="whatsapp" /> : <Text style={styles.menuActionEmoji}>🟢</Text>}
+          {Platform.OS === "web" ? <GuideActionIcon action="whatsapp" /> : Platform.OS === "android" ? <InterfaceIcon name="whatsapp" color="#ffffff" size={20} /> : <Text style={styles.menuActionEmoji}>🟢</Text>}
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabelPrimary" })} style={styles.menuActionLabelPrimary}>WhatsApp</Text>
         </Pressable>
 
         <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionButton", sosGuideAction: "copy" })} style={styles.menuActionButton} onPress={copySummary}>
-          {Platform.OS === "web" ? <GuideActionIcon action="copy" /> : <Text style={styles.menuActionEmoji}>📋</Text>}
+          {Platform.OS === "web" ? <GuideActionIcon action="copy" /> : Platform.OS === "android" ? <InterfaceIcon name="content-copy" color="#102c25" size={20} /> : <Text style={styles.menuActionEmoji}>📋</Text>}
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabel" })} style={styles.menuActionLabel}>{t("assistantUi", "copy")}</Text>
         </Pressable>
 
         <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionButton", sosGuideAction: "help" })} style={styles.menuActionButton} onPress={handleOpenHelp}>
-          {Platform.OS === "web" ? <GuideActionIcon action="help" /> : <Text style={styles.menuActionEmoji}>📞</Text>}
+          {Platform.OS === "web" ? <GuideActionIcon action="help" /> : Platform.OS === "android" ? <InterfaceIcon name="phone-outline" color="#102c25" size={20} /> : <Text style={styles.menuActionEmoji}>📞</Text>}
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabel" })} style={styles.menuActionLabel}>{t("assistantUi", "help")}</Text>
         </Pressable>
 
@@ -3421,7 +3424,7 @@ const saveCurrentProgress = async (
           style={[styles.menuActionButton, styles.menuActionButtonPrimarySoft]}
           onPress={finishFlow}
         >
-          {Platform.OS === "web" ? <GuideActionIcon action="finish" /> : <Text style={styles.menuActionEmoji}>✅</Text>}
+          {Platform.OS === "web" ? <GuideActionIcon action="finish" /> : Platform.OS === "android" ? <InterfaceIcon name="check-circle-outline" color="#ffffff" size={20} /> : <Text style={styles.menuActionEmoji}>✅</Text>}
           <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "menuActionLabelPrimary" })} style={styles.menuActionLabelPrimary}>{t("assistantUi", "finish")}</Text>
         </Pressable>
       </View>
@@ -3498,7 +3501,7 @@ const saveCurrentProgress = async (
               </Text>
 
               <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
-                <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "animalStateQuestion"))}</Text>
+                <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}><InterfaceLabel text={guideQuestionTitle(t("assistantUi", "animalStateQuestion"))} /></Text>
                 <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                   {ANIMAL_STATE_OPTIONS.map((option) => {
                     const active = animalState === option.key;
@@ -3535,7 +3538,7 @@ const saveCurrentProgress = async (
 
               <>
                   <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
-                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "animalTypeQuestion"))}</Text>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}><InterfaceLabel text={guideQuestionTitle(t("assistantUi", "animalTypeQuestion"))} /></Text>
                     {ANIMAL_OPTION_GROUPS.map((group) => (
                       <View
                         key={displayLabel(group.title)} {...stepOneDataSet(isEditorialStepOne, { sosAnimalGroup: group.kind })}
@@ -3555,7 +3558,7 @@ const saveCurrentProgress = async (
                               styles.optionGroupLabelMarine,
                           ]}
                         >
-                          {displayLabel(group.title)}
+                          <InterfaceLabel text={displayLabel(group.title)} />
                         </Text>
                         <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                           {group.options.map((option) => {
@@ -3610,7 +3613,7 @@ const saveCurrentProgress = async (
                               styles.flagTextActive,
                           ]}
                         >
-                          🔍 {displayLabel(UNKNOWN_ANIMAL_OPTION.label)}
+                          <InterfaceLabel text={"🔍 " + displayLabel(UNKNOWN_ANIMAL_OPTION.label)} color={animalType === UNKNOWN_ANIMAL_OPTION.key ? "#ffffff" : undefined} />
                         </Text>
                       </Pressable>
                     </View>
@@ -3618,7 +3621,7 @@ const saveCurrentProgress = async (
 
                   {animalState !== "dead" ? (
                   <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
-                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "observedSignsQuestion"))}</Text>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}><InterfaceLabel text={guideQuestionTitle(t("assistantUi", "observedSignsQuestion"))} /></Text>
                     <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                       {visibleFlagLabels.map(({ key, label }) => {
                         const active = flags[key];
@@ -3653,7 +3656,7 @@ const saveCurrentProgress = async (
                   ) : null}
 
                   <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
-                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "positionQuestion"))}</Text>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}><InterfaceLabel text={guideQuestionTitle(t("assistantUi", "positionQuestion"))} /></Text>
                     <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                       {visiblePositionOptions.map((option) => {
                         const active = animalPosition === option.key;
@@ -3687,7 +3690,7 @@ const saveCurrentProgress = async (
                   </View>
 
                   <View {...stepOneDataSet(isEditorialStepOne, { sosQuestion: "true" })} style={styles.sectionGroup}>
-                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "environmentQuestion"))}</Text>
+                    <Text accessibilityRole={isEditorialStepOne ? "header" : undefined} aria-level={isEditorialStepOne ? 2 : undefined} {...stepOneDataSet(isEditorialStepOne, { sosQuestionTitle: "true" })} style={styles.subheading}><InterfaceLabel text={guideQuestionTitle(t("assistantUi", "environmentQuestion"))} /></Text>
                     <View {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "flagGrid" })} style={styles.flagGrid}>
                       {visibleEnvironmentOptions.map((option) => {
                         const active = animalEnvironment === option.key;
@@ -3759,7 +3762,9 @@ const saveCurrentProgress = async (
               ) : null}
             </View>
 
-            {Platform.OS === "web" ? <AdvicePresentation text={advice} /> : (
+            {Platform.OS === "web" ? <AdvicePresentation text={advice} /> : Platform.OS === "android" ? (
+              <View style={[styles.summaryBox, styles.adviceCard]}><NativeAdvice text={advice} /></View>
+            ) : (
               <Text
                 {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "advice" })}
                 style={[
@@ -3788,7 +3793,7 @@ const saveCurrentProgress = async (
               {t("assistantUi", "informationHelp")}
             </Text>
 
-            <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "subheading" })} style={styles.subheading}>{guideQuestionTitle(t("assistantUi", "contributionQuestion"))}</Text>
+            <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "subheading" })} style={styles.subheading}><InterfaceLabel text={guideQuestionTitle(t("assistantUi", "contributionQuestion"))} /></Text>
 
             <Pressable {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "primaryButton" })} style={styles.primaryButton} onPress={pickPhoto}>
               <Text {...stepOneDataSet(Platform.OS === "web", { sosGuideUi: "primaryButtonText" })} style={styles.primaryButtonText}>
@@ -3946,7 +3951,7 @@ const saveCurrentProgress = async (
           {
             paddingTop: showSummaryActionBar ? 84 : 12,
             // The enclosing SafeAreaView already reserves the system's bottom inset.
-            paddingBottom: Platform.OS === "android" ? 32 : Math.max(220, insets.bottom + 180),
+            paddingBottom: Platform.OS === "android" ? 0 : Math.max(220, insets.bottom + 180),
           },
         ]}
         keyboardShouldPersistTaps="handled"
@@ -3964,7 +3969,7 @@ const saveCurrentProgress = async (
             (showContacts || showProvinces || selectedProvince) ? { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 } : null,
           ]}>{renderStep()}</View>
           <SiteFooter />
-        </> : renderStep()}
+        </> : <>{renderStep()}{Platform.OS === "android" && !showEmptyStep3Confirmation && !showWhatsAppConfirmation ? <View style={{ marginHorizontal: -32, flexGrow: 1, justifyContent: "flex-end" }}><AndroidFooter /></View> : null}</>}
       </ScrollView>
 
       {canShowStep1ScrollHint ? (
@@ -3995,6 +4000,7 @@ const saveCurrentProgress = async (
 }
 
 const styles = androidPresentation(StyleSheet.create({
+  adviceCard: { backgroundColor: fauna.sage, borderColor: fauna.outline, borderRadius: 12, padding: 14 },
   screen: {
     flex: 1,
     backgroundColor: "#f3f7f4",

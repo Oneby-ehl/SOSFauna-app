@@ -6,6 +6,7 @@ import { getEnglishDevelopmentPage } from "@/i18n/developmentPreview";
 import { getLocalizedPath } from "@/i18n/routes";
 
 import { SeoHead } from "@/components/seo/SeoHead";
+import FooterScreen from "@/components/FooterScreen";
 
 export default function NotFoundPage() {
   const { locale } = useI18n();
@@ -30,7 +31,7 @@ export default function NotFoundPage() {
         options={{ title: generalTexts.notFoundUi.navigationTitle }}
       />
 
-      <View style={styles.screen}>
+      <FooterScreen style={styles.screen}>
         <View style={styles.card}>
           <Text style={styles.eyebrow}>SOS FAUNA ESPAÑA</Text>
           <Text style={styles.code}>404</Text>
@@ -48,7 +49,7 @@ export default function NotFoundPage() {
             </Pressable>
           </Link>
         </View>
-      </View>
+      </FooterScreen>
     </>
   );
 }

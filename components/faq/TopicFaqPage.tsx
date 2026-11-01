@@ -1,3 +1,5 @@
+import { InterfaceLabel } from "@/components/ui/InterfaceLabel";
+import { caseHelpStyles } from "./caseHelpStyles";
 import { FaqStyles, FaqIcon, faqWebPart } from "./FaqPresentation";
 import { androidPresentation, editorialTitle, editorialEyebrow, fauna } from "@/constants/androidPresentation";
 import SiteFooter from "@/components/web/SiteFooter";
@@ -48,7 +50,7 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
       <ScrollView {...faqWebPart("screen")} role="main" style={styles.screen} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" stickyHeaderIndices={[1]}>
         <View {...faqWebPart("header")} style={styles.header}>
           <Text {...faqWebPart("eyebrow")} style={styles.eyebrow}>{t("common", "brandEyebrow")}</Text>
-          <Text accessibilityRole="header" aria-level={1} {...faqWebPart("title")} style={styles.title}>{topic.heading}</Text>
+          <Text accessibilityRole="header" aria-level={1} {...faqWebPart("title")} style={styles.title}><InterfaceLabel text={topic.heading} /></Text>
           <Text {...faqWebPart("intro")} style={styles.intro}>{topic.intro}</Text>
         </View>
         <View {...faqWebPart("searchSection")} style={styles.search}>
@@ -66,7 +68,7 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
             />
             {query.length > 0 ? (
               <Pressable accessibilityRole="button" accessibilityLabel={t("faqUi", "clearSearch")} hitSlop={8} onPress={clearSearch} {...faqWebPart("clearSearchButton")} style={styles.clear}>
-                {Platform.OS === "web" ? <FaqIcon kind="clear" /> : <Text style={styles.clearText}>✕</Text>}
+                {Platform.OS === "web" || Platform.OS === "android" ? <FaqIcon kind="clear" /> : <Text style={styles.clearText}>✕</Text>}
               </Pressable>
             ) : null}
           </View>
@@ -78,7 +80,7 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
                 <View {...faqWebPart("topicAnswerLinks")} style={styles.answerLinks}>
                   {item.showCreateNotice ? (
                     <View {...faqWebPart("createNoticeBox")} style={styles.createNoticeBox}>
-                      <Text {...faqWebPart("createNoticeTitle")} style={styles.helpTitle}>{t("faqUi", "caseDoubtTitle")}</Text>
+                      <Text {...faqWebPart("createNoticeTitle")} style={styles.helpTitle}><InterfaceLabel text={t("faqUi", "caseDoubtTitle")} icon="help-circle-outline" /></Text>
                       <Text {...faqWebPart("createNoticeText")} style={styles.helpText}>{t("faqUi", "caseDoubtText")}</Text>
                       <Link href={pagePath("home")} asChild>
                         <Pressable accessibilityRole="button" accessibilityLabel={t("navigation", "guide")} {...faqWebPart("createNoticeButton")} style={styles.helpButton}>
@@ -104,7 +106,7 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
           ))}
           {results.length === 0 ? <Text {...faqWebPart("intro")} style={styles.intro}>{t("faqUi", "topicNoResults")}</Text> : null}
         </View>
-        {Platform.OS !== "web" ? <View {...faqWebPart("topicNavigation")} style={styles.navigation}>
+        {Platform.OS !== "web" && (Platform.OS !== "android" || locale === "en") ? <View {...faqWebPart("topicNavigation")} style={styles.navigation}>
           {locale === "en" ? (
             <>
               <Link href={pagePath("faq")} {...faqWebPart("intro")} style={styles.intro}>
@@ -117,13 +119,13 @@ export default function TopicFaqPage({ topicId }: { topicId: FaqTopicId }) {
               ) : null}
             </>
           ) : null}
-          {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+          {Platform.OS !== "web" && Platform.OS !== "android" ? <Link href={pagePath("home")} asChild>
             <Pressable style={styles.backButton}>
               <Text style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
             </Pressable>
           </Link> : null}
         </View> : null}
-        <SiteFooter />
+        {Platform.OS === "android" ? <View style={{ marginHorizontal: -16, flexGrow: 1, justifyContent: "flex-end" }}><SiteFooter /></View> : <SiteFooter />}
       </ScrollView>
     </>
   );
@@ -154,7 +156,7 @@ const styles = androidPresentation(StyleSheet.create({
   backButton: { alignSelf: "flex-start", backgroundColor: "#14532d", borderRadius: 14, paddingHorizontal: 20, paddingVertical: 12 },
   backButtonText: { color: "#ffffff", fontSize: 15, fontWeight: "800" },
 }), {
-  container: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 24 },
+  container: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 0, gap: 24, flexGrow: 1 },
   header: { gap: 8 },
   eyebrow: editorialEyebrow,
   title: editorialTitle,
@@ -162,10 +164,12 @@ const styles = androidPresentation(StyleSheet.create({
   search: { marginHorizontal: -16, paddingHorizontal: 16 },
   input: { minHeight: 48, borderRadius: 10, paddingLeft: 40 },
   clear: { width: 48, height: 48, top: 2, right: 2, backgroundColor: "transparent" },
-  createNoticeBox: { borderRadius: 10 },
+  createNoticeBox: caseHelpStyles.card,
+  helpTitle: caseHelpStyles.title,
+  helpText: caseHelpStyles.text,
   recoveryCentersBox: { borderRadius: 10 },
-  helpButton: { minHeight: 48, borderRadius: 8, paddingVertical: 10, maxWidth: "100%" },
-  helpButtonText: { textAlign: "center" },
+  helpButton: caseHelpStyles.button,
+  helpButtonText: caseHelpStyles.buttonText,
   backButton: { minHeight: 48, justifyContent: "center", borderRadius: 8, backgroundColor: fauna.surface, borderWidth: 1, borderColor: fauna.outline },
   backButtonText: { color: fauna.forest },
 });

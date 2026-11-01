@@ -25,6 +25,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { androidPresentation, editorialTitle, fauna } from "@/constants/androidPresentation";
 import { HomeMenu, HomeFooter } from "./HomeChrome";
+import { InterfaceIcon, InterfaceLabel } from "@/components/ui/InterfaceLabel";
 
 type AnimalScopeGroupProps = {
   icon: string;
@@ -34,7 +35,7 @@ type AnimalScopeGroupProps = {
 function AnimalScopeGroup({ icon, label }: AnimalScopeGroupProps) {
   return (
     <View style={styles.animalScopeGroup}>
-      <Text style={styles.animalScopeIcon}>{icon}</Text>
+      {Platform.OS === "android" ? <InterfaceIcon name={icon === "🦉" ? "bird" : icon === "🦊" ? "paw" : icon === "🦎" ? "snake" : "waves"} size={34} /> : <Text style={styles.animalScopeIcon}>{icon}</Text>}
       <Text style={styles.animalScopeLabel}>{label}</Text>
     </View>
   );
@@ -458,7 +459,7 @@ export default function LandingPage({ renderWeb }: {
                       isCompact && styles.caseButtonTextCompact,
                     ]}
                   >
-                    {t("home", "quickFaq")}
+                    <InterfaceLabel text={t("home", "quickFaq")} />
                   </Text>
                 </Pressable>
 
@@ -478,7 +479,7 @@ export default function LandingPage({ renderWeb }: {
                       isCompact && styles.caseButtonTextCompact,
                     ]}
                   >
-                    {t("home", "quickCenters")}
+                    <InterfaceLabel text={t("home", "quickCenters")} />
                   </Text>
                 </Pressable>
               </View>

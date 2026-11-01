@@ -30,7 +30,7 @@ export default function PrivacyPage() {
       <InformationStyles />
       <ScrollView
         {...informationWebPart("screen")} style={styles.screen}
-        contentContainerStyle={Platform.OS === "web" ? { flexGrow: 1 } : styles.container}
+        contentContainerStyle={Platform.OS === "web" || Platform.OS === "android" ? { flexGrow: 1 } : styles.container}
       >
         <FooterPageContent {...informationWebPart("pageContent")} style={styles.container}>
         <View {...informationWebPart("header")} style={styles.header}>
@@ -160,7 +160,7 @@ export default function PrivacyPage() {
           </Text>
         </View>
 
-        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+        {Platform.OS !== "web" && Platform.OS !== "android" ? <Link href={pagePath("home")} asChild>
           <Pressable {...informationWebPart("backButton")} style={styles.backButton}>
             <Text {...informationWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backHome")}</Text>
           </Pressable>

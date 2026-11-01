@@ -1,3 +1,6 @@
+import NativeAdvice from "@/components/sos/NativeAdvice";
+import { InterfaceLabel } from "@/components/ui/InterfaceLabel";
+import { caseHelpStyles } from "./caseHelpStyles";
 import SiteFooter from "@/components/web/SiteFooter";
 import { getEffectiveCatalog } from "@/i18n/translate";
 import { DEFAULT_LOCALE, type Locale } from "@/i18n/types";
@@ -526,7 +529,7 @@ export default function FaqPage() {
   const renderCreateNoticePrompt = () => (
     <View {...faqWebPart("createNoticeBox")} style={styles.createNoticeBox}>
       <Text {...faqWebPart("createNoticeTitle")} style={styles.createNoticeTitle}>
-        {t("faqUi", "caseDoubtTitle")}
+        <InterfaceLabel text={t("faqUi", "caseDoubtTitle")} icon="help-circle-outline" />
       </Text>
       <Text {...faqWebPart("createNoticeText")} style={styles.createNoticeText}>
         {t("faqUi", "caseDoubtText")}
@@ -592,7 +595,7 @@ export default function FaqPage() {
         contentContainerStyle={[
           styles.container,
           {
-            paddingBottom: Math.max(
+            paddingBottom: Platform.OS === "android" ? 0 : Math.max(
               160,
               scrollViewHeight - stickyHeaderHeight + 80,
             ),
@@ -639,7 +642,7 @@ export default function FaqPage() {
                 {...faqWebPart("clearSearchButton")} style={styles.clearSearchButton}
                 onPress={clearSearch}
               >
-                {Platform.OS === "web" ? <FaqIcon kind="clear" /> : <Text {...faqWebPart("clearSearchButtonText")} style={styles.clearSearchButtonText}>✕</Text>}
+                {Platform.OS === "web" || Platform.OS === "android" ? <FaqIcon kind="clear" /> : <Text {...faqWebPart("clearSearchButtonText")} style={styles.clearSearchButtonText}>✕</Text>}
               </Pressable>
             ) : null}
           </View>
@@ -681,7 +684,7 @@ export default function FaqPage() {
                     focusedCategory === getFaqCategoryId(category) && styles.categoryPillFocused,
                   ]}
                 >
-                  <Text {...faqWebPart("categoryPillText")} style={styles.categoryPillText}>{categoryLabel(category)}</Text>
+                  <Text {...faqWebPart("categoryPillText")} style={styles.categoryPillText}><InterfaceLabel text={categoryLabel(category)} /></Text>
                 </Pressable>
               ))}
             </View>
@@ -704,7 +707,7 @@ export default function FaqPage() {
                     event.nativeEvent.layout.y;
                 }}
               >
-                <Text accessibilityRole="header" aria-level={2} {...faqWebPart("categoryTitle")} style={styles.categoryTitle}>{categoryLabel(group.category)}</Text>
+                <Text accessibilityRole="header" aria-level={2} {...faqWebPart("categoryTitle")} style={styles.categoryTitle}><InterfaceLabel text={categoryLabel(group.category)} /></Text>
 
                 <View {...faqWebPart("questionList")} style={styles.questionList}>
                   {group.items.map((item) => {
@@ -721,9 +724,9 @@ export default function FaqPage() {
                           {...faqWebPart("questionButton")} style={styles.questionButton}
                         >
                           <Text accessibilityRole="header" aria-level={3} {...faqWebPart("questionText")} style={styles.questionText}>
-                            {item.question}
+                            <InterfaceLabel text={item.question} />
                           </Text>
-                          {Platform.OS === "web" ? <FaqIcon kind="expand" expanded={isOpen} /> : <Text {...faqWebPart("questionIndicator")} style={styles.questionIndicator}>
+                          {Platform.OS === "web" || Platform.OS === "android" ? <FaqIcon kind="expand" expanded={isOpen} /> : <Text {...faqWebPart("questionIndicator")} style={styles.questionIndicator}>
                             {isOpen ? "−" : "+"}
                           </Text>}
                         </Pressable>
@@ -740,7 +743,7 @@ export default function FaqPage() {
                               !isOpen && styles.hiddenAnswerContent,
                             ]}
                           >
-                            {Platform.OS === "web" ? <FaqAnswer text={item.answer} /> : <Text style={styles.answerText}>{item.answer}</Text>}
+                            {Platform.OS === "web" ? <FaqAnswer text={item.answer} /> : Platform.OS === "android" ? <NativeAdvice text={item.answer} /> : <Text style={styles.answerText}>{item.answer}</Text>}
                             {item.showCreateNotice
                               ? renderCreateNoticePrompt()
                               : null}
@@ -764,7 +767,7 @@ export default function FaqPage() {
           </View>
         )}
 
-        {Platform.OS !== "web" ? <View {...faqWebPart("specializedSection")} style={styles.specializedSection}>
+        {Platform.OS !== "web" && Platform.OS !== "android" ? <View {...faqWebPart("specializedSection")} style={styles.specializedSection}>
           <Text accessibilityRole="header" aria-level={2} {...faqWebPart("specializedTitle")} style={styles.specializedTitle}>
             {t("faqUi", "specializedTitle")}
           </Text>
@@ -778,12 +781,12 @@ export default function FaqPage() {
           </View>
         </View> : null}
 
-        {Platform.OS !== "web" ? <Link href={pagePath("home")} asChild>
+        {Platform.OS !== "web" && Platform.OS !== "android" ? <Link href={pagePath("home")} asChild>
           <Pressable {...faqWebPart("backButton")} style={styles.backButton}>
             <Text {...faqWebPart("backButtonText")} style={styles.backButtonText}>{t("navigation", "backToBrand")}</Text>
           </Pressable>
         </Link> : null}
-        <SiteFooter />
+        {Platform.OS === "android" ? <View style={{ marginHorizontal: -16, flexGrow: 1, justifyContent: "flex-end" }}><SiteFooter /></View> : <SiteFooter />}
       </ScrollView>
     </>
   );
@@ -1084,7 +1087,7 @@ const styles = androidPresentation(StyleSheet.create({
     fontWeight: "800",
   },
 }), {
-  container: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 24 },
+  container: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40, gap: 24, flexGrow: 1 },
   header: { gap: 8 },
   eyebrow: editorialEyebrow,
   title: editorialTitle,
@@ -1102,11 +1105,13 @@ const styles = androidPresentation(StyleSheet.create({
   questionText: { color: fauna.ink, fontWeight: "500" },
   answerContent: { paddingHorizontal: 14, gap: 12 },
   answerText: { color: fauna.ink, lineHeight: 26 },
-  createNoticeBox: { borderRadius: 10 },
+  createNoticeBox: caseHelpStyles.card,
+  createNoticeTitle: caseHelpStyles.title,
+  createNoticeText: caseHelpStyles.text,
   recoveryCentersBox: { borderRadius: 10 },
-  createNoticeButton: { minHeight: 48, paddingVertical: 10, maxWidth: "100%", borderRadius: 8 },
+  createNoticeButton: caseHelpStyles.button,
   recoveryCentersButton: { minHeight: 48, paddingVertical: 10, maxWidth: "100%", borderRadius: 8 },
-  createNoticeButtonText: { textAlign: "center" },
+  createNoticeButtonText: caseHelpStyles.buttonText,
   recoveryCentersButtonText: { textAlign: "center" },
   backButton: { minHeight: 48, justifyContent: "center", borderRadius: 8, backgroundColor: fauna.surface, borderWidth: 1, borderColor: fauna.outline },
   backButtonText: { color: fauna.forest },
