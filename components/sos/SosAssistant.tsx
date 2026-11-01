@@ -2560,7 +2560,11 @@ export default function HomeScreen({
 
   const saveToGallery = async (uri: string, label: string) => {
     try {
-      const permission = await MediaLibrary.requestPermissionsAsync();
+      // Only save captures created by this app; never request library-wide reads.
+      // Keep legacy Android write access, and leave other platforms unchanged.
+      const permission = Platform.OS === "android"
+        ? await MediaLibrary.requestPermissionsAsync(true, [])
+        : await MediaLibrary.requestPermissionsAsync();
 
       if (!permission.granted) {
         Alert.alert(
